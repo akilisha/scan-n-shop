@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -38,8 +38,27 @@ import { User } from "@/types";
 export default function Profile() {
   const navigate = useNavigate();
   const { user, setUser, setMode } = useAppMode();
-  const [localUser, setLocalUser] = useState<User>(user || mockUser);
+
+  // If no user is logged in, redirect to home
+  if (!user) {
+    navigate("/");
+    return null;
+  }
+
+  const [localUser, setLocalUser] = useState<User>(user);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Sync localUser with context user changes
+  useEffect(() => {
+    if (user) {
+      setLocalUser(user);
+      setFormData({
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
   const [formData, setFormData] = useState({
     name: localUser.name,
     email: localUser.email,
