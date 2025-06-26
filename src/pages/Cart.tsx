@@ -347,28 +347,56 @@ export default function Cart() {
 
           {/* Quick Add Options (for demo) */}
           {cartItems.length === 0 && (
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-medium mb-3">Or try these demo items:</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {mockProducts.slice(0, 4).map((product) => (
-                    <Button
-                      key={product.id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => addToCart(product)}
-                      className="text-xs p-2 h-auto"
-                    >
-                      <Plus size={12} className="mr-1" />
-                      {product.name}
-                    </Button>
-                  ))}
-                </div>
-                <p className="text-xs text-center text-muted-foreground mt-2">
-                  For demo purposes - normally you'd scan these items
-                </p>
-              </CardContent>
-            </Card>
+            <>
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-medium mb-3">Or try these demo items:</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {mockProducts.slice(0, 4).map((product) => (
+                      <Button
+                        key={product.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addToCart(product)}
+                        className="text-xs p-2 h-auto"
+                      >
+                        <Plus size={12} className="mr-1" />
+                        {product.name}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    For demo purposes - normally you'd scan these items
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary/20">
+                <CardContent className="p-4">
+                  <h3 className="font-medium mb-3 flex items-center">
+                    <Scan size={16} className="mr-2 text-primary" />
+                    How to Test Scanning
+                  </h3>
+                  <div className="text-sm space-y-2 text-muted-foreground">
+                    <p>
+                      <strong>1. Generate test codes:</strong> Use an online
+                      barcode/QR generator
+                    </p>
+                    <p>
+                      <strong>2. Sample barcodes:</strong> 123456789012,
+                      234567890123, 456789012345
+                    </p>
+                    <p>
+                      <strong>3. Display on screen:</strong> Show the code on
+                      another device and scan it
+                    </p>
+                    <p className="text-xs mt-2">
+                      💡 The scanner works with UPC, EAN, and QR codes
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
           )}
         </div>
       </Layout>
