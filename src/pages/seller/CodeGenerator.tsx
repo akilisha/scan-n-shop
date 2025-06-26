@@ -55,7 +55,7 @@ export default function CodeGenerator() {
   const generateCode = () => {
     let codeData = "";
 
-    if (selectedProduct) {
+    if (selectedProduct && selectedProduct !== "custom") {
       const product = mockProducts.find((p) => p.id === selectedProduct);
       if (product) {
         if (codeType === "barcode") {
@@ -320,7 +320,7 @@ export default function CodeGenerator() {
                   <SelectValue placeholder="Choose a product or create custom" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Custom Product</SelectItem>
+                  <SelectItem value="custom">Custom Product</SelectItem>
                   {mockProducts.map((product) => (
                     <SelectItem key={product.id} value={product.id}>
                       {product.name} - ${product.price}
@@ -330,7 +330,7 @@ export default function CodeGenerator() {
               </Select>
             </div>
 
-            {!selectedProduct && (
+            {selectedProduct === "custom" && (
               <>
                 <Separator />
                 <div className="space-y-4">
@@ -412,7 +412,10 @@ export default function CodeGenerator() {
           onClick={generateCode}
           className="w-full"
           size="lg"
-          disabled={!selectedProduct && !customData.name}
+          disabled={
+            (selectedProduct === "custom" && !customData.name) ||
+            !selectedProduct
+          }
         >
           Generate {codeType.replace("_", " ").toUpperCase()}
         </Button>
