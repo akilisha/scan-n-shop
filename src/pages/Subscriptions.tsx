@@ -89,7 +89,7 @@ export default function Subscriptions() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/profile")}
         className="p-2"
       >
         <ArrowLeft size={20} />

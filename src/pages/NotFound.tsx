@@ -27,7 +27,7 @@ export default function NotFound() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/")}
               >
                 Go Back
               </Button>

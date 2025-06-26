@@ -91,7 +91,7 @@ export default function AddProduct() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/seller")}
         className="p-2"
       >
         <ArrowLeft size={20} />
@@ -354,7 +354,7 @@ export default function AddProduct() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/seller")}
             disabled={saving}
           >
             Cancel

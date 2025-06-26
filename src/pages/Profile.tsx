@@ -112,7 +112,7 @@ export default function Profile() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/")}
         className="p-2"
       >
         <ArrowLeft size={20} />

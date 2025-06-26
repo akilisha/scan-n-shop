@@ -73,7 +73,7 @@ export default function PaymentMethods() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/settings")}
         className="p-2"
       >
         <ArrowLeft size={20} />
