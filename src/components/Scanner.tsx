@@ -111,11 +111,16 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
   };
 
   const startScanning = async () => {
-    if (!codeReader.current || !videoRef.current) return;
+    if (!videoRef.current) return;
 
     try {
       setIsScanning(true);
       setError(null);
+
+      // Create a new code reader if needed
+      if (!codeReader.current) {
+        codeReader.current = new BrowserMultiFormatReader();
+      }
 
       const constraints = {
         video: {
