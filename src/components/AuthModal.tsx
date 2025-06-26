@@ -8,10 +8,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail, Lock, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { useAppMode } from "@/contexts/AppModeContext";
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (user: any) => void;
+  onSuccess?: (user: any) => void;
   mode?: "login" | "signup";
 }
 
@@ -21,6 +23,7 @@ export function AuthModal({
   onSuccess,
   mode: initialMode = "login",
 }: AuthModalProps) {
+  const { setUser } = useAppMode();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +50,8 @@ export function AuthModal({
         avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face`,
       };
 
-      onSuccess(user);
+      setUser(user);
+      if (onSuccess) onSuccess(user);
     } catch (err) {
       setError("Authentication failed. Please try again.");
     } finally {
@@ -70,7 +74,8 @@ export function AuthModal({
         avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face`,
       };
 
-      onSuccess(user);
+      setUser(user);
+      if (onSuccess) onSuccess(user);
     } catch (err) {
       setError("Google sign-in failed. Please try again.");
     } finally {
