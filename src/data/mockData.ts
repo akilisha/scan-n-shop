@@ -7,6 +7,7 @@ import {
   User,
   AppSettings,
 } from "@/types";
+import { TEST_BARCODES } from "@/lib/barcodes";
 
 export const mockProducts: Product[] = [
   {
@@ -19,7 +20,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
     category: "Beverages",
     inStock: true,
-    barcode: "1234567890123",
+    barcode: TEST_BARCODES.COFFEE,
   },
   {
     id: "2",
@@ -30,7 +31,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop",
     category: "Beverages",
     inStock: true,
-    barcode: "2345678901234",
+    barcode: TEST_BARCODES.TEA,
   },
   {
     id: "3",
@@ -41,7 +42,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop",
     category: "Digital",
     inStock: true,
-    barcode: "3456789012345",
+    barcode: TEST_BARCODES.MEDITATION_APP,
   },
   {
     id: "4",
@@ -52,7 +53,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=400&fit=crop",
     category: "Electronics",
     inStock: true,
-    barcode: "4567890123456",
+    barcode: TEST_BARCODES.EARBUDS,
   },
   {
     id: "5",
@@ -63,7 +64,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=400&fit=crop",
     category: "Food",
     inStock: true,
-    barcode: "5678901234567",
+    barcode: TEST_BARCODES.CHOCOLATE,
   },
   {
     id: "6",
@@ -74,7 +75,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop",
     category: "Lifestyle",
     inStock: true,
-    barcode: "6789012345678",
+    barcode: TEST_BARCODES.WATER_BOTTLE,
   },
   {
     id: "7",
@@ -85,7 +86,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1506629905645-b178f786832d?w=400&h=400&fit=crop",
     category: "Fitness",
     inStock: true,
-    barcode: "7890123456789",
+    barcode: TEST_BARCODES.YOGA_MAT,
   },
 ];
 
