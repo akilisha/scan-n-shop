@@ -144,7 +144,12 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
             onScan(result.getText());
             stopScanning();
           }
-          if (error && !(error.name === "NotFoundException")) {
+          // Only log actual errors, not NotFoundException which is normal
+          if (
+            error &&
+            !error.message?.includes("NotFoundException") &&
+            !error.message?.includes("No MultiFormat Readers")
+          ) {
             console.error("Scanning error:", error);
           }
         },
