@@ -12,9 +12,11 @@ import { ArrowLeft, CreditCard, Check, Loader2, User } from "lucide-react";
 import { stripePromise, STRIPE_CONFIG, confirmPayment } from "@/lib/stripe";
 import { mockCartItems, mockPaymentMethods } from "@/data/mockData";
 import { CheckoutState, PaymentMethod } from "@/types";
+import { useAppMode } from "@/contexts/AppModeContext";
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { user } = useAppMode();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: "cart",
     processing: false,
@@ -22,24 +24,18 @@ export default function Checkout() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod>(mockPaymentMethods[0]);
   const [cartItems] = useState(mockCartItems);
-  const [user, setUser] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
 
   // Check if user is authenticated on component mount
   useEffect(() => {
-    // In a real app, check if user is logged in from localStorage/context
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (user) {
       setCheckoutState({ step: "payment", processing: false });
     } else {
       setShowAuth(true);
     }
-  }, []);
+  }, [user]);
 
-  const handleAuthSuccess = (authenticatedUser: any) => {
-    setUser(authenticatedUser);
-    localStorage.setItem("user", JSON.stringify(authenticatedUser));
+  const handleAuthSuccess = () => {
     setShowAuth(false);
     setCheckoutState({ step: "payment", processing: false });
   };

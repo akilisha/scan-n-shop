@@ -20,6 +20,7 @@ import SellerSubscription from "./pages/SellerSubscription";
 // Seller Mode Pages
 import SellerDashboard from "./pages/seller/Dashboard";
 import CodeGenerator from "./pages/seller/CodeGenerator";
+import PaymentManagement from "./pages/seller/PaymentManagement";
 
 import NotFound from "./pages/NotFound";
 
@@ -50,6 +51,7 @@ const App = () => (
               {/* Seller Mode Routes */}
               <Route path="/seller" element={<SellerDashboard />} />
               <Route path="/seller/codes" element={<CodeGenerator />} />
+              <Route path="/seller/payments" element={<PaymentManagement />} />
               {/* Add more seller routes as they're created */}
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
