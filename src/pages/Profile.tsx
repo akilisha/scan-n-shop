@@ -20,6 +20,7 @@ import {
   Edit,
   LogOut,
 } from "lucide-react";
+import { useAppMode } from "@/contexts/AppModeContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,29 +37,32 @@ import { User } from "@/types";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>(mockUser);
+  const { user, setUser, setMode } = useAppMode();
+  const [localUser, setLocalUser] = useState<User>(user || mockUser);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    phone: user.phone || "",
+    name: localUser.name,
+    email: localUser.email,
+    phone: localUser.phone || "",
   });
 
   const handleSave = () => {
-    setUser({
-      ...user,
+    const updatedUser = {
+      ...localUser,
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-    });
+    };
+    setLocalUser(updatedUser);
+    setUser(updatedUser);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setFormData({
-      name: user.name,
-      email: user.email,
-      phone: user.phone || "",
+      name: localUser.name,
+      email: localUser.email,
+      phone: localUser.phone || "",
     });
     setIsEditing(false);
   };
@@ -68,16 +72,24 @@ export default function Profile() {
     key: string,
     value: any,
   ) => {
-    setUser({
-      ...user,
+    const updatedUser = {
+      ...localUser,
       preferences: {
-        ...user.preferences,
+        ...localUser.preferences,
         [category]: {
-          ...user.preferences[category],
+          ...localUser.preferences[category],
           [key]: value,
         },
       },
-    });
+    };
+    setLocalUser(updatedUser);
+    setUser(updatedUser);
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
+    setMode("buyer");
+    navigate("/");
   };
 
   const headerContent = (
@@ -108,9 +120,9 @@ export default function Profile() {
             <div className="flex flex-col items-center">
               <div className="relative">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={localUser.avatar} alt={localUser.name} />
                   <AvatarFallback className="text-xl">
-                    {user.name
+                    {localUser.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -123,8 +135,8 @@ export default function Profile() {
                   <Camera size={14} />
                 </Button>
               </div>
-              <h2 className="text-xl font-semibold mt-4">{user.name}</h2>
-              <p className="text-muted-foreground">{user.email}</p>
+              <h2 className="text-xl font-semibold mt-4">{localUser.name}</h2>
+              <p className="text-muted-foreground">{localUser.email}</p>
               <Badge variant="secondary" className="mt-2">
                 <Shield size={12} className="mr-1" />
                 Verified Account
@@ -204,17 +216,17 @@ export default function Profile() {
                   <div>
                     <p className="text-sm font-medium">Email</p>
                     <p className="text-sm text-muted-foreground">
-                      {user.email}
+                      {localUser.email}
                     </p>
                   </div>
                 </div>
-                {user.phone && (
+                {localUser.phone && (
                   <div className="flex items-center space-x-3">
                     <Phone size={16} className="text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">Phone</p>
                       <p className="text-sm text-muted-foreground">
-                        {user.phone}
+                        {localUser.phone}
                       </p>
                     </div>
                   </div>
@@ -265,7 +277,7 @@ export default function Profile() {
                 </p>
               </div>
               <Switch
-                checked={user.preferences.notifications.email}
+                checked={localUser.preferences.notifications.email}
                 onCheckedChange={(checked) =>
                   updatePreference("notifications", "email", checked)
                 }
@@ -279,7 +291,7 @@ export default function Profile() {
                 </p>
               </div>
               <Switch
-                checked={user.preferences.notifications.push}
+                checked={localUser.preferences.notifications.push}
                 onCheckedChange={(checked) =>
                   updatePreference("notifications", "push", checked)
                 }
@@ -293,7 +305,7 @@ export default function Profile() {
                 </p>
               </div>
               <Switch
-                checked={user.preferences.notifications.sms}
+                checked={localUser.preferences.notifications.sms}
                 onCheckedChange={(checked) =>
                   updatePreference("notifications", "sms", checked)
                 }
@@ -314,13 +326,13 @@ export default function Profile() {
             <div className="flex items-center justify-between">
               <span className="font-medium">Language</span>
               <span className="text-muted-foreground">
-                {user.preferences.language}
+                {localUser.preferences.language}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="font-medium">Currency</span>
               <span className="text-muted-foreground">
-                {user.preferences.currency}
+                {localUser.preferences.currency}
               </span>
             </div>
           </CardContent>
@@ -365,7 +377,7 @@ export default function Profile() {
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => navigate("/")}
+                      onClick={handleSignOut}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
                       Sign Out
