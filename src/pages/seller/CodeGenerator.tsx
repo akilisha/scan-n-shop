@@ -20,7 +20,7 @@ import {
   ArrowLeft,
   Download,
   Share,
-  Print,
+  Printer,
   Copy,
   QrCode,
   BarChart3,
@@ -449,7 +449,7 @@ export default function CodeGenerator() {
                   size="sm"
                   onClick={() => window.print()}
                 >
-                  <Print size={14} className="mr-2" />
+                  <Printer size={14} className="mr-2" />
                   Print
                 </Button>
               </div>
