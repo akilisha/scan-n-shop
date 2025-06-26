@@ -25,7 +25,7 @@ import {
   QrCode,
   BarChart3,
   Tag,
-  Refresh,
+  RefreshCw,
 } from "lucide-react";
 import { mockProducts } from "@/data/mockData";
 import { cn } from "@/lib/utils";
@@ -397,7 +397,7 @@ export default function CodeGenerator() {
                         onClick={generateRandomBarcode}
                         className="px-3"
                       >
-                        <Refresh size={16} />
+                        <RefreshCw size={16} />
                       </Button>
                     </div>
                   </div>
