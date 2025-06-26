@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
+import { AuthModal } from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { User } from "@/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,14 +40,10 @@ import { User } from "@/types";
 export default function Profile() {
   const navigate = useNavigate();
   const { user, setUser, setMode } = useAppMode();
+  const [showAuth, setShowAuth] = useState(false);
 
-  // If no user is logged in, redirect to home
-  if (!user) {
-    navigate("/");
-    return null;
-  }
-
-  const [localUser, setLocalUser] = useState<User>(user);
+  // Use mockUser as fallback for display when not logged in
+  const [localUser, setLocalUser] = useState<User>(user || mockUser);
   const [isEditing, setIsEditing] = useState(false);
 
   // Sync localUser with context user changes
@@ -59,6 +57,7 @@ export default function Profile() {
       });
     }
   }, [user]);
+
   const [formData, setFormData] = useState({
     name: localUser.name,
     email: localUser.email,
