@@ -19,6 +19,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
     category: "Beverages",
     inStock: true,
+    barcode: "1234567890123",
   },
   {
     id: "2",
@@ -29,6 +30,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop",
     category: "Beverages",
     inStock: true,
+    barcode: "2345678901234",
   },
   {
     id: "3",
@@ -39,6 +41,7 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop",
     category: "Digital",
     inStock: true,
+    barcode: "3456789012345",
   },
   {
     id: "4",
@@ -49,6 +52,40 @@ export const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=400&fit=crop",
     category: "Electronics",
     inStock: true,
+    barcode: "4567890123456",
+  },
+  {
+    id: "5",
+    name: "Artisan Dark Chocolate",
+    description: "Single-origin 70% dark chocolate bar",
+    price: 8.99,
+    image:
+      "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=400&fit=crop",
+    category: "Food",
+    inStock: true,
+    barcode: "5678901234567",
+  },
+  {
+    id: "6",
+    name: "Bamboo Water Bottle",
+    description: "Eco-friendly insulated water bottle",
+    price: 32.99,
+    image:
+      "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop",
+    category: "Lifestyle",
+    inStock: true,
+    barcode: "6789012345678",
+  },
+  {
+    id: "7",
+    name: "Yoga Mat Premium",
+    description: "Non-slip eco-friendly yoga mat",
+    price: 45.99,
+    image:
+      "https://images.unsplash.com/photo-1506629905645-b178f786832d?w=400&h=400&fit=crop",
+    category: "Fitness",
+    inStock: true,
+    barcode: "7890123456789",
   },
 ];
 
