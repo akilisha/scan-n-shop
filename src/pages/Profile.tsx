@@ -11,19 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import {
-  ArrowLeft,
-  Camera,
-  Mail,
-  Phone,
-  Shield,
-  Bell,
-  Globe,
-  Edit,
-  LogOut,
-} from "lucide-react";
-import { useAppMode } from "@/contexts/AppModeContext";
-import { User } from "@/types";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -34,17 +21,33 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  ArrowLeft,
+  Camera,
+  Mail,
+  Phone,
+  Shield,
+  Bell,
+  Globe,
+  Edit,
+  LogOut,
+  User,
+} from "lucide-react";
+import { useAppMode } from "@/contexts/AppModeContext";
+import { User as UserType } from "@/types";
 import { mockUser } from "@/data/mockData";
-import { User } from "@/types";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, setUser, setMode } = useAppMode();
   const [showAuth, setShowAuth] = useState(false);
-
-  // Use mockUser as fallback for display when not logged in
-  const [localUser, setLocalUser] = useState<User>(user || mockUser);
+  const [localUser, setLocalUser] = useState<UserType>(user || mockUser);
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: localUser.name,
+    email: localUser.email,
+    phone: localUser.phone || "",
+  });
 
   // Sync localUser with context user changes
   useEffect(() => {
@@ -57,12 +60,6 @@ export default function Profile() {
       });
     }
   }, [user]);
-
-  const [formData, setFormData] = useState({
-    name: localUser.name,
-    email: localUser.email,
-    phone: localUser.phone || "",
-  });
 
   const handleSave = () => {
     const updatedUser = {
@@ -86,7 +83,7 @@ export default function Profile() {
   };
 
   const updatePreference = (
-    category: keyof User["preferences"],
+    category: keyof UserType["preferences"],
     key: string,
     value: any,
   ) => {
@@ -129,8 +126,56 @@ export default function Profile() {
     </div>
   );
 
+  // Show sign-in prompt if not logged in
+  if (!user) {
+    return (
+      <>
+        <Layout headerContent={headerContent}>
+          <div className="space-y-6">
+            {/* Sign In Prompt */}
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                  <User className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+                <p className="text-muted-foreground text-center mb-8">
+                  Please sign in to access your profile and manage your account
+                  settings.
+                </p>
+                <div className="w-full space-y-3">
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={() => setShowAuth(true)}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => navigate("/")}
+                  >
+                    Continue Shopping
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </Layout>
+
+        <AuthModal
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => setShowAuth(false)}
+          mode="login"
+        />
+      </>
+    );
+  }
+
   return (
-    <Layout headerContent={headerContent} showBottomNav={false}>
+    <Layout headerContent={headerContent}>
       <div className="space-y-6">
         {/* Profile Header */}
         <Card>
