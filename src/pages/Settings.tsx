@@ -17,7 +17,10 @@ import {
   HelpCircle,
   ExternalLink,
   Trash2,
+  Crown,
+  Store,
 } from "lucide-react";
+import { useAppMode } from "@/contexts/AppModeContext";
 import {
   Select,
   SelectContent,
@@ -41,6 +44,7 @@ import { AppSettings } from "@/types";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { user, canAccessSellerMode, setMode } = useAppMode();
   const [settings, setSettings] = useState<AppSettings>(mockAppSettings);
 
   const updateSetting = (
@@ -83,6 +87,65 @@ export default function Settings() {
   return (
     <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
+        {/* Seller Mode - Only show if signed in */}
+        {user && (
+          <Card className={canAccessSellerMode ? "border-primary/20" : ""}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                {canAccessSellerMode ? (
+                  <Crown size={18} className="text-primary" />
+                ) : (
+                  <Store size={18} />
+                )}
+                <span>Seller Mode</span>
+                {canAccessSellerMode && <Badge className="ml-2">Active</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {canAccessSellerMode ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    You have access to seller tools. Switch to seller mode to
+                    manage your products and view payment analytics.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => {
+                        setMode("seller");
+                        navigate("/seller");
+                      }}
+                      className="flex-1"
+                    >
+                      <Crown size={16} className="mr-2" />
+                      Switch to Seller Mode
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/subscriptions")}
+                    >
+                      Manage
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Unlock powerful seller tools to create products, manage
+                    payments, and grow your business.
+                  </p>
+                  <Button
+                    onClick={() => navigate("/seller-subscription")}
+                    className="w-full"
+                  >
+                    <Crown size={16} className="mr-2" />
+                    Upgrade to Seller
+                  </Button>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Notifications */}
         <Card>
           <CardHeader>
