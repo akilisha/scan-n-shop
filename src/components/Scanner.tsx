@@ -222,7 +222,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
               <Scan size={14} className="mr-1" />
               Scan to Add Items
             </Badge>
-            <div className="w-10" /> {/* Spacer */}
+            <div className="w-10" />
           </div>
         </div>
 
