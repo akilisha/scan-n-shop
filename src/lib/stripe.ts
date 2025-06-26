@@ -3,7 +3,7 @@ import { loadStripe } from "@stripe/stripe-js";
 // Replace with your actual Stripe publishable key
 // For development, you can use Stripe test keys
 export const stripePromise = loadStripe(
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
     "pk_test_51234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",
 );
 
