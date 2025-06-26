@@ -7,6 +7,8 @@ export interface Product {
   category: string;
   inStock: boolean;
   barcode?: string;
+  sellerId?: string;
+  createdAt?: Date;
 }
 
 export interface CartItem {
@@ -41,6 +43,9 @@ export interface PaymentHistory {
   paymentMethod: PaymentMethod;
   items: CartItem[];
   receiptUrl?: string;
+  buyerId?: string;
+  sellerId?: string;
+  refundable?: boolean;
 }
 
 export interface Subscription {
@@ -54,6 +59,7 @@ export interface Subscription {
   currentPeriodEnd: Date;
   nextBillingDate?: Date;
   paymentMethod: PaymentMethod;
+  planType?: "seller" | "premium";
 }
 
 export interface User {
@@ -72,6 +78,8 @@ export interface User {
     language: string;
     darkMode: boolean;
   };
+  subscriptions?: Subscription[];
+  hasSellerAccess?: boolean;
 }
 
 export interface CheckoutState {
@@ -102,3 +110,37 @@ export interface AppSettings {
     dataSharing: boolean;
   };
 }
+
+export interface SellerPlan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  interval: "month" | "year";
+  features: string[];
+  popular?: boolean;
+}
+
+export interface SellerPayment extends PaymentHistory {
+  buyerInfo: {
+    name: string;
+    email: string;
+  };
+  fees: {
+    stripe: number;
+    platform: number;
+  };
+  netAmount: number;
+}
+
+export interface ProductCode {
+  id: string;
+  productId: string;
+  type: "barcode" | "qr" | "price_tag";
+  code: string;
+  data: any;
+  createdAt: Date;
+  printCount: number;
+}
+
+export type AppMode = "buyer" | "seller";
