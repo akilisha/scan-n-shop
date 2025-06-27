@@ -20,48 +20,43 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockPaymentMethods } from "@/data/mockData";
-import { PaymentMethod } from "@/types";
+import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
 
 export default function PaymentMethods() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [paymentMethods, setPaymentMethods] =
-    useState<PaymentMethod[]>(mockPaymentMethods);
+  const {
+    paymentMethods,
+    loading,
+    deleteUserPaymentMethod,
+    setUserDefaultPaymentMethod,
+  } = usePaymentMethods();
   const [showAddForm, setShowAddForm] = useState(
     searchParams.get("add") === "true",
   );
   const [success, setSuccess] = useState<string | null>(null);
 
-  const deletePaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.filter((method) => method.id !== id));
-    setSuccess("Payment method removed successfully");
+  const deletePaymentMethod = async (id: string) => {
+    const { error } = await deleteUserPaymentMethod(id);
+    if (error) {
+      setSuccess(`Error: ${error.message}`);
+    } else {
+      setSuccess("Payment method removed successfully");
+    }
     setTimeout(() => setSuccess(null), 3000);
   };
 
-  const setDefaultPaymentMethod = (id: string) => {
-    setPaymentMethods(
-      paymentMethods.map((method) => ({
-        ...method,
-        isDefault: method.id === id,
-      })),
-    );
-    setSuccess("Default payment method updated");
+  const setDefaultPaymentMethod = async (id: string) => {
+    const { error } = await setUserDefaultPaymentMethod(id);
+    if (error) {
+      setSuccess(`Error: ${error.message}`);
+    } else {
+      setSuccess("Default payment method updated");
+    }
     setTimeout(() => setSuccess(null), 3000);
   };
 
   const handlePaymentSuccess = () => {
-    const newMethod: PaymentMethod = {
-      id: Date.now().toString(),
-      type: "card",
-      last4: "4242",
-      brand: "visa",
-      expiryMonth: 12,
-      expiryYear: 2027,
-      isDefault: paymentMethods.length === 0,
-      nickname: "New Card",
-    };
-    setPaymentMethods([...paymentMethods, newMethod]);
     setShowAddForm(false);
     setSuccess("Payment method added successfully");
     setTimeout(() => setSuccess(null), 3000);
