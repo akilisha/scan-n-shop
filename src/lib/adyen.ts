@@ -1,5 +1,4 @@
 import AdyenCheckout from "@adyen/adyen-web";
-import "@adyen/adyen-web/dist/adyen.css";
 
 // Adyen configuration
 export const ADYEN_CONFIG = {

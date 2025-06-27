@@ -1,9 +1,9 @@
+/* Import Adyen custom styles */
+@import "./styles/adyen.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Adyen custom styles */
-@import "./styles/adyen.css";
 
 @layer base {
   /**
