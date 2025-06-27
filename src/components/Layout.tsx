@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
+import { SellerBottomNavigation } from "./SellerBottomNavigation";
+import { useAppMode } from "@/contexts/AppModeContext";
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -15,6 +17,7 @@ export function Layout({
   showBottomNav = true,
   headerContent,
 }: LayoutProps) {
+  const { mode } = useAppMode();
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -36,8 +39,9 @@ export function Layout({
         {children}
       </main>
 
-      {/* Bottom Navigation */}
-      {showBottomNav && <BottomNavigation />}
+      {/* Bottom Navigation - Always show based on mode */}
+      {showBottomNav &&
+        (mode === "seller" ? <SellerBottomNavigation /> : <BottomNavigation />)}
     </div>
   );
 }

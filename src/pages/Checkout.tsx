@@ -72,9 +72,7 @@ export default function Checkout() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() =>
-          checkoutState.step === "confirmation" ? navigate("/") : navigate(-1)
-        }
+        onClick={() => navigate("/")}
         className="p-2"
       >
         <ArrowLeft size={20} />
