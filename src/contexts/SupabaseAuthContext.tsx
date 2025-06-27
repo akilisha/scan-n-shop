@@ -123,11 +123,13 @@ export function SupabaseAuthProvider({
 
   const handleSignIn = async (email: string, password: string) => {
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
+    try {
+      const { error } = await signIn(email, password);
+      return { error };
+    } finally {
+      // Always reset loading state, regardless of success or error
       setLoading(false);
     }
-    return { error };
   };
 
   const handleSignUp = async (
@@ -136,11 +138,13 @@ export function SupabaseAuthProvider({
     fullName: string,
   ) => {
     setLoading(true);
-    const { error } = await signUp(email, password, fullName);
-    if (error) {
+    try {
+      const { error } = await signUp(email, password, fullName);
+      return { error };
+    } finally {
+      // Always reset loading state, regardless of success or error
       setLoading(false);
     }
-    return { error };
   };
 
   const handleSignInWithGoogle = async () => {
