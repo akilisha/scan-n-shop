@@ -10,20 +10,21 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Check, Loader2, User } from "lucide-react";
 import { stripePromise, STRIPE_CONFIG, confirmPayment } from "@/lib/stripe";
-import { mockCartItems, mockPaymentMethods } from "@/data/mockData";
+import { mockPaymentMethods } from "@/data/mockData";
 import { CheckoutState, PaymentMethod } from "@/types";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { useCart } from "@/contexts/CartContext";
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { user } = useAppMode();
+  const { cartItems, clearCart, getSubtotal, getTotal } = useCart();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: "cart",
     processing: false,
   });
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod>(mockPaymentMethods[0]);
-  const [cartItems] = useState(mockCartItems);
   const [showAuth, setShowAuth] = useState(false);
 
   // Check if user is authenticated on component mount
@@ -40,12 +41,9 @@ export default function Checkout() {
     setCheckoutState({ step: "payment", processing: false });
   };
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  );
+  const subtotal = getSubtotal();
   const tax = subtotal * 0.08;
-  const total = subtotal + tax;
+  const total = getTotal();
 
   const handlePayment = async () => {
     setCheckoutState({ ...checkoutState, processing: true, error: undefined });
@@ -57,6 +55,8 @@ export default function Checkout() {
       // In a real app, you would create and confirm a payment intent here
       // const result = await confirmPayment(clientSecret);
 
+      // Clear the cart after successful payment
+      clearCart();
       setCheckoutState({ step: "confirmation", processing: false });
     } catch (error) {
       setCheckoutState({
@@ -96,7 +96,7 @@ export default function Checkout() {
   if (showAuth) {
     return (
       <>
-        <Layout headerContent={headerContent} showBottomNav={false}>
+        <Layout headerContent={headerContent}>
           <div className="flex flex-col items-center justify-center py-12">
             <Card className="w-full">
               <CardContent className="flex flex-col items-center justify-center py-12">
