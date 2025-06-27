@@ -9,22 +9,23 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Check, Loader2, User } from "lucide-react";
-import { processPayment } from "@/lib/adyen";
-import { mockPaymentMethods } from "@/data/mockData";
-import { CheckoutState, PaymentMethod } from "@/types";
+import { createOrder } from "@/lib/supabase";
+import { CheckoutState } from "@/types";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
 import { useCart } from "@/contexts/CartContext";
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { user } = useAppMode();
+  const { supabaseUser } = useSupabaseAuth();
+  const { paymentMethods } = usePaymentMethods();
   const { cartItems, clearCart, getSubtotal, getTotal } = useCart();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: "cart",
     processing: false,
   });
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<PaymentMethod>(mockPaymentMethods[0]);
   const [showAuth, setShowAuth] = useState(false);
 
   // Check if user is authenticated on component mount
@@ -45,10 +46,48 @@ export default function Checkout() {
   const tax = subtotal * 0.08;
   const total = getTotal();
 
-  const handlePaymentSuccess = () => {
-    // Clear the cart after successful payment
-    clearCart();
-    setCheckoutState({ step: "confirmation", processing: false });
+  const handlePaymentSuccess = async () => {
+    try {
+      // Save order to database if user is authenticated
+      if (supabaseUser && cartItems.length > 0) {
+        const defaultPaymentMethod =
+          paymentMethods.find((method) => method.isDefault) ||
+          paymentMethods[0];
+
+        const orderData = {
+          total_amount: getTotal(),
+          payment_method: {
+            type: defaultPaymentMethod?.type || "card",
+            last4: defaultPaymentMethod?.last4 || "****",
+            brand: defaultPaymentMethod?.brand || "unknown",
+          },
+          items: cartItems.map((item) => ({
+            id: item.id,
+            product_id: item.product.id,
+            product_name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+            total: item.product.price * item.quantity,
+          })),
+          status: "completed",
+        };
+
+        const { error } = await createOrder(supabaseUser.id, orderData);
+        if (error) {
+          console.error("Failed to save order:", error);
+          // Still proceed with clearing cart and showing success
+        }
+      }
+
+      // Clear the cart after successful payment
+      clearCart();
+      setCheckoutState({ step: "confirmation", processing: false });
+    } catch (error) {
+      console.error("Error processing payment success:", error);
+      // Still proceed with success flow
+      clearCart();
+      setCheckoutState({ step: "confirmation", processing: false });
+    }
   };
 
   const handlePaymentError = (error: string) => {
