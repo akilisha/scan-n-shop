@@ -18,7 +18,7 @@ import { useCart } from "@/contexts/CartContext";
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { user } = useAppMode();
+  const { user: supabaseUserProfile } = useSupabaseAuth();
   const { supabaseUser } = useSupabaseAuth();
   const { paymentMethods } = usePaymentMethods();
   const { cartItems, clearCart, getSubtotal, getTotal } = useCart();
@@ -40,12 +40,12 @@ export default function Checkout() {
 
   // Check if user is authenticated on component mount
   useEffect(() => {
-    if (user) {
+    if (supabaseUserProfile) {
       setCheckoutState({ step: "payment", processing: false });
     } else {
       setShowAuth(true);
     }
-  }, [user]);
+  }, [supabaseUserProfile]);
 
   const handleAuthSuccess = () => {
     setShowAuth(false);
