@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Elements } from "@stripe/react-stripe-js";
 import { Layout } from "@/components/Layout";
-import { PaymentForm } from "@/components/PaymentForm";
+import { AdyenPaymentForm } from "@/components/AdyenPaymentForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { stripePromise } from "@/lib/stripe";
 import { mockPaymentMethods } from "@/data/mockData";
 import { PaymentMethod } from "@/types";
 
@@ -89,8 +87,8 @@ export default function PaymentMethods() {
 
         {/* Add Payment Method Form */}
         {showAddForm && (
-          <Elements stripe={stripePromise}>
-            <PaymentForm
+          <>
+            <AdyenPaymentForm
               amount={0}
               onSuccess={handlePaymentSuccess}
               onError={(error) => console.error("Payment error:", error)}
@@ -102,7 +100,7 @@ export default function PaymentMethods() {
             >
               Cancel
             </Button>
-          </Elements>
+          </>
         )}
 
         {/* Existing Payment Methods */}
