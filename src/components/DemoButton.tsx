@@ -44,33 +44,52 @@ export function DemoButton() {
 
   if (isDemoMode) {
     return (
-      <div className="fixed bottom-24 right-4 z-50 animate-fade-in">
-        <Card className="border-warning bg-warning/10 border-2">
-          <CardContent className="p-3">
+      <>
+        {/* Top banner for demo mode - always visible */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg">
+          <div className="flex items-center justify-between px-4 py-2 max-w-sm mx-auto">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-warning rounded-full flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-warning-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm text-warning-foreground">
-                  Demo Mode
-                </p>
-                <p className="text-xs text-warning-foreground/80">
-                  Exploring with sample data
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={exitDemoMode}
-                className="h-8 px-2 text-xs"
-              >
-                Exit
-              </Button>
+              <Sparkles className="h-4 w-4 animate-pulse" />
+              <span className="font-semibold text-sm">Demo Mode Active</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={exitDemoMode}
+              className="h-7 px-2 text-xs text-white hover:bg-white/20"
+            >
+              Exit Demo
+            </Button>
+          </div>
+        </div>
+
+        {/* Bottom floating indicator */}
+        <div className="fixed bottom-24 right-4 z-40 animate-fade-in">
+          <Card className="border-amber-500 bg-amber-50 border-2 shadow-lg">
+            <CardContent className="p-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-white animate-pulse" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-amber-900">
+                    Demo Mode
+                  </p>
+                  <p className="text-xs text-amber-700">Sample data active</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={exitDemoMode}
+                  className="h-8 px-2 text-xs border-amber-500 text-amber-700 hover:bg-amber-100"
+                >
+                  Exit
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 

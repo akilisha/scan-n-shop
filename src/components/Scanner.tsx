@@ -187,19 +187,34 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
       videoRef.current.pause();
       videoRef.current.srcObject = null;
       videoRef.current.load(); // Force reload to clear the stream
+      // Additional cleanup to ensure video element is completely reset
+      videoRef.current.removeAttribute("src");
     }
 
-    // Reset the code reader
+    // Reset the code reader and clean up completely
     if (codeReader.current) {
       try {
         if (typeof codeReader.current.reset === "function") {
           codeReader.current.reset();
         }
+        if (
+          typeof codeReader.current.stopContinuousDecodeFromInputVideoDevice ===
+          "function"
+        ) {
+          codeReader.current.stopContinuousDecodeFromInputVideoDevice();
+        }
       } catch (error) {
-        console.log("CodeReader reset not available, cleaning up manually");
+        console.log("CodeReader cleanup not available, cleaning up manually");
       }
       codeReader.current = null;
     }
+
+    // Force garbage collection of any remaining video elements
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    }, 100);
   };
 
   const toggleFlash = async () => {

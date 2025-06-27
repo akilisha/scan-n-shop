@@ -94,11 +94,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getTotalItems = () => {
-    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    return effectiveCartItems.reduce((sum, item) => sum + item.quantity, 0);
   };
 
   const getSubtotal = () => {
-    return cartItems.reduce(
+    return effectiveCartItems.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
       0,
     );
