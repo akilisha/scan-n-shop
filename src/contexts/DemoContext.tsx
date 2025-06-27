@@ -9,6 +9,9 @@ interface DemoContextType {
   demoUser: User | null;
   demoCartItems: CartItem[];
   addDemoItem: (productId: string) => void;
+  updateDemoQuantity: (itemId: string, newQuantity: number) => void;
+  removeDemoItem: (itemId: string) => void;
+  clearDemoCart: () => void;
   showDemoButton: boolean;
   hideDemoButton: () => void;
 }
@@ -84,6 +87,26 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateDemoQuantity = (itemId: string, newQuantity: number) => {
+    if (newQuantity === 0) {
+      removeDemoItem(itemId);
+      return;
+    }
+    setDemoCartItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item,
+      ),
+    );
+  };
+
+  const removeDemoItem = (itemId: string) => {
+    setDemoCartItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const clearDemoCart = () => {
+    setDemoCartItems([]);
+  };
+
   const hideDemoButton = () => {
     setShowDemoButton(false);
     localStorage.setItem("demoDismissed", "true");
@@ -98,6 +121,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         demoUser: isDemoMode ? demoUser : null,
         demoCartItems,
         addDemoItem,
+        updateDemoQuantity,
+        removeDemoItem,
+        clearDemoCart,
         showDemoButton,
         hideDemoButton,
       }}
