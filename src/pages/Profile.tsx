@@ -75,8 +75,8 @@ export default function Profile() {
 
   const handleCancel = () => {
     setFormData({
-      name: localUser.name,
-      email: localUser.email,
+      name: localUser.name || "",
+      email: localUser.email || "",
       phone: localUser.phone || "",
     });
     setIsEditing(false);
