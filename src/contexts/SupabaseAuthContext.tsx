@@ -50,14 +50,6 @@ export function SupabaseAuthProvider({
 
       if (session?.user) {
         await loadUserProfile(session.user);
-
-        // Exit demo mode when real user signs in
-        try {
-          const { useDemo } = await import("@/contexts/DemoContext");
-          // This will be handled by the context consumers
-        } catch (error) {
-          console.log("Demo context not available");
-        }
       } else {
         setUser(null);
         setSupabaseUser(null);
