@@ -66,11 +66,21 @@ export default function Settings() {
   };
 
   const headerContent = (
-    <div>
-      <h1 className="text-xl font-semibold">Settings</h1>
-      <p className="text-sm text-muted-foreground">
-        Customize your app experience
-      </p>
+    <div className="flex items-center space-x-4">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate("/profile")}
+        className="p-2"
+      >
+        <ArrowLeft size={20} />
+      </Button>
+      <div>
+        <h1 className="text-xl font-semibold">Settings</h1>
+        <p className="text-sm text-muted-foreground">
+          Customize your app experience
+        </p>
+      </div>
     </div>
   );
 
