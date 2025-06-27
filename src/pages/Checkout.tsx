@@ -45,26 +45,18 @@ export default function Checkout() {
   const tax = subtotal * 0.08;
   const total = getTotal();
 
-  const handlePayment = async () => {
-    setCheckoutState({ ...checkoutState, processing: true, error: undefined });
+  const handlePaymentSuccess = () => {
+    // Clear the cart after successful payment
+    clearCart();
+    setCheckoutState({ step: "confirmation", processing: false });
+  };
 
-    try {
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // In a real app, you would create and confirm a payment intent here
-      // const result = await confirmPayment(clientSecret);
-
-      // Clear the cart after successful payment
-      clearCart();
-      setCheckoutState({ step: "confirmation", processing: false });
-    } catch (error) {
-      setCheckoutState({
-        ...checkoutState,
-        processing: false,
-        error: "Payment failed. Please try again.",
-      });
-    }
+  const handlePaymentError = (error: string) => {
+    setCheckoutState({
+      ...checkoutState,
+      processing: false,
+      error: error || "Payment failed. Please try again.",
+    });
   };
 
   const headerContent = (
@@ -74,7 +66,7 @@ export default function Checkout() {
       </h1>
       {checkoutState.step === "payment" && (
         <p className="text-sm text-muted-foreground">
-          Secure payment with Stripe
+          Secure payment with Adyen
         </p>
       )}
     </div>
