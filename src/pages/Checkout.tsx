@@ -323,11 +323,11 @@ export default function Checkout() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockPaymentMethods.map((method) => (
+            {paymentMethods.map((method) => (
               <div
                 key={method.id}
                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedPaymentMethod.id === method.id
+                  selectedPaymentMethod?.id === method.id
                     ? "border-primary bg-primary/5"
                     : "border-border hover:border-primary/50"
                 }`}
@@ -340,10 +340,11 @@ export default function Checkout() {
                     </div>
                     <div>
                       <p className="font-medium">
-                        {method.brand?.toUpperCase()} ••���•{method.last4}
+                        {method.brand?.toUpperCase()} ••••{method.last4}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {method.nickname}
+                        {method.nickname ||
+                          `${method.brand} ending in ${method.last4}`}
                       </p>
                     </div>
                   </div>
