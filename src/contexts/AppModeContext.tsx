@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppMode, User } from "@/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
