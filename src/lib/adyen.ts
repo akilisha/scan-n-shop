@@ -1,4 +1,4 @@
-import AdyenCheckout from "@adyen/adyen-web";
+import { AdyenCheckout } from "@adyen/adyen-web";
 
 // Adyen configuration
 export const ADYEN_CONFIG = {
