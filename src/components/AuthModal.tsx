@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,16 @@ export function AuthModal({
     password: "",
     name: "",
   });
+
+  // Clean up states when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Reset states when modal opens
+      setLoading(false);
+      setError(null);
+      setFormData({ email: "", password: "", name: "" });
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
