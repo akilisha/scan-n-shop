@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Scanner } from "@/components/Scanner";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 export default function Cart() {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { cartItems, addToCart, updateQuantity, removeItem, getTotalItems, getSubtotal, getTotal } = useCart();
   const [scannerOpen, setScannerOpen] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
   const [recentlyAdded, setRecentlyAdded] = useState<string | null>(null);
@@ -109,55 +110,16 @@ export default function Cart() {
     setTimeout(() => setRecentlyAdded(null), 2000);
   };
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity === 0) {
-      setCartItems(cartItems.filter((item) => item.id !== itemId));
-      return;
-    }
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item,
-      ),
-    );
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    // Show recently added indicator
+    setRecentlyAdded(product.id);
+    setTimeout(() => setRecentlyAdded(null), 2000);
   };
 
-  const removeItem = (itemId: string) => {
-    setCartItems(cartItems.filter((item) => item.id !== itemId));
-  };
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  );
-  const tax = subtotal * 0.08;
-  const total = subtotal + tax;
-
-  const headerContent = (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Scan & Shop</h1>
-        <p className="text-sm text-muted-foreground">
-          {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
-        </p>
-      </div>
-      <div className="relative">
-        <ShoppingBag className="h-6 w-6 text-primary" />
-        {cartItems.length > 0 && (
-          <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-            {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-          </Badge>
-        )}
-      </div>
-    </div>
-  );
-
-  // Show camera not available message
-  if (cameraAvailable === false) {
-    return (
-      <Layout headerContent={headerContent}>
-        <div className="flex flex-col items-center justify-center py-12">
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center justify-center py-12">
+  const subtotal = getSubtotal();
+  const tax = subtotal * 0.08; // 8% tax
+  const total = getTotal();
               <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
                 <AlertTriangle className="h-10 w-10 text-destructive" />
               </div>
@@ -211,11 +173,11 @@ export default function Cart() {
           </Card>
 
           {/* Cart Items */}
-          {cartItems.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
-                  <ShoppingBag className="h-12 w-12 text-muted-foreground" />
+        {cartItems.length > 0 && (
+          <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+            {getTotalItems()}
+          </Badge>
+        )}
                 </div>
                 <h2 className="text-xl font-semibold mb-2">Ready to scan!</h2>
                 <p className="text-muted-foreground text-center mb-6">
@@ -269,17 +231,11 @@ export default function Cart() {
                           </div>
                           <Button
                             variant="ghost"
-                            size="sm"
-                            onClick={() => removeItem(item.id)}
-                            className="text-muted-foreground hover:text-destructive p-1"
-                          >
-                            <X size={16} />
-                          </Button>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-4">
-                          <div className="flex items-center space-x-2">
-                            <Button
+                        onClick={() => handleAddToCart(product)}
+                        className="shrink-0"
+                      >
+                        Add
+                      </Button>
                               variant="outline"
                               size="sm"
                               onClick={() =>
@@ -293,22 +249,13 @@ export default function Cart() {
                             <span className="font-medium w-8 text-center">
                               {item.quantity}
                             </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                updateQuantity(item.id, item.quantity + 1)
-                              }
-                              className="h-8 w-8 p-0"
-                            >
-                              <Plus size={14} />
-                            </Button>
-                          </div>
-                          <p className="font-semibold">
-                            ${(item.product.price * item.quantity).toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToCart(product)}
+                        className="shrink-0"
+                      >
+                        Add
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -353,16 +300,16 @@ export default function Cart() {
                   <h3 className="font-medium mb-3">Or try these demo items:</h3>
                   <div className="grid grid-cols-2 gap-2">
                     {mockProducts.slice(0, 4).map((product) => (
-                      <Button
-                        key={product.id}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addToCart(product)}
-                        className="text-xs p-2 h-auto"
-                      >
-                        <Plus size={12} className="mr-1" />
-                        {product.name}
-                      </Button>
+                    <Button
+                      key={product.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddToCart(product)}
+                      className="text-xs p-2 h-auto"
+                    >
+                      <Plus size={12} className="mr-1" />
+                      {product.name}
+                    </Button>
                     ))}
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">
