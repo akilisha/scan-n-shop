@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppMode, User } from "@/types";
+import { useDemo } from "@/contexts/DemoContext";
 
 interface AppModeContextType {
   mode: AppMode;
@@ -15,8 +16,22 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<AppMode>("buyer");
   const [user, setUser] = useState<User | null>(null);
 
+  // Access demo context safely
+  let demoUser = null;
+  let isDemoMode = false;
+  try {
+    const demo = useDemo();
+    demoUser = demo?.demoUser;
+    isDemoMode = demo?.isDemoMode || false;
+  } catch {
+    // Demo context not available, continue normally
+  }
+
+  // Use demo user when in demo mode, otherwise use real user
+  const effectiveUser = isDemoMode ? demoUser : user;
+
   // Check seller access based on user subscriptions
-  const canAccessSellerMode = user?.hasSellerAccess || false;
+  const canAccessSellerMode = effectiveUser?.hasSellerAccess || false;
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -53,7 +68,7 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
         mode,
         setMode,
         canAccessSellerMode,
-        user,
+        user: effectiveUser,
         setUser,
       }}
     >

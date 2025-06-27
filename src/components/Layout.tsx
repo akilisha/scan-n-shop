@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { SellerBottomNavigation } from "./SellerBottomNavigation";
+import { DemoButton } from "./DemoButton";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,9 @@ export function Layout({
       {/* Bottom Navigation - Always show based on mode */}
       {showBottomNav &&
         (mode === "seller" ? <SellerBottomNavigation /> : <BottomNavigation />)}
+
+      {/* Demo Button - Only show for non-signed-in users */}
+      <DemoButton />
     </div>
   );
 }

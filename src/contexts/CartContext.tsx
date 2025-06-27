@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, Product } from "@/types";
+import { useDemo } from "@/contexts/DemoContext";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -16,6 +17,20 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  // Access demo context safely
+  let demoCartItems: CartItem[] = [];
+  let isDemoMode = false;
+  try {
+    const demo = useDemo();
+    demoCartItems = demo?.demoCartItems || [];
+    isDemoMode = demo?.isDemoMode || false;
+  } catch {
+    // Demo context not available, continue normally
+  }
+
+  // Use demo cart when in demo mode, otherwise use real cart
+  const effectiveCartItems = isDemoMode ? demoCartItems : cartItems;
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -98,7 +113,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <CartContext.Provider
       value={{
-        cartItems,
+        cartItems: effectiveCartItems,
         addToCart,
         updateQuantity,
         removeItem,

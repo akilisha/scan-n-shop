@@ -1,0 +1,116 @@
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { CartItem, User } from "@/types";
+import { mockProducts, mockUser } from "@/data/mockData";
+
+interface DemoContextType {
+  isDemoMode: boolean;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
+  demoUser: User | null;
+  demoCartItems: CartItem[];
+  addDemoItem: (productId: string) => void;
+  showDemoButton: boolean;
+  hideDemoButton: () => void;
+}
+
+const DemoContext = createContext<DemoContextType | undefined>(undefined);
+
+export function DemoProvider({ children }: { children: React.ReactNode }) {
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [showDemoButton, setShowDemoButton] = useState(true);
+  const [demoCartItems, setDemoCartItems] = useState<CartItem[]>([]);
+
+  // Create a demo user with limited seller access
+  const demoUser: User = {
+    ...mockUser,
+    name: "Demo User",
+    email: "demo@example.com",
+    hasSellerAccess: true, // Give demo user seller access to showcase features
+  };
+
+  // Load demo button visibility from localStorage
+  useEffect(() => {
+    const dismissed = localStorage.getItem("demoDismissed");
+    if (dismissed === "true") {
+      setShowDemoButton(false);
+    }
+  }, []);
+
+  const enterDemoMode = () => {
+    setIsDemoMode(true);
+    // Pre-populate demo cart with a few items
+    const demoItems: CartItem[] = [
+      {
+        id: "demo1",
+        product: mockProducts[0],
+        quantity: 2,
+      },
+      {
+        id: "demo2",
+        product: mockProducts[1],
+        quantity: 1,
+      },
+    ];
+    setDemoCartItems(demoItems);
+  };
+
+  const exitDemoMode = () => {
+    setIsDemoMode(false);
+    setDemoCartItems([]);
+  };
+
+  const addDemoItem = (productId: string) => {
+    const product = mockProducts.find((p) => p.id === productId);
+    if (!product) return;
+
+    const existingItem = demoCartItems.find(
+      (item) => item.product.id === productId,
+    );
+    if (existingItem) {
+      setDemoCartItems((prev) =>
+        prev.map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        ),
+      );
+    } else {
+      const newItem: CartItem = {
+        id: `demo-${Date.now()}`,
+        product,
+        quantity: 1,
+      };
+      setDemoCartItems((prev) => [...prev, newItem]);
+    }
+  };
+
+  const hideDemoButton = () => {
+    setShowDemoButton(false);
+    localStorage.setItem("demoDismissed", "true");
+  };
+
+  return (
+    <DemoContext.Provider
+      value={{
+        isDemoMode,
+        enterDemoMode,
+        exitDemoMode,
+        demoUser: isDemoMode ? demoUser : null,
+        demoCartItems,
+        addDemoItem,
+        showDemoButton,
+        hideDemoButton,
+      }}
+    >
+      {children}
+    </DemoContext.Provider>
+  );
+}
+
+export function useDemo() {
+  const context = useContext(DemoContext);
+  if (context === undefined) {
+    throw new Error("useDemo must be used within a DemoProvider");
+  }
+  return context;
+}
