@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,7 @@ export function DemoButton() {
   // Get the real user (not demo user) from localStorage to check if actually signed in
   const [realUser, setRealUser] = useState<any>(null);
 
-  useState(() => {
+  useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       try {
@@ -49,7 +49,7 @@ export function DemoButton() {
         setRealUser(null);
       }
     }
-  });
+  }, []);
 
   // Don't show if real user is signed in or demo button was dismissed
   if (realUser || !showDemoButton) {
