@@ -54,8 +54,8 @@ export default function Profile() {
     if (user) {
       setLocalUser(user);
       setFormData({
-        name: user.name,
-        email: user.email,
+        name: user.name || "",
+        email: user.email || "",
         phone: user.phone || "",
       });
     }
