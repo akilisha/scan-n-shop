@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
+import { PaymentMethodsProvider } from "@/contexts/PaymentMethodsContext";
 import { AppModeProvider } from "@/contexts/AppModeContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { DemoProvider } from "@/contexts/DemoContext";
@@ -33,9 +34,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SupabaseAuthProvider>
-        <DemoProvider>
-          <CartProvider>
-            <AppModeProvider>
+        <PaymentMethodsProvider>
+          <DemoProvider>
+            <CartProvider>
+              <AppModeProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
@@ -68,11 +70,11 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
-            </AppModeProvider>
-          </CartProvider>
-        </DemoProvider>
+              </AppModeProvider>
+            </CartProvider>
+          </DemoProvider>
+        </PaymentMethodsProvider>
       </SupabaseAuthProvider>
-    </TooltipProvider>
   </QueryClientProvider>
 );
 
