@@ -249,18 +249,22 @@ export default function Checkout() {
     <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
         {/* User Info */}
-        {user && (
+        {supabaseUserProfile && (
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-primary-foreground font-semibold">
-                    {user.name?.charAt(0) || "U"}
+                    {supabaseUserProfile.name?.charAt(0) || "U"}
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium">{user.name || "User"}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <p className="font-medium">
+                    {supabaseUserProfile.name || "User"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {supabaseUserProfile.email}
+                  </p>
                 </div>
               </div>
             </CardContent>
