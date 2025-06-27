@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Check, Loader2, User } from "lucide-react";
 import { createOrder } from "@/lib/supabase";
 import { CheckoutState } from "@/types";
-import { useAppMode } from "@/contexts/AppModeContext";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
 import { useCart } from "@/contexts/CartContext";
