@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import {
   ShoppingCart,
   CreditCard,
-  History,
   User,
   Crown,
   ArrowLeftRight,
