@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail, Lock, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { useAppMode } from "@/contexts/AppModeContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ export function AuthModal({
   onSuccess,
   mode: initialMode = "login",
 }: AuthModalProps) {
-  const { setUser } = useAppMode();
+  const { signIn, signUp, signInWithGoogle, loading: authLoading } = useSupabaseAuth();
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,14 +39,28 @@ export function AuthModal({
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      let result;
 
-      // Simulate successful authentication
-      const user = {
-        id: "1",
-        email: formData.email,
-        name: mode === "signup" ? formData.name : "John Doe",
+      if (mode === "signup") {
+        if (!formData.name.trim()) {
+          setError("Full name is required");
+          setLoading(false);
+          return;
+        }
+        result = await signUp(formData.email, formData.password, formData.name);
+      } else {
+        result = await signIn(formData.email, formData.password);
+      }
+
+      if (result.error) {
+        setError(result.error.message);
+      } else {
+        // Success - close modal
+        onClose();
+        if (onSuccess) {
+          onSuccess(null); // User will be available through context
+        }
+      }
         avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face`,
         preferences: {
           notifications: {
