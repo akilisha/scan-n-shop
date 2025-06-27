@@ -9,7 +9,9 @@ import {
   Crown,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const navItems = [
   {
@@ -48,6 +50,7 @@ export function BottomNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { canAccessSellerMode, setMode } = useAppMode();
+  const { getTotalItems } = useCart();
 
   const switchToSellerMode = () => {
     setMode("seller");
@@ -66,7 +69,7 @@ export function BottomNavigation() {
               key={item.id}
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center py-2 px-2 rounded-lg transition-all duration-200",
+                "flex flex-col items-center justify-center py-2 px-2 rounded-lg transition-all duration-200 relative",
                 "min-w-0 flex-1 max-w-[60px]",
                 isActive
                   ? "text-primary bg-primary/10"
@@ -80,6 +83,11 @@ export function BottomNavigation() {
                   isActive ? "scale-110" : "scale-100",
                 )}
               />
+              {item.id === "cart" && getTotalItems() > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs">
+                  {getTotalItems()}
+                </Badge>
+              )}
               <span className="text-xs font-medium mt-1 truncate">
                 {item.label}
               </span>
