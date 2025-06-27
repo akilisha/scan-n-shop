@@ -78,7 +78,43 @@ CREATE POLICY "Sellers can delete their own products." ON public.products
   FOR DELETE USING (auth.uid() = seller_id);
 ```
 
-### 4. Create Orders Table
+### 4. Create Payment Methods Table
+
+```sql
+-- Create payment_methods table
+CREATE TABLE public.payment_methods (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL DEFAULT 'card',
+  last4 TEXT NOT NULL,
+  brand TEXT NOT NULL,
+  expiry_month INTEGER NOT NULL,
+  expiry_year INTEGER NOT NULL,
+  nickname TEXT,
+  is_default BOOLEAN DEFAULT FALSE,
+  adyen_token TEXT, -- For storing Adyen payment method tokens
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Enable RLS on payment_methods table
+ALTER TABLE public.payment_methods ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for payment_methods table
+CREATE POLICY "Users can view their own payment methods." ON public.payment_methods
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own payment methods." ON public.payment_methods
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own payment methods." ON public.payment_methods
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own payment methods." ON public.payment_methods
+  FOR DELETE USING (auth.uid() = user_id);
+```
+
+### 5. Create Orders Table
 
 ```sql
 -- Create orders table
@@ -146,6 +182,10 @@ CREATE TRIGGER handle_updated_at_profiles
 
 CREATE TRIGGER handle_updated_at_products
   BEFORE UPDATE ON public.products
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
+
+CREATE TRIGGER handle_updated_at_payment_methods
+  BEFORE UPDATE ON public.payment_methods
   FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 
 CREATE TRIGGER handle_updated_at_orders
