@@ -96,7 +96,7 @@ export default function PaymentHistoryPage() {
   );
 
   return (
-    <Layout headerContent={headerContent} showBottomNav={true}>
+    <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
         {/* Summary Card */}
         <Card>
