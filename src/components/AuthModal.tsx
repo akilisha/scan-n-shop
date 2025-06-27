@@ -55,9 +55,12 @@ export function AuthModal({
         result = await signUp(formData.email, formData.password, formData.name);
 
         if (!result.error) {
-          setError(null);
-          // Show success message for signup
-          setError("Check your email for a verification link!");
+          // Signup successful - close modal and let auth state handle the rest
+          onClose();
+          if (onSuccess) {
+            onSuccess(null);
+          }
+          return;
         }
       } else {
         result = await signIn(formData.email, formData.password);
@@ -65,7 +68,7 @@ export function AuthModal({
 
       if (result.error) {
         setError(result.error.message);
-      } else if (mode === "login") {
+      } else {
         // Success for login - close modal
         onClose();
         if (onSuccess) {
