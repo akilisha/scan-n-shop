@@ -81,11 +81,15 @@ export function BottomNavigation() {
                   isActive ? "scale-110" : "scale-100",
                 )}
               />
-              {item.id === "cart" && getTotalItems() > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs">
-                  {getTotalItems()}
-                </Badge>
-              )}
+              {item.id === "cart" &&
+                (() => {
+                  const totalItems = getTotalItems();
+                  return totalItems > 0 ? (
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs">
+                      {totalItems}
+                    </Badge>
+                  ) : null;
+                })()}
               <span className="text-xs font-medium mt-1 truncate">
                 {item.label}
               </span>
