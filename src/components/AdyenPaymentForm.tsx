@@ -241,6 +241,27 @@ export function AdyenPaymentForm({
         });
 
         if (result.resultCode === "Success") {
+          // Save payment method to database
+          const cardType = detectCardType(formData.cardNumber);
+          const paymentMethodToSave = {
+            type: "card" as const,
+            last4: formData.cardNumber.replace(/\s/g, "").slice(-4),
+            brand: cardType?.name || "unknown",
+            expiryMonth: parseInt(formData.expiryDate.split("/")[0]),
+            expiryYear: parseInt("20" + formData.expiryDate.split("/")[1]),
+            nickname: `${cardType?.name?.toUpperCase() || "CARD"} ••••${formData.cardNumber.replace(/\s/g, "").slice(-4)}`,
+            isDefault: false,
+          };
+
+          const { error } = await addUserPaymentMethod(paymentMethodToSave);
+          if (error) {
+            console.error("Error saving payment method:", error);
+            onError(
+              "Payment method added but failed to save. Please try again.",
+            );
+            return;
+          }
+
           onSuccess();
         } else {
           throw new Error("Failed to store payment method");
