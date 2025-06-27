@@ -200,11 +200,50 @@ export function AdyenPaymentForm({
     setError(null);
 
     try {
-      // Simulate payment processing with validation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Create payment method object in Adyen format
+      const paymentMethodData = {
+        type: "scheme",
+        number: formData.cardNumber.replace(/\s/g, ""),
+        expiryMonth: formData.expiryDate.split("/")[0],
+        expiryYear: "20" + formData.expiryDate.split("/")[1],
+        cvc: formData.cvv,
+        holderName: formData.cardholderName,
+      };
 
-      // Simulate success
-      onSuccess();
+      // For payment amounts > 0, process payment
+      if (amount > 0) {
+        const { processPayment, createPaymentSession } = await import(
+          "@/lib/adyen"
+        );
+
+        // Create payment session
+        const session = await createPaymentSession(amount);
+
+        // Process payment
+        const result = await processPayment(
+          { paymentMethod: paymentMethodData },
+          session,
+        );
+
+        if (result.resultCode === "Authorised") {
+          onSuccess();
+        } else {
+          throw new Error("Payment was not authorized");
+        }
+      } else {
+        // For amount = 0, just store payment method
+        const { storePaymentMethod } = await import("@/lib/adyen");
+
+        const result = await storePaymentMethod({
+          paymentMethod: paymentMethodData,
+        });
+
+        if (result.resultCode === "Success") {
+          onSuccess();
+        } else {
+          throw new Error("Failed to store payment method");
+        }
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Payment failed";
