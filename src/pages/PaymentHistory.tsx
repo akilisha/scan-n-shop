@@ -77,11 +77,21 @@ export default function PaymentHistoryPage() {
     .reduce((sum, payment) => sum + payment.amount, 0);
 
   const headerContent = (
-    <div>
-      <h1 className="text-xl font-semibold">Payment History</h1>
-      <p className="text-sm text-muted-foreground">
-        Track all your transactions
-      </p>
+    <div className="flex items-center space-x-4">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate("/payment-methods")}
+        className="p-2"
+      >
+        <ArrowLeft size={20} />
+      </Button>
+      <div>
+        <h1 className="text-xl font-semibold">Payment History</h1>
+        <p className="text-sm text-muted-foreground">
+          Track all your transactions
+        </p>
+      </div>
     </div>
   );
 
