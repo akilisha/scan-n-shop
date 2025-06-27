@@ -48,6 +48,16 @@ export function AuthModal({
         email: formData.email,
         name: mode === "signup" ? formData.name : "John Doe",
         avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face`,
+        preferences: {
+          notifications: {
+            email: true,
+            push: true,
+            sms: false,
+          },
+          currency: "USD",
+          language: "English",
+          darkMode: false,
+        },
       };
 
       setUser(user);
@@ -72,6 +82,16 @@ export function AuthModal({
         email: "user@gmail.com",
         name: "John Doe",
         avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face`,
+        preferences: {
+          notifications: {
+            email: true,
+            push: true,
+            sms: false,
+          },
+          currency: "USD",
+          language: "English",
+          darkMode: false,
+        },
       };
 
       setUser(user);
