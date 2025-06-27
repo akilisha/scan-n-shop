@@ -21,16 +21,16 @@ const navItems = [
     path: "/",
   },
   {
-    id: "payment",
-    label: "Payment",
+    id: "payments",
+    label: "Payments",
     icon: CreditCard,
     path: "/payment-methods",
   },
   {
-    id: "history",
-    label: "History",
-    icon: History,
-    path: "/payment-history",
+    id: "subscriptions",
+    label: "Plans",
+    icon: Crown,
+    path: "/subscriptions",
   },
   {
     id: "profile",
