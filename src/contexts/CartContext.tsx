@@ -128,7 +128,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getTotalItems = () => {
-    return effectiveCartItems.reduce((sum, item) => sum + item.quantity, 0);
+    // Ensure we have a valid array before reducing
+    const items = effectiveCartItems || [];
+    return items.reduce((sum, item) => sum + (item.quantity || 0), 0);
   };
 
   const getSubtotal = () => {
