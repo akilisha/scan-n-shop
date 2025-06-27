@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,11 +38,11 @@ export function DemoButton() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Auto-exit demo mode when real user signs in
-  useState(() => {
+  useEffect(() => {
     if (supabaseUser && isDemoMode) {
       exitDemoMode();
     }
-  });
+  }, [supabaseUser, isDemoMode, exitDemoMode]);
 
   // Don't show if real user is signed in or demo button was dismissed
   if (supabaseUser || !showDemoButton) {
