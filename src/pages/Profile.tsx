@@ -44,8 +44,8 @@ export default function Profile() {
   const [localUser, setLocalUser] = useState<UserType>(user || mockUser);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: localUser.name,
-    email: localUser.email,
+    name: localUser.name || "",
+    email: localUser.email || "",
     phone: localUser.phone || "",
   });
 
