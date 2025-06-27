@@ -1,0 +1,133 @@
+/* Adyen Component Styling to match our app theme */
+
+/* Main container styling */
+.adyen-checkout__payment-method {
+  border: 1px solid hsl(35, 100%, 90%);
+  border-radius: 12px;
+  padding: 16px;
+  background: hsl(0, 0%, 100%);
+  transition: border-color 0.2s ease;
+}
+
+.adyen-checkout__payment-method:hover {
+  border-color: hsl(15, 84%, 58%);
+}
+
+.adyen-checkout__payment-method--selected {
+  border-color: hsl(15, 84%, 58%);
+  box-shadow: 0 0 0 1px hsl(15, 84%, 58%);
+}
+
+/* Input field styling */
+.adyen-checkout__field {
+  margin-bottom: 12px;
+}
+
+.adyen-checkout__input {
+  border: 1px solid hsl(35, 100%, 90%);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: hsl(20, 14.3%, 4.1%);
+  background: hsl(0, 0%, 100%);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.adyen-checkout__input:focus {
+  outline: none;
+  border-color: hsl(15, 84%, 58%);
+  box-shadow: 0 0 0 1px hsl(15, 84%, 58%);
+}
+
+.adyen-checkout__input--error {
+  border-color: hsl(0, 84.2%, 60.2%);
+}
+
+/* Label styling */
+.adyen-checkout__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(20, 14.3%, 4.1%);
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Error message styling */
+.adyen-checkout__field--error .adyen-checkout__error-text {
+  color: hsl(0, 84.2%, 60.2%);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Button styling */
+.adyen-checkout__button {
+  background: hsl(15, 84%, 58%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.adyen-checkout__button:hover {
+  background: hsl(15, 84%, 52%);
+}
+
+.adyen-checkout__button:disabled {
+  background: hsl(25, 5.3%, 44.7%);
+  cursor: not-allowed;
+}
+
+/* Card component specific styling */
+.adyen-checkout__card {
+  width: 100%;
+}
+
+.adyen-checkout__card__cardNumber__input,
+.adyen-checkout__card__exp-date__input,
+.adyen-checkout__card__cvc__input {
+  border: 1px solid hsl(35, 100%, 90%);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* Digital wallet buttons */
+.adyen-checkout__applepay__button,
+.adyen-checkout__googlepay__button {
+  border-radius: 8px;
+  height: 48px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* Loading state */
+.adyen-checkout__spinner {
+  border-color: hsl(15, 84%, 58%);
+}
+
+/* Hide Adyen branding if needed */
+.adyen-checkout__payment-method__details__content
+  .adyen-checkout__payment-method__brand {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .adyen-checkout__payment-method {
+    padding: 12px;
+  }
+
+  .adyen-checkout__input {
+    padding: 10px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
