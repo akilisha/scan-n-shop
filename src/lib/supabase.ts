@@ -223,3 +223,113 @@ export const createProfile = async (user: any) => {
 
   return { data, error };
 };
+
+// Payment Methods functions
+export const getUserPaymentMethods = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  return { data, error };
+};
+
+export const addPaymentMethod = async (
+  userId: string,
+  paymentMethod: {
+    type: string;
+    last4: string;
+    brand: string;
+    expiry_month: number;
+    expiry_year: number;
+    nickname?: string;
+    is_default?: boolean;
+  },
+) => {
+  // If this is the first payment method, make it default
+  const { data: existingMethods } = await getUserPaymentMethods(userId);
+  const isFirstMethod = !existingMethods || existingMethods.length === 0;
+
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .insert({
+      user_id: userId,
+      ...paymentMethod,
+      is_default: isFirstMethod || paymentMethod.is_default,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const setDefaultPaymentMethod = async (
+  userId: string,
+  paymentMethodId: string,
+) => {
+  // First, set all payment methods to non-default
+  await supabase
+    .from("payment_methods")
+    .update({ is_default: false })
+    .eq("user_id", userId);
+
+  // Then set the selected one as default
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .update({ is_default: true })
+    .eq("id", paymentMethodId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const deletePaymentMethod = async (
+  userId: string,
+  paymentMethodId: string,
+) => {
+  const { error } = await supabase
+    .from("payment_methods")
+    .delete()
+    .eq("id", paymentMethodId)
+    .eq("user_id", userId);
+
+  return { error };
+};
+
+// Orders functions
+export const createOrder = async (
+  userId: string,
+  order: {
+    total_amount: number;
+    payment_method: any;
+    items: any;
+    status?: string;
+  },
+) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .insert({
+      user_id: userId,
+      status: order.status || "completed",
+      total_amount: order.total_amount,
+      payment_method: order.payment_method,
+      items: order.items,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const getUserOrders = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  return { data, error };
+};
