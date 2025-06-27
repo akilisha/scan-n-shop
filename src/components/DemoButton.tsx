@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,11 +23,11 @@ import {
   QrCode,
 } from "lucide-react";
 import { useDemo } from "@/contexts/DemoContext";
-import { useAppMode } from "@/contexts/AppModeContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { cn } from "@/lib/utils";
 
 export function DemoButton() {
-  const { user: effectiveUser } = useAppMode();
+  const { supabaseUser } = useSupabaseAuth(); // Use real Supabase auth state
   const {
     isDemoMode,
     enterDemoMode,
@@ -37,22 +37,8 @@ export function DemoButton() {
   } = useDemo();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Get the real user (not demo user) from localStorage to check if actually signed in
-  const [realUser, setRealUser] = useState<any>(null);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      try {
-        setRealUser(JSON.parse(savedUser));
-      } catch {
-        setRealUser(null);
-      }
-    }
-  }, []);
-
   // Don't show if real user is signed in or demo button was dismissed
-  if (realUser || !showDemoButton) {
+  if (supabaseUser || !showDemoButton) {
     return null;
   }
 
