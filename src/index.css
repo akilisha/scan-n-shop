@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Adyen custom styles */
+@import "./styles/adyen.css";
+
 @layer base {
   /**
    * Tailwind CSS theme with warm, vibrant colors
