@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Elements } from "@stripe/react-stripe-js";
 import { Layout } from "@/components/Layout";
 import { AuthModal } from "@/components/AuthModal";
+import { AdyenPaymentForm } from "@/components/AdyenPaymentForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CreditCard, Check, Loader2, User } from "lucide-react";
-import { stripePromise, STRIPE_CONFIG, confirmPayment } from "@/lib/stripe";
+import { processPayment } from "@/lib/adyen";
 import { mockPaymentMethods } from "@/data/mockData";
 import { CheckoutState, PaymentMethod } from "@/types";
 import { useAppMode } from "@/contexts/AppModeContext";
