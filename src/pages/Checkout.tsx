@@ -51,6 +51,14 @@ export default function Checkout() {
     setCheckoutState({ step: "payment", processing: false });
   };
 
+  // Auto-proceed to payment when user becomes authenticated
+  useEffect(() => {
+    if (supabaseUserProfile && showAuth) {
+      setShowAuth(false);
+      setCheckoutState({ step: "payment", processing: false });
+    }
+  }, [supabaseUserProfile, showAuth]);
+
   const subtotal = getSubtotal();
   const tax = subtotal * 0.08;
   const total = getTotal();
