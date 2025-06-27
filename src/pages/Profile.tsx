@@ -92,7 +92,7 @@ export default function Profile() {
       preferences: {
         ...localUser.preferences,
         [category]: {
-          ...localUser.preferences[category],
+          ...localUser.preferences?.[category],
           [key]: value,
         },
       },
@@ -340,7 +340,7 @@ export default function Profile() {
                 </p>
               </div>
               <Switch
-                checked={localUser.preferences.notifications.email}
+                checked={localUser.preferences?.notifications?.email || false}
                 onCheckedChange={(checked) =>
                   updatePreference("notifications", "email", checked)
                 }
@@ -354,7 +354,7 @@ export default function Profile() {
                 </p>
               </div>
               <Switch
-                checked={localUser.preferences.notifications.push}
+                checked={localUser.preferences?.notifications?.push || false}
                 onCheckedChange={(checked) =>
                   updatePreference("notifications", "push", checked)
                 }
@@ -368,7 +368,7 @@ export default function Profile() {
                 </p>
               </div>
               <Switch
-                checked={localUser.preferences.notifications.sms}
+                checked={localUser.preferences?.notifications?.sms || false}
                 onCheckedChange={(checked) =>
                   updatePreference("notifications", "sms", checked)
                 }
@@ -389,13 +389,13 @@ export default function Profile() {
             <div className="flex items-center justify-between">
               <span className="font-medium">Language</span>
               <span className="text-muted-foreground">
-                {localUser.preferences.language}
+                {localUser.preferences?.language || "English"}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="font-medium">Currency</span>
               <span className="text-muted-foreground">
-                {localUser.preferences.currency}
+                {localUser.preferences?.currency || "USD"}
               </span>
             </div>
           </CardContent>
