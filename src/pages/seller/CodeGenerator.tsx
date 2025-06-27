@@ -249,21 +249,11 @@ export default function CodeGenerator() {
   };
 
   const headerContent = (
-    <div className="flex items-center space-x-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/seller")}
-        className="p-2"
-      >
-        <ArrowLeft size={20} />
-      </Button>
-      <div>
-        <h1 className="text-xl font-semibold">Code Generator</h1>
-        <p className="text-sm text-muted-foreground">
-          Create barcodes and QR codes
-        </p>
-      </div>
+    <div>
+      <h1 className="text-xl font-semibold">Code Generator</h1>
+      <p className="text-sm text-muted-foreground">
+        Create barcodes and QR codes
+      </p>
     </div>
   );
 

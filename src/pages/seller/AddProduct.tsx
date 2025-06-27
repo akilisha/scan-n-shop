@@ -87,21 +87,11 @@ export default function AddProduct() {
   const isValid = productData.name && productData.price && productData.category;
 
   const headerContent = (
-    <div className="flex items-center space-x-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/seller")}
-        className="p-2"
-      >
-        <ArrowLeft size={20} />
-      </Button>
-      <div>
-        <h1 className="text-xl font-semibold">Add Product</h1>
-        <p className="text-sm text-muted-foreground">
-          Create a new product listing
-        </p>
-      </div>
+    <div>
+      <h1 className="text-xl font-semibold">Add Product</h1>
+      <p className="text-sm text-muted-foreground">
+        Create a new product listing
+      </p>
     </div>
   );
 
