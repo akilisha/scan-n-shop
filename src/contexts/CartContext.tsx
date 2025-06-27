@@ -22,11 +22,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   let demoCartItems: CartItem[] = [];
   let isDemoMode = false;
   let addDemoItem: ((productId: string) => void) | undefined;
+  let updateDemoQuantity:
+    | ((itemId: string, newQuantity: number) => void)
+    | undefined;
+  let removeDemoItem: ((itemId: string) => void) | undefined;
+  let clearDemoCart: (() => void) | undefined;
   try {
     const demo = useDemo();
     demoCartItems = demo?.demoCartItems || [];
     isDemoMode = demo?.isDemoMode || false;
     addDemoItem = demo?.addDemoItem;
+    updateDemoQuantity = demo?.updateDemoQuantity;
+    removeDemoItem = demo?.removeDemoItem;
+    clearDemoCart = demo?.clearDemoCart;
   } catch {
     // Demo context not available, continue normally
   }
@@ -82,6 +90,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
+    // If in demo mode, use demo cart operations
+    if (isDemoMode && updateDemoQuantity) {
+      updateDemoQuantity(itemId, newQuantity);
+      return;
+    }
+
     if (newQuantity === 0) {
       removeItem(itemId);
       return;
@@ -94,10 +108,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeItem = (itemId: string) => {
+    // If in demo mode, use demo cart operations
+    if (isDemoMode && removeDemoItem) {
+      removeDemoItem(itemId);
+      return;
+    }
+
     setCartItems(cartItems.filter((item) => item.id !== itemId));
   };
 
   const clearCart = () => {
+    // If in demo mode, use demo cart operations
+    if (isDemoMode && clearDemoCart) {
+      clearDemoCart();
+      return;
+    }
+
     setCartItems([]);
   };
 
