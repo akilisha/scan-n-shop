@@ -17,6 +17,7 @@ import Subscriptions from "./pages/Subscriptions";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import SellerSubscription from "./pages/SellerSubscription";
+import AuthCallback from "./pages/AuthCallback";
 
 // Seller Mode Pages
 import SellerDashboard from "./pages/seller/Dashboard";
@@ -51,6 +52,7 @@ const App = () => (
                     path="/seller-subscription"
                     element={<SellerSubscription />}
                   />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
 
                   {/* Seller Mode Routes */}
                   <Route path="/seller" element={<SellerDashboard />} />
