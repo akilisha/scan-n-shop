@@ -324,29 +324,17 @@ export default function Checkout() {
           </Alert>
         )}
 
-        {/* Payment Button */}
-        <div className="space-y-4">
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={handlePayment}
-            disabled={checkoutState.processing}
-          >
-            {checkoutState.processing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing Payment...
-              </>
-            ) : (
-              `Pay $${total.toFixed(2)}`
-            )}
-          </Button>
+        {/* Adyen Payment Form */}
+        <AdyenPaymentForm
+          amount={total}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+        />
 
-          <p className="text-xs text-center text-muted-foreground">
-            Powered by <span className="text-primary font-medium">Stripe</span>.
-            Your payment information is secure and encrypted.
-          </p>
-        </div>
+        <p className="text-xs text-center text-muted-foreground">
+          Powered by <span className="text-primary font-medium">Adyen</span>.
+          Your payment information is secure and encrypted.
+        </p>
       </div>
     </Layout>
   );
