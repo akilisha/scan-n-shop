@@ -37,6 +37,13 @@ export function DemoButton() {
   } = useDemo();
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Auto-exit demo mode when real user signs in
+  useState(() => {
+    if (supabaseUser && isDemoMode) {
+      exitDemoMode();
+    }
+  });
+
   // Don't show if real user is signed in or demo button was dismissed
   if (supabaseUser || !showDemoButton) {
     return null;
