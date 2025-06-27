@@ -60,6 +60,12 @@ export default function PaymentMethods() {
     setShowAddForm(false);
     setSuccess("Payment method added successfully");
     setTimeout(() => setSuccess(null), 3000);
+
+    // If user came from checkout, redirect back
+    const fromCheckout = searchParams.get("from") === "checkout";
+    if (fromCheckout) {
+      setTimeout(() => navigate("/checkout"), 1500);
+    }
   };
 
   const headerContent = (
