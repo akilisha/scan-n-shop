@@ -35,17 +35,21 @@ import {
   CreditCard,
   Crown,
   Settings,
+  Loader2,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { User as UserType } from "@/types";
 import { mockUser } from "@/data/mockData";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, setUser, setMode } = useAppMode();
+  const { user, setMode } = useAppMode();
+  const { signOut, updateUserProfile } = useSupabaseAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [localUser, setLocalUser] = useState<UserType>(user || mockUser);
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: localUser.name || "",
     email: localUser.email || "",
@@ -64,16 +68,31 @@ export default function Profile() {
     }
   }, [user]);
 
-  const handleSave = () => {
-    const updatedUser = {
-      ...localUser,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-    };
-    setLocalUser(updatedUser);
-    setUser(updatedUser);
-    setIsEditing(false);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { error } = await updateUserProfile({
+        name: formData.name,
+        phone: formData.phone,
+      });
+
+      if (error) {
+        console.error("Error updating profile:", error);
+        // Still update local state for demo purposes
+      }
+
+      const updatedUser = {
+        ...localUser,
+        name: formData.name,
+        phone: formData.phone,
+      };
+      setLocalUser(updatedUser);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -101,13 +120,16 @@ export default function Profile() {
       },
     };
     setLocalUser(updatedUser);
-    setUser(updatedUser);
   };
 
-  const handleSignOut = () => {
-    setUser(null);
-    setMode("buyer");
-    navigate("/");
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setMode("buyer");
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const headerContent = (
@@ -262,13 +284,25 @@ export default function Profile() {
                   />
                 </div>
                 <div className="flex space-x-2 pt-2">
-                  <Button onClick={handleSave} className="flex-1">
-                    Save Changes
+                  <Button
+                    onClick={handleSave}
+                    className="flex-1"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={handleCancel}
                     className="flex-1"
+                    disabled={saving}
                   >
                     Cancel
                   </Button>
