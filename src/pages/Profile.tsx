@@ -193,8 +193,12 @@ export default function Profile() {
                   <Camera size={14} />
                 </Button>
               </div>
-              <h2 className="text-xl font-semibold mt-4">{localUser.name}</h2>
-              <p className="text-muted-foreground">{localUser.email}</p>
+              <h2 className="text-xl font-semibold mt-4">
+                {localUser.name || "User"}
+              </h2>
+              <p className="text-muted-foreground">
+                {localUser.email || "No email"}
+              </p>
               <Badge variant="secondary" className="mt-2">
                 <Shield size={12} className="mr-1" />
                 Verified Account
