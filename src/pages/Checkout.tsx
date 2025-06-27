@@ -68,27 +68,15 @@ export default function Checkout() {
   };
 
   const headerContent = (
-    <div className="flex items-center space-x-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/")}
-        className="p-2"
-      >
-        <ArrowLeft size={20} />
-      </Button>
-      <div>
-        <h1 className="text-xl font-semibold">
-          {checkoutState.step === "confirmation"
-            ? "Order Complete"
-            : "Checkout"}
-        </h1>
-        {checkoutState.step === "payment" && (
-          <p className="text-sm text-muted-foreground">
-            Secure payment with Stripe
-          </p>
-        )}
-      </div>
+    <div>
+      <h1 className="text-xl font-semibold">
+        {checkoutState.step === "confirmation" ? "Order Complete" : "Checkout"}
+      </h1>
+      {checkoutState.step === "payment" && (
+        <p className="text-sm text-muted-foreground">
+          Secure payment with Stripe
+        </p>
+      )}
     </div>
   );
 
@@ -162,7 +150,7 @@ export default function Checkout() {
 
   if (checkoutState.step === "confirmation") {
     return (
-      <Layout headerContent={headerContent} showBottomNav={false}>
+      <Layout headerContent={headerContent} showBottomNav={true}>
         <div className="flex flex-col items-center justify-center py-12">
           <div className="w-20 h-20 bg-success rounded-full flex items-center justify-center mb-6 animate-scale-in">
             <Check className="h-10 w-10 text-success-foreground" />
@@ -311,7 +299,7 @@ export default function Checkout() {
                     </div>
                     <div>
                       <p className="font-medium">
-                        {method.brand?.toUpperCase()} ••••{method.last4}
+                        {method.brand?.toUpperCase()} ••���•{method.last4}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {method.nickname}

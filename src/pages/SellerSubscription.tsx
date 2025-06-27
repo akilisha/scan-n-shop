@@ -89,26 +89,16 @@ export default function SellerSubscription() {
   };
 
   const headerContent = (
-    <div className="flex items-center space-x-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/settings")}
-        className="p-2"
-      >
-        <ArrowLeft size={20} />
-      </Button>
-      <div>
-        <h1 className="text-xl font-semibold">Seller Subscription</h1>
-        <p className="text-sm text-muted-foreground">
-          Unlock powerful seller tools
-        </p>
-      </div>
+    <div>
+      <h1 className="text-xl font-semibold">Seller Subscription</h1>
+      <p className="text-sm text-muted-foreground">
+        Unlock powerful seller tools
+      </p>
     </div>
   );
 
   return (
-    <Layout headerContent={headerContent} showBottomNav={false}>
+    <Layout headerContent={headerContent} showBottomNav={true}>
       <div className="space-y-6">
         {/* Benefits Header */}
         <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-coral-50">
