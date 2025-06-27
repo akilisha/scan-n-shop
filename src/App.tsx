@@ -34,8 +34,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SupabaseAuthProvider>
-        <PaymentMethodsProvider>
-          <DemoProvider>
+        <DemoProvider>
+          <PaymentMethodsProvider>
             <CartProvider>
               <AppModeProvider>
                 <Toaster />
@@ -81,8 +81,8 @@ const App = () => (
                 </BrowserRouter>
               </AppModeProvider>
             </CartProvider>
-          </DemoProvider>
-        </PaymentMethodsProvider>
+          </PaymentMethodsProvider>
+        </DemoProvider>
       </SupabaseAuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
