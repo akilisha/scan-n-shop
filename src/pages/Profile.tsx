@@ -278,7 +278,7 @@ export default function Profile() {
                   <div>
                     <p className="text-sm font-medium">Email</p>
                     <p className="text-sm text-muted-foreground">
-                      {localUser.email}
+                      {localUser.email || "No email"}
                     </p>
                   </div>
                 </div>
