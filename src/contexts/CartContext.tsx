@@ -27,20 +27,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     | undefined;
   let removeDemoItem: ((itemId: string) => void) | undefined;
   let clearDemoCart: (() => void) | undefined;
+
   try {
     const demo = useDemo();
-    demoCartItems = demo?.demoCartItems || [];
-    isDemoMode = demo?.isDemoMode || false;
-    addDemoItem = demo?.addDemoItem;
-    updateDemoQuantity = demo?.updateDemoQuantity;
-    removeDemoItem = demo?.removeDemoItem;
-    clearDemoCart = demo?.clearDemoCart;
+    if (demo) {
+      demoCartItems = demo.demoCartItems || [];
+      isDemoMode = demo.isDemoMode || false;
+      addDemoItem = demo.addDemoItem;
+      updateDemoQuantity = demo.updateDemoQuantity;
+      removeDemoItem = demo.removeDemoItem;
+      clearDemoCart = demo.clearDemoCart;
+    }
   } catch {
     // Demo context not available, continue normally
+    isDemoMode = false;
+    demoCartItems = [];
   }
 
   // Use demo cart when in demo mode, otherwise use real cart
-  const effectiveCartItems = isDemoMode ? demoCartItems : cartItems;
+  const effectiveCartItems =
+    isDemoMode && demoCartItems.length >= 0 ? demoCartItems : cartItems;
 
   // Load cart from localStorage on mount
   useEffect(() => {
