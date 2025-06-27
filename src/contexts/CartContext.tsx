@@ -21,10 +21,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Access demo context safely
   let demoCartItems: CartItem[] = [];
   let isDemoMode = false;
+  let addDemoItem: ((productId: string) => void) | undefined;
   try {
     const demo = useDemo();
     demoCartItems = demo?.demoCartItems || [];
     isDemoMode = demo?.isDemoMode || false;
+    addDemoItem = demo?.addDemoItem;
   } catch {
     // Demo context not available, continue normally
   }
@@ -51,6 +53,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cartItems]);
 
   const addToCart = (product: Product) => {
+    // If in demo mode, use demo cart operations
+    if (isDemoMode && addDemoItem) {
+      addDemoItem(product.id);
+      return;
+    }
+
     const existingItem = cartItems.find(
       (item) => item.product.id === product.id,
     );
