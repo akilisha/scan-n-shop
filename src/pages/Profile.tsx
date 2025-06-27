@@ -108,21 +108,11 @@ export default function Profile() {
   };
 
   const headerContent = (
-    <div className="flex items-center space-x-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/")}
-        className="p-2"
-      >
-        <ArrowLeft size={20} />
-      </Button>
-      <div>
-        <h1 className="text-xl font-semibold">Profile</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your account settings
-        </p>
-      </div>
+    <div>
+      <h1 className="text-xl font-semibold">Profile</h1>
+      <p className="text-sm text-muted-foreground">
+        Manage your account settings
+      </p>
     </div>
   );
 
@@ -130,7 +120,7 @@ export default function Profile() {
   if (!user) {
     return (
       <>
-        <Layout headerContent={headerContent}>
+        <Layout headerContent={headerContent} showBottomNav={true}>
           <div className="space-y-6">
             {/* Sign In Prompt */}
             <Card>
@@ -175,7 +165,7 @@ export default function Profile() {
   }
 
   return (
-    <Layout headerContent={headerContent}>
+    <Layout headerContent={headerContent} showBottomNav={true}>
       <div className="space-y-6">
         {/* Profile Header */}
         <Card>
