@@ -4,13 +4,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CreditCard, Smartphone, Wallet } from "lucide-react";
+import { Loader2, CreditCard, Smartphone, Wallet, Shield } from "lucide-react";
 
 interface AdyenPaymentFormProps {
   amount: number;
   onSuccess: () => void;
   onError: (error: string) => void;
 }
+
+interface CardType {
+  name: string;
+  pattern: RegExp;
+  maxLength: number;
+  cvvLength: number;
+  logo: string;
+}
+
+const CARD_TYPES: CardType[] = [
+  {
+    name: "visa",
+    pattern: /^4[0-9]{12}(?:[0-9]{3})?$/,
+    maxLength: 19,
+    cvvLength: 3,
+    logo: "💳",
+  },
+  {
+    name: "mastercard",
+    pattern: /^5[1-5][0-9]{14}$/,
+    maxLength: 19,
+    cvvLength: 3,
+    logo: "💳",
+  },
+  {
+    name: "amex",
+    pattern: /^3[47][0-9]{13}$/,
+    maxLength: 17,
+    cvvLength: 4,
+    logo: "💳",
+  },
+  {
+    name: "discover",
+    pattern: /^6(?:011|5[0-9]{2})[0-9]{12}$/,
+    maxLength: 19,
+    cvvLength: 3,
+    logo: "💳",
+  },
+];
 
 export function AdyenPaymentForm({
   amount,
@@ -19,20 +58,149 @@ export function AdyenPaymentForm({
 }: AdyenPaymentFormProps) {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detectedCardType, setDetectedCardType] = useState<CardType | null>(
+    null,
+  );
   const [formData, setFormData] = useState({
     cardNumber: "",
     expiryDate: "",
     cvv: "",
     cardholderName: "",
+    billingAddress: "",
+    city: "",
+    zipCode: "",
   });
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Check if digital wallets are supported
+  const isApplePaySupported =
+    window.ApplePaySession && ApplePaySession.canMakePayments;
+  const isGooglePaySupported = window.google && window.google.payments;
+
+  const detectCardType = (cardNumber: string): CardType | null => {
+    const cleanNumber = cardNumber.replace(/\s/g, "");
+    for (const cardType of CARD_TYPES) {
+      if (cardType.pattern.test(cleanNumber)) {
+        return cardType;
+      }
+    }
+    return null;
+  };
+
+  const formatCardNumber = (value: string): string => {
+    const cleanValue = value.replace(/\s/g, "");
+    const cardType = detectCardType(cleanValue);
+
+    if (cardType?.name === "amex") {
+      // American Express: 4-6-5 format
+      return cleanValue.replace(/(\d{4})(\d{6})(\d{5})/, "$1 $2 $3");
+    } else {
+      // Others: 4-4-4-4 format
+      return cleanValue.replace(/(\d{4})(?=\d)/g, "$1 ");
+    }
+  };
+
+  const formatExpiryDate = (value: string): string => {
+    const cleanValue = value.replace(/\D/g, "");
+    if (cleanValue.length >= 2) {
+      return cleanValue.substring(0, 2) + "/" + cleanValue.substring(2, 4);
+    }
+    return cleanValue;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.cardholderName.trim()) {
+      errors.cardholderName = "Cardholder name is required";
+    }
+
+    const cleanCardNumber = formData.cardNumber.replace(/\s/g, "");
+    if (!cleanCardNumber) {
+      errors.cardNumber = "Card number is required";
+    } else if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
+      errors.cardNumber = "Invalid card number";
+    } else if (!detectedCardType) {
+      errors.cardNumber = "Unsupported card type";
+    }
+
+    const expiryParts = formData.expiryDate.split("/");
+    if (!formData.expiryDate || expiryParts.length !== 2) {
+      errors.expiryDate = "Valid expiry date required (MM/YY)";
+    } else {
+      const month = parseInt(expiryParts[0]);
+      const year = parseInt("20" + expiryParts[1]);
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+
+      if (month < 1 || month > 12) {
+        errors.expiryDate = "Invalid month";
+      } else if (
+        year < currentYear ||
+        (year === currentYear && month < currentMonth)
+      ) {
+        errors.expiryDate = "Card has expired";
+      }
+    }
+
+    const expectedCvvLength = detectedCardType?.cvvLength || 3;
+    if (!formData.cvv) {
+      errors.cvv = "CVV is required";
+    } else if (formData.cvv.length !== expectedCvvLength) {
+      errors.cvv = `CVV must be ${expectedCvvLength} digits`;
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    let formattedValue = value;
+
+    if (field === "cardNumber") {
+      const cleanValue = value.replace(/\s/g, "");
+      if (cleanValue.length <= 19) {
+        formattedValue = formatCardNumber(cleanValue);
+        const cardType = detectCardType(cleanValue);
+        setDetectedCardType(cardType);
+      } else {
+        return; // Don't update if too long
+      }
+    } else if (field === "expiryDate") {
+      formattedValue = formatExpiryDate(value);
+      if (formattedValue.length > 5) return; // Don't update if too long
+    } else if (field === "cvv") {
+      const cleanValue = value.replace(/\D/g, "");
+      const maxLength = detectedCardType?.cvvLength || 4;
+      if (cleanValue.length <= maxLength) {
+        formattedValue = cleanValue;
+      } else {
+        return; // Don't update if too long
+      }
+    }
+
+    setFormData((prev) => ({ ...prev, [field]: formattedValue }));
+
+    // Clear error for this field
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      setError("Please correct the errors below");
+      return;
+    }
+
     setProcessing(true);
     setError(null);
 
     try {
-      // Simulate payment processing
+      // Simulate payment processing with validation
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Simulate success
@@ -47,21 +215,67 @@ export function AdyenPaymentForm({
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  const handleApplePay = async () => {
+    if (!isApplePaySupported) {
+      setError("Apple Pay is not supported on this device");
+      return;
+    }
 
-  const simulateDigitalWallet = async (method: string) => {
     setProcessing(true);
     setError(null);
 
     try {
-      // Simulate digital wallet processing
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Simulate Apple Pay authentication flow
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simulate user authentication
+          if (Math.random() > 0.2) {
+            // 80% success rate
+            resolve(true);
+          } else {
+            reject(new Error("User cancelled Apple Pay"));
+          }
+        }, 1500);
+      });
+
       onSuccess();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : `${method} payment failed`;
+        err instanceof Error ? err.message : "Apple Pay failed";
+      setError(errorMessage);
+      onError(errorMessage);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleGooglePay = async () => {
+    if (!isGooglePaySupported) {
+      setError("Google Pay is not supported on this device");
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+
+    try {
+      // Simulate Google Pay authentication flow
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simulate user authentication
+          if (Math.random() > 0.2) {
+            // 80% success rate
+            resolve(true);
+          } else {
+            reject(new Error("User cancelled Google Pay"));
+          }
+        }, 1500);
+      });
+
+      onSuccess();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Google Pay failed";
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -70,23 +284,34 @@ export function AdyenPaymentForm({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* Credit/Debit Cards */}
+      {/* Credit/Debit Card Form */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <CreditCard size={20} />
-            <span>Credit or Debit Card</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CreditCard size={20} />
+              <span>Credit or Debit Card</span>
+            </div>
+            {detectedCardType && (
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl">{detectedCardType.logo}</span>
+                <span className="text-sm font-medium text-muted-foreground uppercase">
+                  {detectedCardType.name}
+                </span>
+              </div>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Cardholder Name */}
             <div className="space-y-2">
               <Label htmlFor="cardholderName">Cardholder Name</Label>
               <Input
@@ -96,10 +321,19 @@ export function AdyenPaymentForm({
                   handleInputChange("cardholderName", e.target.value)
                 }
                 placeholder="John Doe"
+                className={
+                  formErrors.cardholderName ? "border-destructive" : ""
+                }
                 required
               />
+              {formErrors.cardholderName && (
+                <p className="text-sm text-destructive">
+                  {formErrors.cardholderName}
+                </p>
+              )}
             </div>
 
+            {/* Card Number */}
             <div className="space-y-2">
               <Label htmlFor="cardNumber">Card Number</Label>
               <Input
@@ -109,11 +343,17 @@ export function AdyenPaymentForm({
                   handleInputChange("cardNumber", e.target.value)
                 }
                 placeholder="1234 5678 9012 3456"
-                maxLength={19}
+                className={formErrors.cardNumber ? "border-destructive" : ""}
                 required
               />
+              {formErrors.cardNumber && (
+                <p className="text-sm text-destructive">
+                  {formErrors.cardNumber}
+                </p>
+              )}
             </div>
 
+            {/* Expiry Date and CVV */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="expiryDate">Expiry Date</Label>
@@ -124,23 +364,38 @@ export function AdyenPaymentForm({
                     handleInputChange("expiryDate", e.target.value)
                   }
                   placeholder="MM/YY"
-                  maxLength={5}
+                  className={formErrors.expiryDate ? "border-destructive" : ""}
                   required
                 />
+                {formErrors.expiryDate && (
+                  <p className="text-sm text-destructive">
+                    {formErrors.expiryDate}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
+                <Label htmlFor="cvv">
+                  CVV{" "}
+                  {detectedCardType && `(${detectedCardType.cvvLength} digits)`}
+                </Label>
                 <Input
                   id="cvv"
                   value={formData.cvv}
                   onChange={(e) => handleInputChange("cvv", e.target.value)}
-                  placeholder="123"
-                  maxLength={4}
+                  placeholder={
+                    detectedCardType?.name === "amex" ? "1234" : "123"
+                  }
+                  className={formErrors.cvv ? "border-destructive" : ""}
+                  type="password"
                   required
                 />
+                {formErrors.cvv && (
+                  <p className="text-sm text-destructive">{formErrors.cvv}</p>
+                )}
               </div>
             </div>
 
+            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full"
@@ -163,7 +418,7 @@ export function AdyenPaymentForm({
       {/* Digital Wallets */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Apple Pay */}
-        <Card>
+        <Card className={!isApplePaySupported ? "opacity-50" : ""}>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Smartphone size={20} />
@@ -172,21 +427,28 @@ export function AdyenPaymentForm({
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => simulateDigitalWallet("Apple Pay")}
-              disabled={processing}
-              className="w-full bg-black hover:bg-gray-800 text-white"
+              onClick={handleApplePay}
+              disabled={processing || !isApplePaySupported}
+              className="w-full bg-black hover:bg-gray-800 text-white disabled:opacity-50"
             >
               {processing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
+              ) : isApplePaySupported ? (
                 "Pay with Apple Pay"
+              ) : (
+                "Not Available"
               )}
             </Button>
+            {!isApplePaySupported && (
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Only available on Safari/iOS
+              </p>
+            )}
           </CardContent>
         </Card>
 
         {/* Google Pay */}
-        <Card>
+        <Card className={!isGooglePaySupported ? "opacity-50" : ""}>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Wallet size={20} />
@@ -195,16 +457,23 @@ export function AdyenPaymentForm({
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => simulateDigitalWallet("Google Pay")}
-              disabled={processing}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleGooglePay}
+              disabled={processing || !isGooglePaySupported}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
             >
               {processing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
+              ) : isGooglePaySupported ? (
                 "Pay with Google Pay"
+              ) : (
+                "Not Available"
               )}
             </Button>
+            {!isGooglePaySupported && (
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Only available on supported browsers
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -224,12 +493,18 @@ export function AdyenPaymentForm({
       )}
 
       {/* Security Notice */}
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground">
-          Powered by <span className="text-primary font-medium">Adyen</span>.
-          Your payment information is secure and encrypted.
-        </p>
-      </div>
+      <Card className="border-muted">
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Shield size={16} />
+            <span>
+              Powered by <span className="text-primary font-medium">Adyen</span>
+              . Your payment information is secure and encrypted with
+              industry-standard SSL.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
