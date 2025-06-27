@@ -172,29 +172,32 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
     setIsScanning(false);
     setFlashOn(false);
 
-    // Stop the stream first
+    // Stop all media tracks immediately and forcefully
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current.getTracks().forEach((track) => {
+        track.stop();
+        // Force remove the track from the stream
+        streamRef.current?.removeTrack(track);
+      });
       streamRef.current = null;
     }
 
-    // Clear the video element
+    // Clear the video element and pause it
     if (videoRef.current) {
+      videoRef.current.pause();
       videoRef.current.srcObject = null;
+      videoRef.current.load(); // Force reload to clear the stream
     }
 
-    // Reset the code reader by creating a new instance if needed
+    // Reset the code reader
     if (codeReader.current) {
       try {
-        // Some versions have a reset method, try it safely
         if (typeof codeReader.current.reset === "function") {
           codeReader.current.reset();
         }
       } catch (error) {
-        // If reset fails, just clear the reference
         console.log("CodeReader reset not available, cleaning up manually");
       }
-      // Always clear the reference
       codeReader.current = null;
     }
   };
