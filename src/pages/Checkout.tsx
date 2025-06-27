@@ -27,6 +27,16 @@ export default function Checkout() {
     processing: false,
   });
   const [showAuth, setShowAuth] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<any>(null);
+
+  // Set default payment method when payment methods are loaded
+  useEffect(() => {
+    if (paymentMethods.length > 0 && !selectedPaymentMethod) {
+      const defaultMethod =
+        paymentMethods.find((method) => method.isDefault) || paymentMethods[0];
+      setSelectedPaymentMethod(defaultMethod);
+    }
+  }, [paymentMethods, selectedPaymentMethod]);
 
   // Check if user is authenticated on component mount
   useEffect(() => {
