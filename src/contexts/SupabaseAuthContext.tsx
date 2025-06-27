@@ -86,11 +86,13 @@ export function SupabaseAuthProvider({
           await createProfile(supabaseUser);
         if (createError) {
           console.error("Error creating profile:", createError);
+          setLoading(false);
           return;
         }
         profile = newProfile;
       } else if (error) {
         console.error("Error fetching profile:", error);
+        setLoading(false);
         return;
       }
 
@@ -116,8 +118,10 @@ export function SupabaseAuthProvider({
 
         setUser(appUser);
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error loading user profile:", error);
+      setLoading(false);
     }
   };
 
