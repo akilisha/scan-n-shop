@@ -5,8 +5,8 @@ import {
   CreditCard,
   History,
   User,
-  Settings,
   Crown,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useCart } from "@/contexts/CartContext";
@@ -38,23 +38,22 @@ const navItems = [
     icon: User,
     path: "/profile",
   },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
-    path: "/settings",
-  },
 ];
 
 export function BottomNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { canAccessSellerMode, setMode } = useAppMode();
+  const { canAccessSellerMode, setMode, user } = useAppMode();
   const { getTotalItems } = useCart();
 
   const switchToSellerMode = () => {
-    setMode("seller");
-    navigate("/seller");
+    if (canAccessSellerMode) {
+      setMode("seller");
+      navigate("/seller");
+    } else {
+      // Navigate to seller subscription if no access
+      navigate("/seller-subscription");
+    }
   };
 
   return (
@@ -95,18 +94,28 @@ export function BottomNavigation() {
           );
         })}
 
-        {/* Seller Mode Button - Only show if user has access */}
-        {canAccessSellerMode && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={switchToSellerMode}
-            className="flex flex-col items-center justify-center py-2 px-2 min-w-0 max-w-[60px] h-auto text-primary"
-          >
-            <Crown size={18} />
-            <span className="text-xs font-medium mt-1">Seller</span>
-          </Button>
-        )}
+        {/* Mode Switch Tab - Always visible */}
+        <button
+          onClick={switchToSellerMode}
+          className={cn(
+            "flex flex-col items-center justify-center py-2 px-2 rounded-lg transition-all duration-200 relative",
+            "min-w-0 flex-1 max-w-[60px]",
+            "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+            canAccessSellerMode && "text-coral-600 hover:text-coral-700",
+          )}
+        >
+          {canAccessSellerMode ? (
+            <Crown size={18} className="transition-all duration-200" />
+          ) : (
+            <ArrowLeftRight size={18} className="transition-all duration-200" />
+          )}
+          {canAccessSellerMode && (
+            <Badge className="absolute -top-1 -right-1 h-3 w-3 p-0 bg-coral-500" />
+          )}
+          <span className="text-xs font-medium mt-1 truncate">
+            {canAccessSellerMode ? "Seller" : "Upgrade"}
+          </span>
+        </button>
       </div>
     </div>
   );
