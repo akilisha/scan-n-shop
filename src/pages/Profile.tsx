@@ -32,6 +32,9 @@ import {
   Edit,
   LogOut,
   User,
+  CreditCard,
+  Crown,
+  Settings,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { User as UserType } from "@/types";
@@ -400,7 +403,7 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Account Actions */}
+        {/* Quick Actions */}
         <Card>
           <CardContent className="p-4">
             <div className="space-y-3">
@@ -409,6 +412,7 @@ export default function Profile() {
                 className="w-full justify-start"
                 onClick={() => navigate("/payment-methods")}
               >
+                <CreditCard size={16} className="mr-2" />
                 Manage Payment Methods
               </Button>
               <Button
@@ -416,7 +420,16 @@ export default function Profile() {
                 className="w-full justify-start"
                 onClick={() => navigate("/subscriptions")}
               >
+                <Crown size={16} className="mr-2" />
                 Manage Subscriptions
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => navigate("/settings")}
+              >
+                <Settings size={16} className="mr-2" />
+                App Settings
               </Button>
               <Separator />
               <AlertDialog>
@@ -435,7 +448,7 @@ export default function Profile() {
                     <AlertDialogDescription>
                       Are you sure you want to sign out of your account?
                     </AlertDialogDescription>
-                  </AlertDialogHeader>
+                  </AlertDialogFooter>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
