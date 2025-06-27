@@ -27,7 +27,7 @@ import { useAppMode } from "@/contexts/AppModeContext";
 import { cn } from "@/lib/utils";
 
 export function DemoButton() {
-  const { user } = useAppMode();
+  const { user: effectiveUser } = useAppMode();
   const {
     isDemoMode,
     enterDemoMode,
@@ -37,8 +37,22 @@ export function DemoButton() {
   } = useDemo();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Don't show if user is signed in or demo button was dismissed
-  if (user || !showDemoButton) {
+  // Get the real user (not demo user) from localStorage to check if actually signed in
+  const [realUser, setRealUser] = useState<any>(null);
+
+  useState(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      try {
+        setRealUser(JSON.parse(savedUser));
+      } catch {
+        setRealUser(null);
+      }
+    }
+  });
+
+  // Don't show if real user is signed in or demo button was dismissed
+  if (realUser || !showDemoButton) {
     return null;
   }
 
