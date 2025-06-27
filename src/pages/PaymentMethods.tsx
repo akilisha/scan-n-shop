@@ -13,6 +13,7 @@ import {
   Plus,
   MoreVertical,
   Trash2,
+  History,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -193,6 +194,22 @@ export default function PaymentMethods() {
                 ))}
               </div>
             )}
+
+            {/* Quick Actions */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => navigate("/payment-history")}
+                  >
+                    <History size={16} className="mr-2" />
+                    View Payment History
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Security Notice */}
             <Card>
