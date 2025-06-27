@@ -173,12 +173,17 @@ export default function Profile() {
             <div className="flex flex-col items-center">
               <div className="relative">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src={localUser.avatar} alt={localUser.name} />
+                  <AvatarImage
+                    src={localUser.avatar}
+                    alt={localUser.name || "User"}
+                  />
                   <AvatarFallback className="text-xl">
                     {localUser.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                      ? localUser.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                      : "U"}
                   </AvatarFallback>
                 </Avatar>
                 <Button
