@@ -363,7 +363,9 @@ export default function Checkout() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => navigate("/payment-methods?add=true")}
+              onClick={() =>
+                navigate("/payment-methods?add=true&from=checkout")
+              }
             >
               Add New Payment Method
             </Button>
