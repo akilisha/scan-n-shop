@@ -448,7 +448,7 @@ export default function Profile() {
                     <AlertDialogDescription>
                       Are you sure you want to sign out of your account?
                     </AlertDialogDescription>
-                  </AlertDialogFooter>
+                  </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
