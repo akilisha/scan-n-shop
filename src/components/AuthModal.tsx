@@ -110,6 +110,7 @@ export function AuthModal({
   const switchMode = () => {
     setMode(mode === "login" ? "signup" : "login");
     setError(null);
+    setLoading(false); // Reset loading state when switching modes
     setFormData({ email: "", password: "", name: "" });
   };
 
