@@ -102,10 +102,6 @@ export default function SellerSubscription() {
   };
 
   const handleStartRegistration = () => {
-    if (!user) {
-      navigate("/profile"); // Redirect to sign in
-      return;
-    }
     setCurrentStep("payment");
   };
 
