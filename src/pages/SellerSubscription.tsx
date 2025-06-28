@@ -355,7 +355,9 @@ export default function SellerSubscription() {
               onClick={handleStartRegistration}
               className="w-full h-12 text-lg"
             >
-              Start Registration - ${pricing[selectedPlan].price}/month
+              {!user
+                ? "Sign In & Start Registration"
+                : `Start Registration - $${pricing[selectedPlan].price}/month`}
             </Button>
 
             {/* Trust Indicators */}
