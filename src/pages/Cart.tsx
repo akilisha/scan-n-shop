@@ -142,11 +142,15 @@ export default function Cart() {
     }
   };
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = async (product: Product) => {
     addToCart(product);
-    // Show recently added indicator
     setRecentlyAdded(product.id);
-    setTimeout(() => setRecentlyAdded(null), 2000);
+
+    // Provide haptic feedback for successful add
+    await nativeService.hapticImpact("light");
+
+    setTimeout(() => setRecentlyAdded(null), 3000);
+  };
   };
 
   const subtotal = getSubtotal();
