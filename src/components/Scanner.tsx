@@ -221,9 +221,18 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
     }
   };
 
-  const stopScanning = () => {
+  const stopScanning = async () => {
     setIsScanning(false);
     setFlashOn(false);
+
+    // Stop native scanning if active
+    if (useNativeScanner) {
+      try {
+        await nativeService.stopBarcodeScanning();
+      } catch (error) {
+        console.error("Error stopping native scanning:", error);
+      }
+    }
 
     // Stop all media tracks immediately and forcefully
     if (streamRef.current) {
