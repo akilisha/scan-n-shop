@@ -19,7 +19,7 @@ import {
 import { nativeService } from "@/lib/native";
 import { mockProducts } from "@/data/mockData";
 
-// Mock location-based data for demo
+// Mock location-based data for demo (events + products)
 const generateMockLocationData = (): MapItem[] => {
   const baseLocation = { lat: 40.7128, lng: -74.006 }; // NYC
 
@@ -66,24 +66,91 @@ const generateMockLocationData = (): MapItem[] => {
     },
   ];
 
-  const products: MapItem[] = mockProducts
-    .slice(0, 5)
-    .map((product, index) => ({
-      id: product.id,
+  // Add realistic local products
+  const localProducts: MapItem[] = [
+    {
+      id: "prod-1",
       type: "product",
-      latitude: baseLocation.lat + (Math.random() - 0.5) * 0.02,
-      longitude: baseLocation.lng + (Math.random() - 0.5) * 0.02,
-      title: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      imageUrl: product.image,
-      sellerName: "Local Seller",
-      distance: Math.random() * 5 + 0.5,
-    }));
+      latitude: baseLocation.lat + 0.006,
+      longitude: baseLocation.lng + 0.003,
+      title: "Vintage Bicycle - Great Condition",
+      description: "Red Schwinn bike, well maintained, perfect for city riding",
+      price: 180,
+      category: "Sports & Outdoors",
+      imageUrl: "/api/placeholder/400/300",
+      sellerName: "Mike's Bikes",
+      distance: 0.8,
+      tags: ["vintage", "bicycle", "transportation"],
+      status: "available",
+    },
+    {
+      id: "prod-2",
+      type: "product",
+      latitude: baseLocation.lat - 0.004,
+      longitude: baseLocation.lng + 0.007,
+      title: "Handmade Wooden Coffee Table",
+      description: "Beautiful oak table, custom made, seats 4 people",
+      price: 320,
+      category: "Furniture",
+      imageUrl: "/api/placeholder/400/300",
+      sellerName: "Sarah's Woodworks",
+      distance: 1.1,
+      tags: ["furniture", "handmade", "wood"],
+      status: "available",
+    },
+    {
+      id: "prod-3",
+      type: "product",
+      latitude: baseLocation.lat + 0.008,
+      longitude: baseLocation.lng - 0.005,
+      title: "Fresh Organic Vegetables",
+      description: "Locally grown tomatoes, lettuce, carrots from our farm",
+      price: 25,
+      category: "Food",
+      imageUrl: "/api/placeholder/400/300",
+      sellerName: "Green Valley Farm",
+      distance: 1.5,
+      tags: ["organic", "vegetables", "local"],
+      status: "available",
+    },
+    {
+      id: "prod-4",
+      type: "product",
+      latitude: baseLocation.lat - 0.009,
+      longitude: baseLocation.lng - 0.003,
+      title: "Art Prints & Paintings",
+      description:
+        "Original watercolor paintings and prints of local landmarks",
+      price: 75,
+      category: "Art & Collectibles",
+      imageUrl: "/api/placeholder/400/300",
+      sellerName: "Local Artist Collective",
+      distance: 1.3,
+      tags: ["art", "paintings", "local"],
+      status: "available",
+    },
+    {
+      id: "prod-5",
+      type: "product",
+      latitude: baseLocation.lat + 0.003,
+      longitude: baseLocation.lng + 0.009,
+      title: "Homemade Sourdough Bread",
+      description:
+        "Fresh baked daily, using traditional methods and local flour",
+      price: 8,
+      category: "Food",
+      imageUrl: "/api/placeholder/400/300",
+      sellerName: "Neighborhood Bakery",
+      distance: 0.6,
+      tags: ["bread", "homemade", "fresh"],
+      status: "available",
+    },
+  ];
 
-  return [...events, ...products];
+  return [...events, ...localProducts];
 };
+
+type DiscoveryMode = "all" | "events" | "products";
 
 export default function DiscoverNearby() {
   const navigate = useNavigate();
@@ -91,15 +158,31 @@ export default function DiscoverNearby() {
   const [selectedItem, setSelectedItem] = useState<MapItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [savedLocations, setSavedLocations] = useState<any[]>([]);
+  const [discoveryMode, setDiscoveryMode] = useState<DiscoveryMode>("all");
+  const [allItems, setAllItems] = useState<MapItem[]>([]);
 
   useEffect(() => {
     // Load initial nearby items
     const mockData = generateMockLocationData();
+    setAllItems(mockData);
     setSearchResults(mockData);
 
     // Load saved locations from storage
     loadSavedLocations();
   }, []);
+
+  // Filter items based on discovery mode
+  useEffect(() => {
+    let filteredItems = allItems;
+
+    if (discoveryMode === "events") {
+      filteredItems = allItems.filter((item) => item.type === "event");
+    } else if (discoveryMode === "products") {
+      filteredItems = allItems.filter((item) => item.type === "product");
+    }
+
+    setSearchResults(filteredItems);
+  }, [discoveryMode, allItems]);
 
   const loadSavedLocations = async () => {
     try {
@@ -137,17 +220,31 @@ export default function DiscoverNearby() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // For demo, return filtered mock data
-    let results = generateMockLocationData();
+    // Start with all items or discovery mode filtered items
+    let results = allItems;
 
+    // Apply discovery mode filter
+    if (discoveryMode === "events") {
+      results = results.filter((item) => item.type === "event");
+    } else if (discoveryMode === "products") {
+      results = results.filter((item) => item.type === "product");
+    }
+
+    // Apply search query
     if (filters.query) {
       results = results.filter(
         (item) =>
           item.title.toLowerCase().includes(filters.query.toLowerCase()) ||
-          item.description?.toLowerCase().includes(filters.query.toLowerCase()),
+          item.description
+            ?.toLowerCase()
+            .includes(filters.query.toLowerCase()) ||
+          item.tags?.some((tag) =>
+            tag.toLowerCase().includes(filters.query.toLowerCase()),
+          ),
       );
     }
 
+    // Apply category filter
     if (filters.category !== "all") {
       results = results.filter(
         (item) =>
@@ -232,26 +329,74 @@ export default function DiscoverNearby() {
               </div>
               <div className="flex-1">
                 <h2 className="font-semibold text-lg mb-2">
-                  🗺️ Location-Based Discovery
+                  🗺️ Local Discovery Hub
                 </h2>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Find garage sales, farmers markets, and items near you! This
-                  is your new superpower for local shopping.
+                  Find events, products, and local businesses near you! Your
+                  hyperlocal marketplace for everything nearby.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary" className="text-xs">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Weekend Events
+                    Events & Markets
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    <Star className="h-3 w-3 mr-1" />
+                    Local Products
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
                     <Navigation className="h-3 w-3 mr-1" />
                     GPS Navigation
                   </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    <Star className="h-3 w-3 mr-1" />
-                    Nearby Deals
-                  </Badge>
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Discovery Mode Toggle */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                What are you looking for?
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant={discoveryMode === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDiscoveryMode("all")}
+                  className="text-xs"
+                >
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Everything
+                </Button>
+                <Button
+                  variant={discoveryMode === "events" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDiscoveryMode("events")}
+                  className="text-xs"
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Events
+                </Button>
+                <Button
+                  variant={discoveryMode === "products" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDiscoveryMode("products")}
+                  className="text-xs"
+                >
+                  <Star className="h-3 w-3 mr-1" />
+                  Products
+                </Button>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {discoveryMode === "all" &&
+                  `Showing ${searchResults.length} events & products nearby`}
+                {discoveryMode === "events" &&
+                  `Showing ${searchResults.length} events nearby`}
+                {discoveryMode === "products" &&
+                  `Showing ${searchResults.length} products nearby`}
               </div>
             </div>
           </CardContent>
