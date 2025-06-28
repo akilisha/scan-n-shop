@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   ArrowLeft,
   Check,
@@ -14,9 +15,14 @@ import {
   Building,
   Star,
   Loader2,
+  User,
 } from "lucide-react";
 import { sellerPlans, yearlySellerPlans } from "@/data/sellerPlans";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
+import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
+import { supabase } from "@/lib/supabase";
+import { nativeService } from "@/lib/native";
 import { cn } from "@/lib/utils";
 
 export default function SellerSubscription() {
