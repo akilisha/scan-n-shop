@@ -106,31 +106,20 @@ class NativeService {
     }
 
     try {
-      // Check permission first
-      const permission = await BarcodeScanner.checkPermission({ force: true });
+      // Start scanning with the new API
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.ALL,
+      });
 
-      if (!permission.granted) {
-        throw new Error("Camera permission denied");
-      }
-
-      // Start scanning
-      BarcodeScanner.hideBackground();
-
-      const result = await BarcodeScanner.startScan();
-
-      // Clean up
-      BarcodeScanner.showBackground();
-
-      if (result.hasContent) {
+      if (result && result.ScanResult) {
         return {
-          text: result.content,
-          format: result.format || "UNKNOWN",
+          text: result.ScanResult,
+          format: "UNKNOWN", // The new API doesn't return format
         };
       }
 
       return null;
     } catch (error) {
-      BarcodeScanner.showBackground();
       console.error("Error scanning barcode:", error);
       throw error;
     }
@@ -138,8 +127,13 @@ class NativeService {
 
   async stopBarcodeScanning(): Promise<void> {
     if (this.isNative) {
-      await BarcodeScanner.stopScan();
-      BarcodeScanner.showBackground();
+      try {
+        // The new API doesn't have explicit stop methods
+        // Scanning stops automatically when a code is detected or user cancels
+        console.log("Barcode scanning stopped");
+      } catch (error) {
+        console.error("Error stopping barcode scanning:", error);
+      }
     }
   }
 
