@@ -228,9 +228,9 @@ export function AdyenPaymentForm({
         );
 
         if (result.resultCode === "Authorised") {
-          // Save payment method to database for future use
+          // Create payment method details for the order
           const cardType = detectCardType(formData.cardNumber);
-          const paymentMethodToSave = {
+          const paymentMethodDetails = {
             type: "card" as const,
             last4: formData.cardNumber.replace(/\s/g, "").slice(-4),
             brand: cardType?.name || "unknown",
@@ -240,18 +240,19 @@ export function AdyenPaymentForm({
             isDefault: paymentMethods.length === 0, // Set as default if it's the first card
           };
 
-          // Save payment method but don't fail payment if this fails
+          // Save payment method to database for future use
           try {
-            await addUserPaymentMethod(paymentMethodToSave);
+            await addUserPaymentMethod(paymentMethodDetails);
           } catch (saveError) {
-            console.error(
-              "Warning: Failed to save payment method for future use:",
-              saveError,
-            );
+            console.error("Warning: Failed to save payment method for future use:", saveError);
             // Don't fail the payment if saving fails
           }
 
-          onSuccess();
+          // Pass payment method details to success callback
+          onSuccess(paymentMethodDetails);
+        } else {
+          throw new Error("Payment was not authorized");
+        }
         } else {
           throw new Error("Payment was not authorized");
         }
