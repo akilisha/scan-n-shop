@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,9 @@ import {
 import { mockPaymentHistory } from "@/data/mockData";
 import { PaymentHistory } from "@/types";
 import { format } from "date-fns";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useDemo } from "@/contexts/DemoContext";
+import { getUserOrders } from "@/lib/supabase";
 
 export default function PaymentHistoryPage() {
   const navigate = useNavigate();
