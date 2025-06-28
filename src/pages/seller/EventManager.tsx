@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { nativeService } from "@/lib/native";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 // Mock events for demo
 const mockEvents: (EventData & { id: string })[] = [
@@ -47,23 +49,110 @@ const mockEvents: (EventData & { id: string })[] = [
 
 export default function EventManager() {
   const navigate = useNavigate();
-  const [events, setEvents] = useState(mockEvents);
+  const { user } = useSupabaseAuth();
+  const [events, setEvents] = useState<(EventData & { id: string })[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<
     (EventData & { id: string }) | null
   >(null);
 
-  const handleCreateEvent = async (eventData: EventData) => {
+  useEffect(() => {
+    if (user) {
+      loadUserEvents();
+    }
+  }, [user]);
+
+  const loadUserEvents = async () => {
+    if (!user) return;
+
+    setLoading(true);
     try {
-      // In real app, this would call the API
-      console.log("Creating event:", eventData);
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("seller_id", user.id)
+        .order("created_at", { ascending: false });
 
-      const newEvent = {
-        ...eventData,
-        id: Date.now().toString(),
-      };
+      if (error) throw error;
 
-      setEvents([newEvent, ...events]);
+      // Convert database data to EventData format
+      const formattedEvents = (data || []).map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        eventType: event.event_type,
+        location: {
+          latitude: event.latitude,
+          longitude: event.longitude,
+          address: event.address,
+          locationName: event.location_name,
+          searchRadius: event.search_radius,
+        },
+        startDate: new Date(event.start_date),
+        endDate: event.end_date ? new Date(event.end_date) : undefined,
+        isRecurring: event.is_recurring,
+        recurrencePattern: event.recurrence_pattern,
+        maxParticipants: event.max_participants,
+        entryFee: event.entry_fee,
+        contactPhone: event.contact_phone,
+        contactEmail: event.contact_email,
+        specialInstructions: event.special_instructions,
+        tags: event.tags || [],
+        images: event.images || [],
+        status: event.status,
+      }));
+
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.error("Error loading events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateEvent = async (eventData: EventData) => {
+    if (!user) {
+      console.error("No user logged in");
+      return;
+    }
+
+    try {
+      // Save to Supabase
+      const { data, error } = await supabase
+        .from("events")
+        .insert({
+          title: eventData.title,
+          description: eventData.description,
+          event_type: eventData.eventType,
+          latitude: eventData.location.latitude,
+          longitude: eventData.location.longitude,
+          address: eventData.location.address,
+          location_name: eventData.location.locationName,
+          search_radius: eventData.location.searchRadius,
+          start_date: eventData.startDate.toISOString(),
+          end_date: eventData.endDate?.toISOString(),
+          is_recurring: eventData.isRecurring,
+          recurrence_pattern: eventData.recurrencePattern,
+          max_participants: eventData.maxParticipants,
+          entry_fee: eventData.entryFee,
+          contact_phone: eventData.contactPhone,
+          contact_email: eventData.contactEmail,
+          special_instructions: eventData.specialInstructions,
+          tags: eventData.tags,
+          images: eventData.images,
+          status: eventData.status,
+          seller_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Reload events
+      await loadUserEvents();
       setShowCreateForm(false);
 
       await nativeService.hapticSuccess();
