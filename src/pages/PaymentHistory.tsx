@@ -127,7 +127,7 @@ export default function PaymentHistoryPage() {
     );
   };
 
-  const totalAmount = payments
+  const totalAmount = effectivePayments
     .filter((p) => p.status === "succeeded")
     .reduce((sum, payment) => sum + payment.amount, 0);
 
