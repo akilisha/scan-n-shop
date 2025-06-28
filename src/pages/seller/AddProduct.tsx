@@ -81,7 +81,7 @@ export default function AddProduct() {
           description: productData.description || null,
           price: parseFloat(productData.price),
           category: productData.category,
-          image: productData.image || null,
+          image_url: productData.image || null,
           seller_id: user.id,
           in_stock: productData.inStock,
           created_at: new Date().toISOString(),
