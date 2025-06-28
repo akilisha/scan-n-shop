@@ -31,6 +31,8 @@ import EditProduct from "./pages/seller/EditProduct";
 import ProductManager from "./pages/seller/ProductManager";
 import PremiumListingsManager from "./pages/seller/services/PremiumListingsManager";
 import CustomBrandingManager from "./pages/seller/services/CustomBrandingManager";
+import MultiLocationManager from "./pages/seller/services/MultiLocationManager";
+import ComingSoon from "./pages/seller/services/ComingSoon";
 
 import NotFound from "./pages/NotFound";
 
