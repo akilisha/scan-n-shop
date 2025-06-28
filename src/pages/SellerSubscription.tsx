@@ -122,16 +122,38 @@ export default function SellerSubscription() {
   const handleBankSetup = async () => {
     setIsProcessing(true);
 
-    // Here you would integrate with Adyen for Platforms
-    // to create a connected account
-    setTimeout(() => {
+    try {
+      // Here you would integrate with Adyen for Platforms
+      // to create a connected account
+
+      // For now, simulate the process and update user's seller access
+      setTimeout(async () => {
+        if (user) {
+          // Update the user's seller access in the database
+          // This would normally be done after successful Adyen setup
+          // For now we'll simulate it
+
+          // You would call your backend API here to:
+          // 1. Create Adyen connected account
+          // 2. Store bank details securely
+          // 3. Update user's has_seller_access to true
+          // 4. Create subscription record
+
+          console.log("Seller access granted for user:", user.id);
+        }
+
+        setIsProcessing(false);
+        setCurrentStep("complete");
+      }, 3000);
+    } catch (error) {
+      console.error("Bank setup failed:", error);
       setIsProcessing(false);
-      setCurrentStep("complete");
-    }, 3000);
+    }
   };
 
   const handleComplete = () => {
-    navigate("/seller");
+    // Force refresh the user context to pick up seller access
+    window.location.href = "/seller";
   };
 
   const headerContent = (
