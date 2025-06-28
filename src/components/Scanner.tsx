@@ -346,6 +346,23 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
                 </Button>
               </CardContent>
             </Card>
+          ) : useNativeScanner && isScanning ? (
+            <Card className="absolute inset-4 top-20 flex items-center justify-center">
+              <CardContent className="text-center p-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Scan className="h-8 w-8 text-primary animate-pulse" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Camera Opening...
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  The native camera scanner will open automatically
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Point your camera at a barcode or QR code to scan
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             <>
               <video
