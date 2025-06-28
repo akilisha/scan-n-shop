@@ -163,7 +163,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
     }
   };
 
-  const startScanning = async () => {
+  const startWebCameraScanning = async () => {
     if (!videoRef.current) return;
 
     try {
