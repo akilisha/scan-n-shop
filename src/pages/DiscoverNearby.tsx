@@ -554,4 +554,3 @@ export default function DiscoverNearby() {
     </Layout>
   );
 }
-}
