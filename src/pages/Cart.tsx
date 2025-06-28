@@ -63,19 +63,32 @@ export default function Cart() {
     setIsOnline(online);
 
     // Get current location for market tracking (optional feature)
-    try {
-      const location = await nativeService.getCurrentLocation();
-      if (location) {
-        setCurrentLocation(location);
-        console.log("Location acquired for market tracking");
-      } else {
-        console.log(
-          "Location not available - continuing without location features",
-        );
+    const locationPermission =
+      await nativeService.getLocationPermissionStatus();
+
+    if (locationPermission === "denied") {
+      console.log(
+        "Location access previously denied - continuing without location features",
+      );
+    } else if (locationPermission === "unsupported") {
+      console.log(
+        "Location not supported - continuing without location features",
+      );
+    } else {
+      try {
+        const location = await nativeService.getCurrentLocation();
+        if (location) {
+          setCurrentLocation(location);
+          console.log("Location acquired for market tracking");
+        } else {
+          console.log(
+            "Location not available - continuing without location features",
+          );
+        }
+      } catch (error) {
+        console.log("Location not available - this is optional");
+        // Location is optional, continue without it
       }
-    } catch (error) {
-      console.log("Location not available - this is optional:", error);
-      // Location is optional, continue without it
     }
 
     // Load offline cart if available
