@@ -93,22 +93,23 @@ export default function SellerSubscription() {
         hasSellerAccess: true,
       });
 
-      // Create a subscription record (you could add a subscriptions table)
-      const subscriptionData = {
-        user_id: supabaseUser.id,
-        plan_id: planId,
-        plan_name: selectedPlanData.name,
-        price: selectedPlanData.price,
-        interval: isYearly ? "year" : "month",
-        status: "active",
-        created_at: new Date().toISOString(),
-        current_period_end: new Date(
-          Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000,
-        ).toISOString(),
-      };
+      // Create a subscription record in the database
+      const { data: subscriptionData, error: subscriptionError } =
+        await createSubscription(supabaseUser.id, {
+          plan_id: planId,
+          plan_name: selectedPlanData.name,
+          price: selectedPlanData.price,
+          interval: isYearly ? "year" : "month",
+          current_period_end: new Date(
+            Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+        });
 
-      // In a real app, you'd save this to a subscriptions table
-      console.log("Subscription created:", subscriptionData);
+      if (subscriptionError) {
+        throw new Error("Failed to create subscription record");
+      }
+
+      console.log("Subscription created successfully:", subscriptionData);
 
       // Provide success haptic feedback
       await nativeService.hapticSuccess();
