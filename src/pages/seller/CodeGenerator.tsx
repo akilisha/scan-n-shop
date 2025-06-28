@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { SellerBottomNavigation } from "@/components/SellerBottomNavigation";
 import { Button } from "@/components/ui/button";
@@ -26,13 +26,29 @@ import {
   BarChart3,
   Tag,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
-import { mockProducts } from "@/data/mockData";
+import { supabase } from "@/lib/supabase";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { cn } from "@/lib/utils";
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  category: string;
+  image: string | null;
+  in_stock: boolean;
+}
 
 export default function CodeGenerator() {
   const navigate = useNavigate();
+  const { user } = useSupabaseAuth();
+  const [searchParams] = useSearchParams();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [codeType, setCodeType] = useState<"barcode" | "qr" | "price_tag">(
     "qr",
@@ -45,6 +61,41 @@ export default function CodeGenerator() {
   });
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (user) {
+      loadProducts();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // Auto-select product from URL parameter
+    const productId = searchParams.get("product");
+    if (productId && products.length > 0) {
+      setSelectedProduct(productId);
+    }
+  }, [searchParams, products]);
+
+  const loadProducts = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("seller_id", user.id)
+        .eq("in_stock", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const generateRandomBarcode = () => {
     const barcode = Math.floor(Math.random() * 1000000000000)
       .toString()
@@ -56,10 +107,12 @@ export default function CodeGenerator() {
     let codeData = "";
 
     if (selectedProduct && selectedProduct !== "custom") {
-      const product = mockProducts.find((p) => p.id === selectedProduct);
+      const product = products.find((p) => p.id === selectedProduct);
       if (product) {
+        const barcode =
+          customData.barcode || generateRandomBarcode().toString();
         if (codeType === "barcode") {
-          codeData = product.barcode || generateRandomBarcode().toString();
+          codeData = barcode;
         } else if (codeType === "qr") {
           codeData = JSON.stringify({
             type: "product",
@@ -67,7 +120,8 @@ export default function CodeGenerator() {
             name: product.name,
             price: product.price,
             description: product.description,
-            barcode: product.barcode,
+            category: product.category,
+            barcode: barcode,
             timestamp: Date.now(),
           });
         } else {
@@ -75,7 +129,8 @@ export default function CodeGenerator() {
             type: "price_tag",
             name: product.name,
             price: product.price,
-            barcode: product.barcode,
+            category: product.category,
+            barcode: barcode,
             currency: "USD",
             timestamp: Date.now(),
           });
@@ -305,19 +360,40 @@ export default function CodeGenerator() {
               <Select
                 value={selectedProduct}
                 onValueChange={setSelectedProduct}
+                disabled={loading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a product or create custom" />
+                  <SelectValue
+                    placeholder={
+                      loading
+                        ? "Loading products..."
+                        : products.length === 0
+                          ? "No products found - create one first"
+                          : "Choose a product or create custom"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="custom">Custom Product</SelectItem>
-                  {mockProducts.map((product) => (
+                  {products.map((product) => (
                     <SelectItem key={product.id} value={product.id}>
-                      {product.name} - ${product.price}
+                      {product.name} - ${product.price.toFixed(2)} (
+                      {product.category})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {products.length === 0 && !loading && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  No products available.{" "}
+                  <button
+                    onClick={() => navigate("/seller/products/new")}
+                    className="text-primary hover:underline"
+                  >
+                    Create your first product
+                  </button>
+                </p>
+              )}
             </div>
 
             {selectedProduct === "custom" && (
