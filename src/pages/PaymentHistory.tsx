@@ -162,7 +162,10 @@ export default function PaymentHistoryPage() {
                 ${totalAmount.toFixed(2)}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                {payments.filter((p) => p.status === "succeeded").length}{" "}
+                {
+                  effectivePayments.filter((p) => p.status === "succeeded")
+                    .length
+                }{" "}
                 successful transactions
               </p>
             </div>
