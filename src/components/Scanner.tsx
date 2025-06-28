@@ -45,6 +45,21 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    checkDeviceCapabilities();
+  }, []);
+
+  const checkDeviceCapabilities = async () => {
+    try {
+      const deviceInfo = await nativeService.getDeviceInfo();
+      const isNative = deviceInfo.platform !== "web";
+      setUseNativeScanner(isNative);
+    } catch (error) {
+      console.log("Device capability check failed, using web scanner");
+      setUseNativeScanner(false);
+    }
+  };
+
   const checkCameraPermissions = async (): Promise<boolean> => {
     try {
       const result = await navigator.permissions.query({
