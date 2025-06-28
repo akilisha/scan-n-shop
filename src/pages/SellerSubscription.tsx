@@ -381,6 +381,14 @@ export default function SellerSubscription() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        onSuccess={handleAuthSuccess}
+        mode="login"
+      />
     </Layout>
   );
 }
