@@ -327,89 +327,103 @@ export default function EventManager() {
             {events.map((event) => (
               <Card key={event.id}>
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="font-semibold text-lg">{event.title}</h3>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-xs",
-                            getStatusColor(event.status),
-                          )}
-                        >
-                          {event.status}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {getEventTypeLabel(event.eventType)}
-                        </Badge>
-                      </div>
-
-                      <p className="text-muted-foreground mb-4">
-                        {event.description}
-                      </p>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-primary" />
-                          <span className="text-sm">
-                            {event.startDate.toLocaleDateString()}
-                          </span>
+                  <div className="space-y-4">
+                    {/* Event Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg mb-2 truncate">
+                          {event.title}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "text-xs",
+                              getStatusColor(event.status),
+                            )}
+                          >
+                            {event.status}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {getEventTypeLabel(event.eventType)}
+                          </Badge>
                         </div>
-
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-primary" />
-                          <span className="text-sm">
-                            {event.startDate.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span className="text-sm">
-                            {event.location.locationName ||
-                              event.location.address}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Tags */}
-                      {event.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {event.tags.map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Stats */}
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>🗺️ {event.location.searchRadius}km radius</span>
-                        {event.entryFee > 0 && (
-                          <span>💰 ${event.entryFee} entry</span>
-                        )}
-                        {event.isRecurring && <span>🔄 Recurring</span>}
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-col space-y-2 ml-4">
+                    {/* Description */}
+                    <p className="text-muted-foreground text-sm line-clamp-2">
+                      {event.description}
+                    </p>
+
+                    {/* Event Details */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm truncate">
+                          {event.startDate.toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm truncate">
+                          {event.startDate.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm truncate">
+                          {event.location.locationName ||
+                            event.location.address}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    {event.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {event.tags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Stats */}
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center">
+                        🗺️ {event.location.searchRadius}km radius
+                      </span>
+                      {event.entryFee > 0 && (
+                        <span className="flex items-center">
+                          💰 ${event.entryFee} entry
+                        </span>
+                      )}
+                      {event.isRecurring && (
+                        <span className="flex items-center">🔄 Recurring</span>
+                      )}
+                    </div>
+
+                    {/* Actions - Better responsive layout */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setEditingEvent(event)}
+                        className="w-full justify-start"
                       >
                         <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        Edit Event
                       </Button>
 
                       <Button
@@ -418,16 +432,17 @@ export default function EventManager() {
                         onClick={() =>
                           console.log("View event analytics:", event.id)
                         }
+                        className="w-full justify-start"
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        View
+                        View Stats
                       </Button>
 
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => deleteEvent(event.id)}
-                        className="text-destructive hover:text-destructive"
+                        className="w-full justify-start text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
