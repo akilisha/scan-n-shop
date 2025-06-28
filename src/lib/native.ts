@@ -137,6 +137,39 @@ class NativeService {
     }
   }
 
+  // Check if location permission was previously denied
+  isLocationPermissionDenied(): boolean {
+    return localStorage.getItem("location_permission_denied") === "true";
+  }
+
+  // Clear location permission status (for when user wants to try again)
+  clearLocationPermissionStatus(): void {
+    localStorage.removeItem("location_permission_denied");
+  }
+
+  // Get location permission status
+  async getLocationPermissionStatus(): Promise<
+    "granted" | "denied" | "prompt" | "unsupported"
+  > {
+    if (!navigator.geolocation) {
+      return "unsupported";
+    }
+
+    if (this.isLocationPermissionDenied()) {
+      return "denied";
+    }
+
+    try {
+      const permission = await navigator.permissions.query({
+        name: "geolocation" as PermissionName,
+      });
+      return permission.state as "granted" | "denied" | "prompt";
+    } catch {
+      // Permissions API not supported, assume prompt
+      return "prompt";
+    }
+  }
+
   // Geolocation - Find nearby markets, customers, or trading spots
   async getCurrentLocation(): Promise<LocationData | null> {
     if (!this.isNative) {
