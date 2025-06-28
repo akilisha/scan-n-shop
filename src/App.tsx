@@ -64,6 +64,9 @@ const App = () => (
                     />
                     <Route path="/auth/callback" element={<AuthCallback />} />
 
+                    {/* Location-Based Discovery Routes */}
+                    <Route path="/discover" element={<DiscoverNearby />} />
+
                     {/* Seller Mode Routes */}
                     <Route path="/seller" element={<SellerDashboard />} />
                     <Route
@@ -75,6 +78,7 @@ const App = () => (
                       path="/seller/payments"
                       element={<PaymentManagement />}
                     />
+                    <Route path="/seller/events" element={<EventManager />} />
                     {/* Add more seller routes as they're created */}
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
