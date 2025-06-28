@@ -303,104 +303,112 @@ export default function ProductManager() {
             {filteredProducts.map((product) => (
               <Card key={product.id}>
                 <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    {/* Product Image */}
-                    <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      ) : (
-                        <Package className="h-8 w-8 text-muted-foreground" />
-                      )}
-                    </div>
+                  <div className="space-y-4">
+                    {/* Product Header */}
+                    <div className="flex items-start space-x-4">
+                      {/* Product Image */}
+                      <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <Package className="h-8 w-8 text-muted-foreground" />
+                        )}
+                      </div>
 
-                    {/* Product Details */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">
-                            {product.name}
-                          </h3>
-                          {product.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {product.description}
+                      {/* Product Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg truncate">
+                              {product.name}
+                            </h3>
+                            {product.description && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {product.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="text-right flex-shrink-0 ml-4">
+                            <p className="text-xl font-bold text-primary">
+                              ${product.price.toFixed(2)}
                             </p>
-                          )}
-                          <div className="flex items-center space-x-3 mt-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {product.category}
-                            </Badge>
-                            <Badge
-                              variant={
-                                product.in_stock ? "default" : "secondary"
-                              }
-                              className="text-xs"
-                            >
-                              {product.in_stock ? "In Stock" : "Out of Stock"}
-                            </Badge>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(
+                                product.created_at,
+                              ).toLocaleDateString()}
+                            </p>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-primary">
-                            ${product.price.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Created{" "}
-                            {new Date(product.created_at).toLocaleDateString()}
-                          </p>
+                        {/* Tags */}
+                        <div className="flex items-center space-x-3 mt-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {product.category}
+                          </Badge>
+                          <Badge
+                            variant={product.in_stock ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {product.in_stock ? "In Stock" : "Out of Stock"}
+                          </Badge>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center space-x-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(`/seller/codes?product=${product.id}`)
-                          }
-                        >
-                          <QrCode className="h-4 w-4 mr-1" />
-                          Generate Code
-                        </Button>
+                    {/* Actions - Stacked vertically for better mobile layout */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate(`/seller/codes?product=${product.id}`)
+                        }
+                        className="w-full justify-start"
+                      >
+                        <QrCode className="h-4 w-4 mr-2" />
+                        Generate Code
+                      </Button>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            toggleStock(product.id, product.in_stock)
-                          }
-                        >
-                          {product.in_stock
-                            ? "Mark Out of Stock"
-                            : "Mark In Stock"}
-                        </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          toggleStock(product.id, product.in_stock)
+                        }
+                        className="w-full justify-start"
+                      >
+                        <div
+                          className={`h-2 w-2 rounded-full mr-2 ${product.in_stock ? "bg-red-500" : "bg-green-500"}`}
+                        />
+                        {product.in_stock ? "Out of Stock" : "In Stock"}
+                      </Button>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(`/seller/products/edit/${product.id}`)
-                          }
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate(`/seller/products/edit/${product.id}`)
+                        }
+                        className="w-full justify-start"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deleteProduct(product.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteProduct(product.id)}
+                        className="w-full justify-start text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
