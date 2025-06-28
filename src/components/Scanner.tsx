@@ -29,6 +29,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
   const [flashOn, setFlashOn] = useState(false);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
+  const [useNativeScanner, setUseNativeScanner] = useState(false);
   const codeReader = useRef<BrowserMultiFormatReader | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
