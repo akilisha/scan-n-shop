@@ -115,6 +115,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
       } else {
         setIsScanning(false);
         // User cancelled scanning
+        onClose();
       }
     } catch (error) {
       console.error("Native scanning error:", error);
