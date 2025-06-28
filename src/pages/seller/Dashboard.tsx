@@ -14,6 +14,8 @@ import {
   Eye,
   ArrowUpRight,
   DollarSign,
+  Calendar,
+  QrCode,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 
