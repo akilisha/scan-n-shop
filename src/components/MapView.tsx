@@ -157,10 +157,57 @@ export function MapView({
 
   // Navigate to item location
   const navigateToItem = async (item: MapItem) => {
-    const url = `https://maps.google.com/?q=${item.latitude},${item.longitude}`;
-    // In a real app, you'd open the native maps app
-    console.log("Navigate to:", url);
     await nativeService.hapticSuccess();
+
+    // Create the navigation URL with item details
+    const query = encodeURIComponent(
+      `${item.title} - ${item.latitude},${item.longitude}`,
+    );
+
+    // Try different map apps in order of preference
+    const mapUrls = [
+      // Google Maps (most universal)
+      `https://www.google.com/maps/search/?api=1&query=${query}`,
+      // Apple Maps (for iOS devices)
+      `maps://maps.google.com/maps?q=${item.latitude},${item.longitude}`,
+      // Generic coordinates fallback
+      `https://maps.google.com/?q=${item.latitude},${item.longitude}`,
+    ];
+
+    try {
+      // Try to open in new tab/window (works on web)
+      const mapWindow = window.open(mapUrls[0], "_blank");
+
+      if (!mapWindow) {
+        // If popup blocked, try direct navigation
+        window.location.href = mapUrls[0];
+      }
+
+      // Show success feedback
+      await nativeService.sendLocalNotification(
+        "Navigation Started",
+        `Opening directions to ${item.title}`,
+      );
+    } catch (error) {
+      console.error("Error opening maps:", error);
+
+      // Fallback: copy coordinates to clipboard
+      try {
+        await navigator.clipboard.writeText(
+          `${item.latitude}, ${item.longitude}`,
+        );
+        alert(
+          `Coordinates copied to clipboard: ${item.latitude}, ${item.longitude}\nYou can paste these into any maps app.`,
+        );
+      } catch (clipboardError) {
+        // Final fallback: show coordinates in alert
+        alert(
+          `Navigate to: ${item.title}\nCoordinates: ${item.latitude}, ${item.longitude}\n\nCopy these coordinates into your preferred maps app.`,
+        );
+      }
+
+      await nativeService.hapticError();
+    }
   };
 
   return (
