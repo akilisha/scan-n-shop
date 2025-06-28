@@ -151,7 +151,6 @@ export default function Cart() {
 
     setTimeout(() => setRecentlyAdded(null), 3000);
   };
-  };
 
   const subtotal = getSubtotal();
   const tax = subtotal * 0.08;
