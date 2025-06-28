@@ -184,6 +184,31 @@ export default function SellerSubscription() {
   return (
     <Layout headerContent={headerContent} showBottomNav={true}>
       <div className="space-y-6">
+        {/* Authentication Prompt */}
+        {showAuthPrompt && (
+          <Alert>
+            <User className="h-4 w-4" />
+            <AlertDescription>
+              Please sign in to subscribe to seller plans.{" "}
+              <Button
+                variant="link"
+                size="sm"
+                className="p-0 h-auto"
+                onClick={() => navigate("/cart")}
+              >
+                Sign in here
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Benefits Header */}
         <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-coral-50">
           <CardContent className="p-6">
