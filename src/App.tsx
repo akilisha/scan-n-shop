@@ -91,6 +91,16 @@ const App = () => (
                       element={<PaymentManagement />}
                     />
                     <Route path="/seller/events" element={<EventManager />} />
+
+                    {/* Value-Added Service Management Routes */}
+                    <Route
+                      path="/seller/services/premium_listings"
+                      element={<PremiumListingsManager />}
+                    />
+                    <Route
+                      path="/seller/services/custom_branding"
+                      element={<CustomBrandingManager />}
+                    />
                     {/* Add more seller routes as they're created */}
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
