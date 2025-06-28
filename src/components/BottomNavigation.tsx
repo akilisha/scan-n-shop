@@ -21,6 +21,12 @@ const navItems = [
     path: "/",
   },
   {
+    id: "discover",
+    label: "Discover",
+    icon: MapPin,
+    path: "/discover",
+  },
+  {
     id: "payments",
     label: "Payments",
     icon: CreditCard,
