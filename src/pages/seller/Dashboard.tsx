@@ -157,23 +157,42 @@ export default function SellerDashboard() {
             <CardTitle className="text-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col space-y-2"
-                onClick={() => navigate("/seller/products/new")}
-              >
-                <Package className="h-6 w-6" />
-                <span className="text-sm">Add Product</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col space-y-2"
-                onClick={() => navigate("/seller/codes")}
-              >
-                <Plus className="h-6 w-6" />
-                <span className="text-sm">Generate Code</span>
-              </Button>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              className="h-16 flex flex-col justify-center"
+              onClick={() => navigate("/seller/products")}
+            >
+              <Package size={20} className="mb-1" />
+              <span className="text-sm">My Products</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-16 flex flex-col justify-center"
+              onClick={() => navigate("/seller/products/new")}
+            >
+              <Plus size={20} className="mb-1" />
+              <span className="text-sm">Add Product</span>
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <Button
+              variant="outline"
+              className="h-16 flex flex-col justify-center"
+              onClick={() => navigate("/seller/codes")}
+            >
+              <QrCode size={20} className="mb-1" />
+              <span className="text-sm">Generate Codes</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-16 flex flex-col justify-center"
+              onClick={() => navigate("/seller/events")}
+            >
+              <Calendar size={20} className="mb-1" />
+              <span className="text-sm">My Events</span>
+            </Button>
+          </div>
             </div>
           </CardContent>
         </Card>
