@@ -244,15 +244,15 @@ export function AdyenPaymentForm({
           try {
             await addUserPaymentMethod(paymentMethodDetails);
           } catch (saveError) {
-            console.error("Warning: Failed to save payment method for future use:", saveError);
+            console.error(
+              "Warning: Failed to save payment method for future use:",
+              saveError,
+            );
             // Don't fail the payment if saving fails
           }
 
           // Pass payment method details to success callback
           onSuccess(paymentMethodDetails);
-        } else {
-          throw new Error("Payment was not authorized");
-        }
         } else {
           throw new Error("Payment was not authorized");
         }
