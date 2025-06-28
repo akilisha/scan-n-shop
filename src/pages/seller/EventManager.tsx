@@ -60,11 +60,18 @@ export default function EventManager() {
   useEffect(() => {
     if (user) {
       loadUserEvents();
+    } else {
+      // If no user, stop loading immediately
+      setLoading(false);
+      setEvents([]);
     }
   }, [user]);
 
   const loadUserEvents = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -74,7 +81,12 @@ export default function EventManager() {
         .eq("seller_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist or other database error, log and continue with empty array
+        console.warn("Events table may not exist yet:", error);
+        setEvents([]);
+        return;
+      }
 
       // Convert database data to EventData format
       const formattedEvents = (data || []).map((event: any) => ({
@@ -106,6 +118,8 @@ export default function EventManager() {
       setEvents(formattedEvents);
     } catch (error) {
       console.error("Error loading events:", error);
+      // Always ensure we set an empty array and stop loading on any error
+      setEvents([]);
     } finally {
       setLoading(false);
     }
