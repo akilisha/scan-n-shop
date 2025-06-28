@@ -690,31 +690,13 @@ export function EventCreator({
       {/* Actions */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex space-x-3">
-            <Button
-              onClick={onCancel}
-              variant="outline"
-              className="flex-1"
-              disabled={isSaving}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => handleSave("draft")}
-              variant="outline"
-              className="flex-1"
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                "Save Draft"
-              )}
-            </Button>
+          <div className="space-y-3">
+            {/* Primary Action */}
             <Button
               onClick={() => handleSave("active")}
-              className="flex-1"
+              className="w-full"
               disabled={isSaving}
+              size="lg"
             >
               {isSaving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -725,6 +707,30 @@ export function EventCreator({
                 </>
               )}
             </Button>
+
+            {/* Secondary Actions */}
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => handleSave("draft")}
+                variant="outline"
+                className="flex-1"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  "Save Draft"
+                )}
+              </Button>
+              <Button
+                onClick={onCancel}
+                variant="outline"
+                className="flex-1"
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
           <p className="text-xs text-center text-muted-foreground mt-2">
             Published events are immediately discoverable by nearby customers
