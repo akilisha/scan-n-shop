@@ -181,6 +181,15 @@ export default function SellerSubscription() {
     </div>
   );
 
+  const headerContent = (
+    <div>
+      <h1 className="text-xl font-semibold">Seller Subscription</h1>
+      <p className="text-sm text-muted-foreground">
+        Unlock powerful seller tools
+      </p>
+    </div>
+  );
+
   return (
     <Layout headerContent={headerContent} showBottomNav={true}>
       <div className="space-y-6">
