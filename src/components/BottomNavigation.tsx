@@ -6,6 +6,7 @@ import {
   User,
   Crown,
   ArrowLeftRight,
+  MapPin,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useCart } from "@/contexts/CartContext";
