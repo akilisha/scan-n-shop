@@ -48,6 +48,20 @@ export function AuthModal({
     }
   }, [isOpen]);
 
+  // Safety timeout to prevent infinite loading
+  useEffect(() => {
+    if (loading || authLoading) {
+      const timeout = setTimeout(() => {
+        if (loading) {
+          setLoading(false);
+          setError("Request timed out. Please try again.");
+        }
+      }, 30000); // 30 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [loading, authLoading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
