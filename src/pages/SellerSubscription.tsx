@@ -112,11 +112,25 @@ export default function SellerSubscription() {
   const handlePaymentSubmit = async () => {
     setIsProcessing(true);
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // Simulate payment processing and subscription creation
+      setTimeout(() => {
+        // Here you would:
+        // 1. Process payment with Adyen
+        // 2. Create subscription record in database
+        // 3. Send confirmation email
+
+        console.log(
+          `Seller subscription created: ${selectedPlan} plan for $${pricing[selectedPlan].price}/month`,
+        );
+
+        setIsProcessing(false);
+        setCurrentStep("bank_setup");
+      }, 2000);
+    } catch (error) {
+      console.error("Payment failed:", error);
       setIsProcessing(false);
-      setCurrentStep("bank_setup");
-    }, 2000);
+    }
   };
 
   const handleBankSetup = async () => {
