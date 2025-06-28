@@ -294,14 +294,14 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
   };
 
   const switchCamera = async () => {
-    if (cameras.length <= 1) return;
+    if (useNativeScanner || cameras.length <= 1) return;
 
-    stopScanning();
+    await stopScanning();
     const nextIndex = (currentCameraIndex + 1) % cameras.length;
     setCurrentCameraIndex(nextIndex);
 
     setTimeout(() => {
-      startScanning();
+      startWebCameraScanning();
     }, 100);
   };
 
