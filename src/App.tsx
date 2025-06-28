@@ -19,6 +19,8 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import SellerSubscription from "./pages/SellerSubscription";
 import AuthCallback from "./pages/AuthCallback";
+import DiscoverNearby from "./pages/DiscoverNearby";
+import EventManager from "./pages/seller/EventManager";
 
 // Seller Mode Pages
 import SellerDashboard from "./pages/seller/Dashboard";
