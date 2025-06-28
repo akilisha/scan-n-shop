@@ -27,6 +27,7 @@ import SellerDashboard from "./pages/seller/Dashboard";
 import CodeGenerator from "./pages/seller/CodeGenerator";
 import PaymentManagement from "./pages/seller/PaymentManagement";
 import AddProduct from "./pages/seller/AddProduct";
+import ProductManager from "./pages/seller/ProductManager";
 
 import NotFound from "./pages/NotFound";
 
@@ -69,6 +70,10 @@ const App = () => (
 
                     {/* Seller Mode Routes */}
                     <Route path="/seller" element={<SellerDashboard />} />
+                    <Route
+                      path="/seller/products"
+                      element={<ProductManager />}
+                    />
                     <Route
                       path="/seller/products/new"
                       element={<AddProduct />}
