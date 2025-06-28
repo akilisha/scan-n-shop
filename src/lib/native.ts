@@ -1,6 +1,9 @@
 import { Capacitor } from "@capacitor/core";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
-import { BarcodeScanner } from "@capacitor/barcode-scanner";
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerTypeHint,
+} from "@capacitor/barcode-scanner";
 import { Geolocation } from "@capacitor/geolocation";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
