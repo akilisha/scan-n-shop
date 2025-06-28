@@ -69,13 +69,14 @@ const sellerBenefits: SellerBenefit[] = [
 type OnboardingStep = "benefits" | "payment" | "bank_setup" | "complete";
 
 export default function SellerSubscription() {
-  const navigate = useNavigate();
-  const { user } = useSupabaseAuth();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("benefits");
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"promotional" | "regular">(
     "promotional",
   );
+
+  const navigate = useNavigate();
+  const { user } = useSupabaseAuth();
 
   // Bank account form state
   const [bankDetails, setBankDetails] = useState({
