@@ -31,9 +31,61 @@ import { getUserOrders } from "@/lib/supabase";
 
 export default function PaymentHistoryPage() {
   const navigate = useNavigate();
-  const [payments] = useState<PaymentHistory[]>(mockPaymentHistory);
+  const { supabaseUser } = useSupabaseAuth();
+  const { isDemoMode } = useDemo();
+  const [payments, setPayments] = useState<PaymentHistory[]>([]);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  // Use mock data in demo mode, real data for authenticated users
+  const effectivePayments = isDemoMode ? mockPaymentHistory : payments;
+
+  useEffect(() => {
+    if (supabaseUser && !isDemoMode) {
+      loadUserOrders();
+    }
+  }, [supabaseUser, isDemoMode]);
+
+  const loadUserOrders = async () => {
+    if (!supabaseUser) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await getUserOrders(supabaseUser.id);
+
+      if (error) {
+        console.error("Error loading orders:", error);
+        return;
+      }
+
+      // Convert orders to payment history format
+      const convertedPayments: PaymentHistory[] = (data || []).map((order) => ({
+        id: order.id,
+        amount: order.total_amount,
+        currency: "usd",
+        status:
+          order.status === "completed"
+            ? "succeeded"
+            : (order.status as PaymentHistory["status"]),
+        description: `Order #${order.id.slice(0, 8)}`,
+        date: new Date(order.created_at),
+        paymentMethod: {
+          type: order.payment_method.type || "card",
+          brand: order.payment_method.brand || "unknown",
+          last4: order.payment_method.last4 || "****",
+        },
+        items: order.items || [],
+        receiptUrl: null,
+      }));
+
+      setPayments(convertedPayments);
+    } catch (error) {
+      console.error("Error loading orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch =
