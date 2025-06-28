@@ -143,7 +143,40 @@ CREATE POLICY "Users can update their own orders." ON public.orders
   FOR UPDATE USING (auth.uid() = user_id);
 ```
 
-### 5. Create Functions and Triggers
+### 5. Create Subscriptions Table
+
+```sql
+-- Create subscriptions table for seller plans
+CREATE TABLE public.subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  plan_id TEXT NOT NULL,
+  plan_name TEXT NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  interval TEXT NOT NULL CHECK (interval IN ('month', 'year')),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'canceled', 'past_due', 'trialing')),
+  current_period_start TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  current_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+  canceled_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Enable RLS on subscriptions table
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for subscriptions table
+CREATE POLICY "Users can view their own subscriptions." ON public.subscriptions
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own subscriptions." ON public.subscriptions
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own subscriptions." ON public.subscriptions
+  FOR UPDATE USING (auth.uid() = user_id);
+```
+
+### 6. Create Functions and Triggers
 
 ```sql
 -- Function to automatically create profile on signup
