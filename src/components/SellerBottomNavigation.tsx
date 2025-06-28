@@ -26,6 +26,12 @@ const sellerNavItems = [
     path: "/seller/products/new",
   },
   {
+    id: "events",
+    label: "Events",
+    icon: Calendar,
+    path: "/seller/events",
+  },
+  {
     id: "codes",
     label: "Codes",
     icon: QrCode,
