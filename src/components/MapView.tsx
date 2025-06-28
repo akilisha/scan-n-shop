@@ -130,6 +130,17 @@ function MapEventHandler({
   return null;
 }
 
+// Map updater component to handle center changes
+function MapUpdater({ center }: { center: LatLngExpression }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, map.getZoom());
+  }, [center, map]);
+
+  return null;
+}
+
 // Map controls component
 function MapControls({ onLocate }: { onLocate: () => void }) {
   const map = useMap();
@@ -482,6 +493,9 @@ export function MapView({
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+
+                {/* Map updater for center changes */}
+                <MapUpdater center={mapCenter} />
 
                 {/* Event handlers */}
                 <MapEventHandler
