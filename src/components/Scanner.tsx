@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { nativeService } from "@/lib/native";
 
 interface ScannerProps {
   onScan: (data: string) => void;
