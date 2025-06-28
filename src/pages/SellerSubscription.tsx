@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Shield,
@@ -246,68 +245,58 @@ export default function SellerSubscription() {
                 <CardTitle>Choose Your Plan</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs
-                  value={selectedPlan}
-                  onValueChange={(value) =>
-                    setSelectedPlan(value as "promotional" | "regular")
-                  }
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="promotional">
-                      Promotional (Limited Time)
-                    </TabsTrigger>
-                    <TabsTrigger value="regular">Regular</TabsTrigger>
-                  </TabsList>
+                <div className="space-y-4">
+                  <div
+                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                      selectedPlan === "promotional"
+                        ? "border-primary bg-primary/5"
+                        : "border-border"
+                    }`}
+                    onClick={() => setSelectedPlan("promotional")}
+                  >
+                    <div className="text-center">
+                      <Badge className="mb-3 bg-primary">
+                        50% OFF - Limited Time
+                      </Badge>
+                      <div className="mb-2">
+                        <span className="text-3xl font-bold">
+                          ${pricing.promotional.price}
+                        </span>
+                        <span className="text-muted-foreground">/month</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        For {pricing.promotional.duration}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {pricing.promotional.after}
+                      </p>
+                    </div>
+                  </div>
 
-                  <TabsContent value="promotional" className="mt-6">
-                    <Card className="border-primary/30 bg-primary/5">
-                      <CardContent className="p-6">
-                        <div className="text-center">
-                          <Badge className="mb-3 bg-primary">
-                            50% OFF - Limited Time
-                          </Badge>
-                          <div className="mb-2">
-                            <span className="text-3xl font-bold">
-                              ${pricing.promotional.price}
-                            </span>
-                            <span className="text-muted-foreground">
-                              /month
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            For {pricing.promotional.duration}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {pricing.promotional.after}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="regular" className="mt-6">
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="text-center">
-                          <div className="mb-2">
-                            <span className="text-3xl font-bold">
-                              ${pricing.regular.price}
-                            </span>
-                            <span className="text-muted-foreground">
-                              /month
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Standard pricing
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {pricing.regular.after}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
+                  <div
+                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                      selectedPlan === "regular"
+                        ? "border-primary bg-primary/5"
+                        : "border-border"
+                    }`}
+                    onClick={() => setSelectedPlan("regular")}
+                  >
+                    <div className="text-center">
+                      <div className="mb-2">
+                        <span className="text-3xl font-bold">
+                          ${pricing.regular.price}
+                        </span>
+                        <span className="text-muted-foreground">/month</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Standard pricing
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {pricing.regular.after}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
