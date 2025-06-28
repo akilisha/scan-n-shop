@@ -394,18 +394,22 @@ export function MapView({
                 {sortedItems.slice(0, 20).map((item, index) => (
                   <div
                     key={item.id}
-                    className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-full"
+                    className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-full transition-transform hover:scale-110"
                     style={{
                       left: `${20 + (index % 5) * 15}%`,
                       top: `${30 + Math.floor(index / 5) * 20}%`,
                     }}
                     onClick={() => handleItemClick(item)}
+                    title={`${item.title}${item.distance ? ` - ${item.distance.toFixed(1)}km away` : ""}`}
                   >
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold",
-                        item.type === "event" ? "bg-primary" : "bg-orange-500",
-                        selectedItem?.id === item.id && "ring-2 ring-primary",
+                        "w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold transition-all",
+                        item.type === "event"
+                          ? "bg-primary hover:bg-primary/80"
+                          : "bg-orange-500 hover:bg-orange-400",
+                        selectedItem?.id === item.id &&
+                          "ring-2 ring-primary scale-110",
                       )}
                     >
                       {item.type === "event" ? (
