@@ -103,6 +103,14 @@ const App = () => (
                       path="/seller/services/custom_branding"
                       element={<CustomBrandingManager />}
                     />
+                    <Route
+                      path="/seller/services/multi_location"
+                      element={<MultiLocationManager />}
+                    />
+                    <Route
+                      path="/seller/services/:serviceId/coming-soon"
+                      element={<ComingSoon />}
+                    />
                     {/* Add more seller routes as they're created */}
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
