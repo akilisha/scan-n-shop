@@ -42,60 +42,128 @@ export default function SellerSubscription() {
 
   const plans = isYearly ? yearlySellerPlans : sellerPlans;
 
-  const plans = isYearly ? yearlySellerPlans : sellerPlans;
-
   const handleSubscribe = async (planId: string) => {
+    // Check if user is authenticated
+    if (!supabaseUser || !supabaseUserProfile) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
+    // Check if user has payment methods
+    if (paymentMethods.length === 0) {
+      setError("Please add a payment method before subscribing.");
+      setTimeout(
+        () => navigate("/payment-methods?add=true&from=seller-subscription"),
+        2000,
+      );
+      return;
+    }
+
     setSelectedPlan(planId);
     setSubscribing(true);
+    setError(null);
 
     try {
-      // Simulate subscription process
+      const selectedPlanData = plans.find((p) => p.id === planId);
+      if (!selectedPlanData) {
+        throw new Error("Selected plan not found");
+      }
+
+      // Provide haptic feedback for subscription start
+      await nativeService.hapticImpact("medium");
+
+      // Simulate payment processing (in real implementation, this would be Adyen/Stripe)
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Update user with seller access
-      const updatedUser = {
-        ...user!,
+      // Update user profile to grant seller access in Supabase
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          has_seller_access: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", supabaseUser.id);
+
+      if (updateError) {
+        throw new Error("Failed to update seller access");
+      }
+
+      // Update local user profile state
+      await updateUserProfile({
         hasSellerAccess: true,
-        subscriptions: [
-          ...(user?.subscriptions || []),
-          {
-            id: Date.now().toString(),
-            name: plans.find((p) => p.id === planId)?.name || "Seller Plan",
-            description: "Seller mode access",
-            price: plans.find((p) => p.id === planId)?.price || 0,
-            interval: isYearly ? ("year" as const) : ("month" as const),
-            status: "active" as const,
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(
-              Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000,
-            ),
-            nextBillingDate: new Date(
-              Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000,
-            ),
-            paymentMethod: {
-              id: "1",
-              type: "card" as const,
-              last4: "4242",
-              brand: "visa",
-              isDefault: true,
-            },
-            planType: "seller" as const,
-          },
-        ],
+      });
+
+      // Create a subscription record (you could add a subscriptions table)
+      const subscriptionData = {
+        user_id: supabaseUser.id,
+        plan_id: planId,
+        plan_name: selectedPlanData.name,
+        price: selectedPlanData.price,
+        interval: isYearly ? "year" : "month",
+        status: "active",
+        created_at: new Date().toISOString(),
+        current_period_end: new Date(
+          Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000,
+        ).toISOString(),
       };
 
-      setUser(updatedUser);
+      // In a real app, you'd save this to a subscriptions table
+      console.log("Subscription created:", subscriptionData);
+
+      // Provide success haptic feedback
+      await nativeService.hapticSuccess();
+
+      // Show success notification
+      await nativeService.sendLocalNotification(
+        "Seller Access Activated!",
+        `Welcome to ${selectedPlanData.name}. You can now create and manage products.`,
+      );
 
       // Switch to seller mode
       setMode("seller");
       navigate("/seller");
     } catch (error) {
       console.error("Subscription failed:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Subscription failed. Please try again.",
+      );
+      await nativeService.hapticError();
     } finally {
       setSubscribing(false);
       setSelectedPlan(null);
     }
   };
+
+  // Check if user already has seller access
+  const hasSellerAccess = supabaseUserProfile?.hasSellerAccess;
+
+  if (hasSellerAccess) {
+    return (
+      <Layout headerContent={headerContent} showBottomNav={true}>
+        <div className="space-y-6">
+          <Card className="border-success/20 bg-success/5">
+            <CardContent className="p-6 text-center">
+              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="h-8 w-8 text-success" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">
+                You're Already a Seller!
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                You have active seller access and can create products and manage
+                your business.
+              </p>
+              <Button onClick={() => navigate("/seller")}>
+                Go to Seller Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   const getPlanIcon = (planId: string) => {
     if (planId.includes("starter")) return Crown;
