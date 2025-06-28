@@ -14,7 +14,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import PaymentMethods from "./pages/PaymentMethods";
 import PaymentHistory from "./pages/PaymentHistory";
-import Subscriptions from "./pages/Subscriptions";
+import Plans from "./pages/Plans";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import SellerSubscription from "./pages/SellerSubscription";
