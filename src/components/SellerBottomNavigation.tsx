@@ -7,6 +7,7 @@ import {
   BarChart3,
   Settings,
   ArrowLeftRight,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppMode } from "@/contexts/AppModeContext";
