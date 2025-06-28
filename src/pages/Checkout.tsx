@@ -118,6 +118,22 @@ export default function Checkout() {
     });
   };
 
+  const handleExistingPaymentMethodPayment = async () => {
+    if (!selectedPaymentMethod) return;
+
+    setCheckoutState({ ...checkoutState, processing: true });
+
+    try {
+      // Simulate payment processing with existing payment method
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Call success handler with selected payment method details
+      await handlePaymentSuccess(selectedPaymentMethod);
+    } catch (error) {
+      handlePaymentError("Payment failed. Please try again.");
+    }
+  };
+
   const headerContent = (
     <div>
       <h1 className="text-xl font-semibold">
