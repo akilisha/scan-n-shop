@@ -152,8 +152,11 @@ export default function SellerSubscription() {
   };
 
   const handleComplete = () => {
-    // Force refresh the user context to pick up seller access
-    window.location.href = "/seller";
+    // Grant seller access for demo users
+    localStorage.setItem("demo_seller_access", "true");
+
+    // Navigate to seller dashboard
+    navigate("/seller");
   };
 
   const headerContent = (
