@@ -64,6 +64,25 @@ export function LocationPicker({
     setIsLoadingLocation(true);
     setError(null);
 
+    // Check permission status first
+    const permissionStatus = await nativeService.getLocationPermissionStatus();
+
+    if (permissionStatus === "denied") {
+      setError(
+        "Location access was previously denied. You can still search by entering an address below, or enable location in your browser settings.",
+      );
+      setIsLoadingLocation(false);
+      return;
+    }
+
+    if (permissionStatus === "unsupported") {
+      setError(
+        "Location services are not supported. Please enter an address manually.",
+      );
+      setIsLoadingLocation(false);
+      return;
+    }
+
     try {
       await nativeService.hapticImpact("light");
       const location = await nativeService.getCurrentLocation();
