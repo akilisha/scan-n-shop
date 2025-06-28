@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { nativeService } from "@/lib/native";
 import { mockProducts } from "@/data/mockData";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 // Mock location-based data for demo (events + products)
 const generateMockLocationData = (): MapItem[] => {
@@ -160,6 +161,7 @@ export default function DiscoverNearby() {
   const [savedLocations, setSavedLocations] = useState<any[]>([]);
   const [discoveryMode, setDiscoveryMode] = useState<DiscoveryMode>("all");
   const [allItems, setAllItems] = useState<MapItem[]>([]);
+  const [showProductDetail, setShowProductDetail] = useState(false);
 
   useEffect(() => {
     // Load initial nearby items
@@ -262,6 +264,11 @@ export default function DiscoverNearby() {
   const handleItemClick = async (item: MapItem) => {
     setSelectedItem(item);
     await nativeService.hapticImpact("light");
+
+    // Show product detail modal for products
+    if (item.type === "product") {
+      setShowProductDetail(true);
+    }
   };
 
   const navigateToItem = async (item: MapItem) => {
@@ -534,9 +541,16 @@ export default function DiscoverNearby() {
             farmers markets, and individual items near your location. Set your
             search radius, browse on the map, and get directions to sales and
             events happening around you!
-          </AlertDescription>
-        </Alert>
+        )}
+
+        {/* Product Detail Modal */}
+        <ProductDetailModal
+          product={selectedItem}
+          isOpen={showProductDetail}
+          onClose={() => setShowProductDetail(false)}
+        />
       </div>
     </Layout>
   );
+}
 }
