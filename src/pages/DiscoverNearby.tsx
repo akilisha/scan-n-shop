@@ -134,16 +134,47 @@ export default function DiscoverNearby() {
   };
 
   const navigateToItem = async (item: MapItem) => {
-    // In a real app, this would open native maps
-    const url = `https://maps.google.com/?q=${item.latitude},${item.longitude}`;
-    console.log("Navigate to:", url);
     await nativeService.hapticSuccess();
 
-    // Show notification
-    await nativeService.sendLocalNotification(
-      "Navigation Started",
-      `Getting directions to ${item.title}`,
+    // Create the navigation URL with item details
+    const query = encodeURIComponent(
+      `${item.title} - ${item.latitude},${item.longitude}`,
     );
+    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+    try {
+      // Try to open in new tab/window
+      const mapWindow = window.open(mapUrl, "_blank");
+
+      if (!mapWindow) {
+        // If popup blocked, try direct navigation
+        window.location.href = mapUrl;
+      }
+
+      // Show success notification
+      await nativeService.sendLocalNotification(
+        "Navigation Started",
+        `Opening directions to ${item.title}`,
+      );
+    } catch (error) {
+      console.error("Error opening maps:", error);
+
+      // Fallback: copy coordinates and show alert
+      try {
+        await navigator.clipboard.writeText(
+          `${item.latitude}, ${item.longitude}`,
+        );
+        alert(
+          `Coordinates copied: ${item.latitude}, ${item.longitude}\nPaste into your maps app to navigate to ${item.title}`,
+        );
+      } catch (clipboardError) {
+        alert(
+          `Navigate to: ${item.title}\nCoordinates: ${item.latitude}, ${item.longitude}`,
+        );
+      }
+
+      await nativeService.hapticError();
+    }
   };
 
   const headerContent = (
