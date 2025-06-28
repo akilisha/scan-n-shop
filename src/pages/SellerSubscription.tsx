@@ -595,6 +595,16 @@ export default function SellerSubscription() {
           </div>
         )}
       </div>
+
+      {/* Inline Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          setCurrentStep("payment");
+        }}
+      />
     </Layout>
   );
 }
