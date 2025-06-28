@@ -9,7 +9,7 @@ import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
 
 interface AdyenPaymentFormProps {
   amount: number;
-  onSuccess: () => void;
+  onSuccess: (paymentMethodDetails?: any) => void;
   onError: (error: string) => void;
 }
 
