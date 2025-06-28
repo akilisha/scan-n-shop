@@ -310,10 +310,37 @@ export function MapView({
             {/* Map Container */}
             <div
               ref={mapRef}
-              className="w-full h-96 bg-muted rounded-lg border-2 border-dashed border-muted-foreground/25 relative overflow-hidden"
+              className="w-full h-96 bg-muted rounded-lg border relative overflow-hidden"
             >
-              {/* Mock Map Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50" />
+              {/* Realistic Map Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-green-50 to-blue-50">
+                {/* Street Grid Pattern */}
+                <div className="absolute inset-0">
+                  {/* Horizontal Streets */}
+                  {[20, 35, 50, 65, 80].map((top) => (
+                    <div
+                      key={`h-${top}`}
+                      className="absolute w-full h-1 bg-gray-300"
+                      style={{ top: `${top}%` }}
+                    />
+                  ))}
+                  {/* Vertical Streets */}
+                  {[15, 30, 45, 60, 75, 90].map((left) => (
+                    <div
+                      key={`v-${left}`}
+                      className="absolute h-full w-1 bg-gray-300"
+                      style={{ left: `${left}%` }}
+                    />
+                  ))}
+                  {/* Parks/Green Areas */}
+                  <div className="absolute w-16 h-12 bg-green-200 rounded-lg top-4 left-4 opacity-60" />
+                  <div className="absolute w-20 h-16 bg-green-200 rounded-lg bottom-8 right-6 opacity-60" />
+                  {/* Buildings */}
+                  <div className="absolute w-8 h-6 bg-gray-400 top-8 left-20 opacity-40" />
+                  <div className="absolute w-6 h-8 bg-gray-400 top-12 right-20 opacity-40" />
+                  <div className="absolute w-10 h-6 bg-gray-400 bottom-20 left-12 opacity-40" />
+                </div>
+              </div>
 
               {/* Map Items as Pins */}
               <div className="absolute inset-0 p-4">
