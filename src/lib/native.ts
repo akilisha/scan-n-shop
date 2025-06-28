@@ -144,10 +144,16 @@ class NativeService {
       try {
         const position = await new Promise<GeolocationPosition>(
           (resolve, reject) => {
+            // Check if geolocation is supported
+            if (!navigator.geolocation) {
+              reject(new Error("Geolocation is not supported by this browser"));
+              return;
+            }
+
             navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 300000,
+              enableHighAccuracy: false, // Use false for faster, less accurate location
+              timeout: 15000, // Increased timeout
+              maximumAge: 600000, // Allow cached location up to 10 minutes
             });
           },
         );
