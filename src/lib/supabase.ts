@@ -333,3 +333,73 @@ export const getUserOrders = async (userId: string) => {
 
   return { data, error };
 };
+
+// Subscription management functions
+export const createSubscription = async (
+  userId: string,
+  subscriptionData: {
+    plan_id: string;
+    plan_name: string;
+    price: number;
+    interval: "month" | "year";
+    current_period_end: string;
+  },
+) => {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .insert({
+      user_id: userId,
+      ...subscriptionData,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const getUserSubscriptions = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  return { data, error };
+};
+
+export const updateSubscriptionStatus = async (
+  subscriptionId: string,
+  status: string,
+) => {
+  const updates: any = {
+    status,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status === "canceled") {
+    updates.canceled_at = new Date().toISOString();
+  }
+
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .update(updates)
+    .eq("id", subscriptionId)
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const getActiveSellerSubscription = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .gte("current_period_end", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return { data, error };
+};
