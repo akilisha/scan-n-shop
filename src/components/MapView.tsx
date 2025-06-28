@@ -187,6 +187,13 @@ export function MapView({
   );
   const mapRef = useRef<HTMLDivElement>(null);
 
+  // Update map center when center prop changes
+  useEffect(() => {
+    if (center) {
+      setMapCenter([center.latitude, center.longitude]);
+    }
+  }, [center]);
+
   // Get user's current location
   const getCurrentLocation = async () => {
     setIsLoadingLocation(true);
