@@ -57,7 +57,7 @@ export function AdyenPaymentForm({
   onSuccess,
   onError,
 }: AdyenPaymentFormProps) {
-  const { addUserPaymentMethod } = usePaymentMethods();
+  const { addUserPaymentMethod, paymentMethods } = usePaymentMethods();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detectedCardType, setDetectedCardType] = useState<CardType | null>(
