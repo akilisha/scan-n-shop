@@ -87,7 +87,7 @@ export default function PaymentHistoryPage() {
     }
   };
 
-  const filteredPayments = payments.filter((payment) => {
+  const filteredPayments = effectivePayments.filter((payment) => {
     const matchesSearch =
       payment.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       payment.id.toLowerCase().includes(searchQuery.toLowerCase());
