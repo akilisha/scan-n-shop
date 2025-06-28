@@ -86,13 +86,11 @@ export function SupabaseAuthProvider({
           await createProfile(supabaseUser);
         if (createError) {
           console.error("Error creating profile:", createError);
-          setLoading(false);
           return;
         }
         profile = newProfile;
       } else if (error) {
         console.error("Error fetching profile:", error);
-        setLoading(false);
         return;
       }
 
@@ -118,10 +116,8 @@ export function SupabaseAuthProvider({
 
         setUser(appUser);
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error loading user profile:", error);
-      setLoading(false);
     }
   };
 
@@ -129,10 +125,13 @@ export function SupabaseAuthProvider({
     setLoading(true);
     try {
       const { error } = await signIn(email, password);
+      // Don't reset loading here - let the auth state change listener handle it
+      // to avoid race conditions
       return { error };
-    } finally {
-      // Always reset loading state, regardless of success or error
+    } catch (error) {
+      // Only reset loading on error
       setLoading(false);
+      return { error };
     }
   };
 
@@ -144,10 +143,13 @@ export function SupabaseAuthProvider({
     setLoading(true);
     try {
       const { error } = await signUp(email, password, fullName);
+      // Don't reset loading here - let the auth state change listener handle it
+      // to avoid race conditions
       return { error };
-    } finally {
-      // Always reset loading state, regardless of success or error
+    } catch (error) {
+      // Only reset loading on error
       setLoading(false);
+      return { error };
     }
   };
 
