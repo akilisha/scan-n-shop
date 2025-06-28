@@ -161,6 +161,7 @@ export default function SellerDashboard() {
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <Button
+                variant="outline"
                 className="h-16 flex flex-col justify-center"
                 onClick={() => navigate("/seller/products")}
               >
@@ -168,7 +169,6 @@ export default function SellerDashboard() {
                 <span className="text-sm">My Products</span>
               </Button>
               <Button
-                variant="outline"
                 className="h-16 flex flex-col justify-center"
                 onClick={() => navigate("/seller/products/new")}
               >

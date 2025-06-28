@@ -27,6 +27,7 @@ import SellerDashboard from "./pages/seller/Dashboard";
 import CodeGenerator from "./pages/seller/CodeGenerator";
 import PaymentManagement from "./pages/seller/PaymentManagement";
 import AddProduct from "./pages/seller/AddProduct";
+import EditProduct from "./pages/seller/EditProduct";
 import ProductManager from "./pages/seller/ProductManager";
 
 import NotFound from "./pages/NotFound";
@@ -77,6 +78,10 @@ const App = () => (
                     <Route
                       path="/seller/products/new"
                       element={<AddProduct />}
+                    />
+                    <Route
+                      path="/seller/products/edit/:productId"
+                      element={<EditProduct />}
                     />
                     <Route path="/seller/codes" element={<CodeGenerator />} />
                     <Route
