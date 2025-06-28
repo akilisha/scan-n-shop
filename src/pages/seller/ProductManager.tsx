@@ -91,7 +91,13 @@ export default function ProductManager() {
     }
   };
 
-  const deleteProduct = async (productId: string) => {
+  const deleteProduct = async (productId: string, productName: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${productName}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
     try {
       const { error } = await supabase
         .from("products")
@@ -103,6 +109,12 @@ export default function ProductManager() {
 
       setProducts(products.filter((p) => p.id !== productId));
       await nativeService.hapticSuccess();
+
+      // Send notification
+      await nativeService.sendLocalNotification(
+        "Product Deleted",
+        `${productName} has been removed from your inventory`,
+      );
     } catch (error) {
       console.error("Error deleting product:", error);
       await nativeService.hapticError();
@@ -403,7 +415,7 @@ export default function ProductManager() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => deleteProduct(product.id)}
+                        onClick={() => deleteProduct(product.id, product.name)}
                         className="w-full justify-start text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
