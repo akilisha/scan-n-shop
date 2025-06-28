@@ -403,3 +403,460 @@ export const getActiveSellerSubscription = async (userId: string) => {
 
   return { data, error };
 };
+
+// =============================================================================
+// LOCATION-BASED MARKETPLACE FUNCTIONS
+// =============================================================================
+
+// Event management functions
+export const createEvent = async (
+  userId: string,
+  eventData: {
+    title: string;
+    description: string;
+    event_type: string;
+    latitude: number;
+    longitude: number;
+    location_name: string;
+    address?: string;
+    search_radius?: number;
+    start_date: string;
+    end_date?: string;
+    is_recurring?: boolean;
+    recurrence_pattern?: string;
+    max_participants?: number;
+    entry_fee?: number;
+    contact_phone?: string;
+    contact_email?: string;
+    special_instructions?: string;
+    tags?: string[];
+    images?: string[];
+    status?: string;
+  },
+) => {
+  const { data, error } = await supabase
+    .from("events")
+    .insert({
+      seller_id: userId,
+      ...eventData,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const updateEvent = async (eventId: string, updates: any) => {
+  const { data, error } = await supabase
+    .from("events")
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", eventId)
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const getUserEvents = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("seller_id", userId)
+    .order("start_date", { ascending: false });
+
+  return { data, error };
+};
+
+export const getEvent = async (eventId: string) => {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("id", eventId)
+    .single();
+
+  return { data, error };
+};
+
+export const deleteEvent = async (eventId: string) => {
+  const { data, error } = await supabase
+    .from("events")
+    .delete()
+    .eq("id", eventId);
+
+  return { data, error };
+};
+
+// Product location functions
+export const updateProductLocation = async (
+  productId: string,
+  locationData: {
+    latitude: number;
+    longitude: number;
+    location_name?: string;
+    address?: string;
+    search_radius?: number;
+    zip_code?: string;
+    is_pickup_only?: boolean;
+    is_delivery_available?: boolean;
+    delivery_radius?: number;
+  },
+) => {
+  const { data, error } = await supabase
+    .from("products")
+    .update({
+      ...locationData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", productId)
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+// Proximity search functions
+export const searchNearbyProducts = async (
+  latitude: number,
+  longitude: number,
+  radiusKm: number = 10,
+  filters: {
+    query?: string;
+    category?: string;
+    priceMin?: number;
+    priceMax?: number;
+    limit?: number;
+  } = {},
+) => {
+  let query = supabase
+    .from("products")
+    .select("*, profiles:seller_id(full_name)")
+    .not("latitude", "is", null)
+    .not("longitude", "is", null);
+
+  // Add text search if query provided
+  if (filters.query) {
+    query = query.or(
+      `name.ilike.%${filters.query}%,description.ilike.%${filters.query}%`,
+    );
+  }
+
+  // Add category filter
+  if (filters.category && filters.category !== "all") {
+    query = query.eq("category", filters.category);
+  }
+
+  // Add price filters
+  if (filters.priceMin !== undefined) {
+    query = query.gte("price", filters.priceMin);
+  }
+  if (filters.priceMax !== undefined) {
+    query = query.lte("price", filters.priceMax);
+  }
+
+  // Limit results
+  if (filters.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) return { data: null, error };
+
+  // Calculate distances and filter by radius
+  const productsWithDistance = data
+    ?.map((product: any) => {
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        product.latitude,
+        product.longitude,
+      );
+      return { ...product, distance };
+    })
+    .filter((product: any) => product.distance <= radiusKm)
+    .sort((a: any, b: any) => a.distance - b.distance);
+
+  return { data: productsWithDistance, error: null };
+};
+
+export const searchNearbyEvents = async (
+  latitude: number,
+  longitude: number,
+  radiusKm: number = 15,
+  filters: {
+    query?: string;
+    eventType?: string;
+    timeFrame?: string;
+    limit?: number;
+  } = {},
+) => {
+  let query = supabase
+    .from("events")
+    .select("*, profiles:seller_id(full_name)")
+    .eq("status", "active");
+
+  // Add text search if query provided
+  if (filters.query) {
+    query = query.or(
+      `title.ilike.%${filters.query}%,description.ilike.%${filters.query}%`,
+    );
+  }
+
+  // Add event type filter
+  if (filters.eventType && filters.eventType !== "all") {
+    query = query.eq("event_type", filters.eventType);
+  }
+
+  // Add time frame filter
+  if (filters.timeFrame) {
+    const now = new Date();
+    let startDate = new Date();
+    let endDate = new Date();
+
+    switch (filters.timeFrame) {
+      case "today":
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "tomorrow":
+        startDate.setDate(now.getDate() + 1);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setDate(now.getDate() + 1);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "this_week":
+        endDate.setDate(now.getDate() + (7 - now.getDay()));
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "this_weekend":
+        startDate.setDate(now.getDate() + (6 - now.getDay())); // Saturday
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setDate(now.getDate() + (7 - now.getDay())); // Sunday
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "next_week":
+        startDate.setDate(now.getDate() + (7 - now.getDay()) + 1); // Next Monday
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setDate(now.getDate() + (7 - now.getDay()) + 7); // Next Sunday
+        endDate.setHours(23, 59, 59, 999);
+        break;
+    }
+
+    if (filters.timeFrame !== "all") {
+      query = query
+        .gte("start_date", startDate.toISOString())
+        .lte("start_date", endDate.toISOString());
+    }
+  }
+
+  // Limit results
+  if (filters.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) return { data: null, error };
+
+  // Calculate distances and filter by radius
+  const eventsWithDistance = data
+    ?.map((event: any) => {
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        event.latitude,
+        event.longitude,
+      );
+      return { ...event, distance };
+    })
+    .filter((event: any) => event.distance <= radiusKm)
+    .sort((a: any, b: any) => a.distance - b.distance);
+
+  return { data: eventsWithDistance, error: null };
+};
+
+// Saved locations management
+export const saveUserLocation = async (
+  userId: string,
+  locationData: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    address?: string;
+    location_type?: string;
+    is_default?: boolean;
+  },
+) => {
+  // If setting as default, unset other defaults first
+  if (locationData.is_default) {
+    await supabase
+      .from("saved_locations")
+      .update({ is_default: false })
+      .eq("user_id", userId);
+  }
+
+  const { data, error } = await supabase
+    .from("saved_locations")
+    .insert({
+      user_id: userId,
+      ...locationData,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const getUserSavedLocations = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("saved_locations")
+    .select("*")
+    .eq("user_id", userId)
+    .order("is_default", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  return { data, error };
+};
+
+export const deleteUserSavedLocation = async (locationId: string) => {
+  const { data, error } = await supabase
+    .from("saved_locations")
+    .delete()
+    .eq("id", locationId);
+
+  return { data, error };
+};
+
+// Search history and analytics
+export const saveLocationSearch = async (
+  userId: string,
+  searchData: {
+    search_latitude: number;
+    search_longitude: number;
+    search_radius: number;
+    search_query?: string;
+    category?: string;
+    location_name?: string;
+  },
+) => {
+  // Check if similar search exists and update count
+  const { data: existingSearch } = await supabase
+    .from("location_searches")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("search_latitude", searchData.search_latitude)
+    .eq("search_longitude", searchData.search_longitude)
+    .eq("search_query", searchData.search_query || "")
+    .single();
+
+  if (existingSearch) {
+    // Update existing search
+    const { data, error } = await supabase
+      .from("location_searches")
+      .update({
+        search_count: existingSearch.search_count + 1,
+        last_searched: new Date().toISOString(),
+      })
+      .eq("id", existingSearch.id)
+      .select()
+      .single();
+
+    return { data, error };
+  } else {
+    // Create new search record
+    const { data, error } = await supabase
+      .from("location_searches")
+      .insert({
+        user_id: userId,
+        ...searchData,
+      })
+      .select()
+      .single();
+
+    return { data, error };
+  }
+};
+
+export const getUserSearchHistory = async (
+  userId: string,
+  limit: number = 10,
+) => {
+  const { data, error } = await supabase
+    .from("location_searches")
+    .select("*")
+    .eq("user_id", userId)
+    .order("last_searched", { ascending: false })
+    .limit(limit);
+
+  return { data, error };
+};
+
+// Event-Product relationships
+export const addProductToEvent = async (
+  eventId: string,
+  productId: string,
+  featured: boolean = false,
+) => {
+  const { data, error } = await supabase
+    .from("event_products")
+    .insert({
+      event_id: eventId,
+      product_id: productId,
+      featured,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+};
+
+export const getEventProducts = async (eventId: string) => {
+  const { data, error } = await supabase
+    .from("event_products")
+    .select(
+      `
+      *,
+      products (*)
+    `,
+    )
+    .eq("event_id", eventId)
+    .order("featured", { ascending: false })
+    .order("display_order", { ascending: true });
+
+  return { data, error };
+};
+
+export const removeProductFromEvent = async (
+  eventId: string,
+  productId: string,
+) => {
+  const { data, error } = await supabase
+    .from("event_products")
+    .delete()
+    .eq("event_id", eventId)
+    .eq("product_id", productId);
+
+  return { data, error };
+};
+
+// Helper function to calculate distance between two points
+function calculateDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
