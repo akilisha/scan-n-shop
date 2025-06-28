@@ -65,6 +65,16 @@ export default function EventManager() {
       setLoading(false);
       setEvents([]);
     }
+
+    // Safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn("Events loading timed out, stopping loading state");
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeoutId);
   }, [user]);
 
   const loadUserEvents = async () => {
