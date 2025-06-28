@@ -25,6 +25,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 interface SellerBenefit {
   icon: React.ComponentType<{ size?: number; className?: string }>;
