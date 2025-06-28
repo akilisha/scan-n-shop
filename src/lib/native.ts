@@ -183,20 +183,24 @@ class NativeService {
           heading: position.coords.heading || undefined,
         };
       } catch (error) {
-        // Handle GeolocationPositionError properly
+        // Handle GeolocationPositionError gracefully
         if (error instanceof GeolocationPositionError) {
           const errorMessages = {
-            1: "Location access denied by user",
-            2: "Location information unavailable",
-            3: "Location request timed out",
+            1: "Location access denied - this is fine! You can still search by entering an address.",
+            2: "Location unavailable - no problem! Try entering your city or zip code instead.",
+            3: "Location request timed out - you can manually enter your location instead.",
           };
-          console.error(
-            "Web geolocation error:",
+          const message =
             errorMessages[error.code as keyof typeof errorMessages] ||
-              error.message,
-          );
+            error.message;
+          console.log("Location not available:", message);
+
+          // Store that user denied location for better UX
+          if (error.code === 1) {
+            localStorage.setItem("location_permission_denied", "true");
+          }
         } else {
-          console.error("Web geolocation error:", error);
+          console.log("Location not available:", error);
         }
         return null;
       }
