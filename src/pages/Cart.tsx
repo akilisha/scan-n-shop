@@ -49,7 +49,47 @@ export default function Cart() {
 
   useEffect(() => {
     checkCameraAvailability();
+    initializeNativeFeatures();
+    saveCartToOfflineStorage();
   }, []);
+
+  useEffect(() => {
+    saveCartToOfflineStorage();
+  }, [cartItems]);
+
+  const initializeNativeFeatures = async () => {
+    // Check network status
+    const online = await nativeService.isOnline();
+    setIsOnline(online);
+
+    // Get current location for market tracking
+    try {
+      const location = await nativeService.getCurrentLocation();
+      setCurrentLocation(location);
+    } catch (error) {
+      console.log("Location not available:", error);
+    }
+
+    // Load offline cart if available
+    const offlineCart = await nativeService.getOfflineCart();
+    if (offlineCart && offlineCart.items && offlineCart.items.length > 0) {
+      // Merge offline cart with current cart
+      console.log("Offline cart found:", offlineCart);
+      // Could implement cart merging logic here
+    }
+  };
+
+  const saveCartToOfflineStorage = async () => {
+    try {
+      await nativeService.saveOfflineCart({
+        items: cartItems,
+        timestamp: Date.now(),
+        location: currentLocation,
+      });
+    } catch (error) {
+      console.error("Failed to save cart offline:", error);
+    }
+  };
 
   const checkCameraAvailability = async () => {
     try {
