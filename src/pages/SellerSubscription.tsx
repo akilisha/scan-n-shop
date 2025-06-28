@@ -27,10 +27,20 @@ import { cn } from "@/lib/utils";
 
 export default function SellerSubscription() {
   const navigate = useNavigate();
-  const { user, setUser, setMode } = useAppMode();
+  const {
+    user: supabaseUserProfile,
+    supabaseUser,
+    updateUserProfile,
+  } = useSupabaseAuth();
+  const { setMode } = useAppMode();
+  const { paymentMethods } = usePaymentMethods();
   const [isYearly, setIsYearly] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [subscribing, setSubscribing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  const plans = isYearly ? yearlySellerPlans : sellerPlans;
 
   const plans = isYearly ? yearlySellerPlans : sellerPlans;
 
