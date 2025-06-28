@@ -21,7 +21,7 @@ import { sellerPlans, yearlySellerPlans } from "@/data/sellerPlans";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
-import { supabase } from "@/lib/supabase";
+import { supabase, createSubscription } from "@/lib/supabase";
 import { nativeService } from "@/lib/native";
 import { cn } from "@/lib/utils";
 
