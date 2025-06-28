@@ -120,9 +120,11 @@ export function LocationPicker({
         );
       }
     } catch (error) {
-      console.error("Location error:", error);
-      setError("Location access denied. Please enter an address manually.");
-      await nativeService.hapticError();
+      console.log("Location not available:", error);
+      setError(
+        "No problem! Location access isn't required. Just enter your address below and we'll help customers find you.",
+      );
+      // Don't show haptic error for location denial - it's not an error
     } finally {
       setIsLoadingLocation(false);
     }
