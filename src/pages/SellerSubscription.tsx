@@ -53,6 +53,11 @@ export default function SellerSubscription() {
     </div>
   );
 
+  const handleAuthSuccess = () => {
+    setShowAuth(false);
+    setShowAuthPrompt(false);
+  };
+
   const handleSubscribe = async (planId: string) => {
     // Check if user is authenticated
     if (!supabaseUser || !supabaseUserProfile) {
