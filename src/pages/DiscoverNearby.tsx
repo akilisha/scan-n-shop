@@ -541,6 +541,7 @@ export default function DiscoverNearby() {
             farmers markets, and individual items near your location. Set your
             search radius, browse on the map, and get directions to sales and
             events happening around you!
+          </p>
         )}
 
         {/* Product Detail Modal */}
