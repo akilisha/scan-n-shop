@@ -33,10 +33,10 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
   const effectiveUser = isDemoMode ? demoUser : supabaseUser;
 
   // Check seller access based on user subscriptions
-  // For demo mode, we'll allow seller access after going through subscription
+  // Only allow seller access if they have completed the subscription flow
   const canAccessSellerMode =
     effectiveUser?.hasSellerAccess ||
-    (isDemoMode && localStorage.getItem("demo_seller_access") === "true");
+    localStorage.getItem("demo_seller_access") === "true";
 
   // Reset to buyer mode if user loses seller access
   useEffect(() => {
