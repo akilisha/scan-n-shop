@@ -1,4 +1,13 @@
 import { useState, useEffect, useRef } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
+import { Icon, LatLngExpression, DivIcon } from "leaflet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +24,9 @@ import {
   Route,
   Target,
   Layers,
+  Locate,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -59,6 +71,99 @@ interface MapViewProps {
   className?: string;
 }
 
+// Custom marker icons
+const createCustomIcon = (
+  type: "product" | "event",
+  isSelected: boolean = false,
+) => {
+  const iconHtml =
+    type === "event"
+      ? `<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${isSelected ? "bg-blue-600 ring-2 ring-blue-400" : "bg-blue-500"} text-white">
+         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+           <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+         </svg>
+       </div>`
+      : `<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${isSelected ? "bg-orange-600 ring-2 ring-orange-400" : "bg-orange-500"} text-white text-xs font-bold">
+         $
+       </div>`;
+
+  return new DivIcon({
+    html: iconHtml,
+    className: "custom-marker",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
+};
+
+const userLocationIcon = new DivIcon({
+  html: `<div class="flex items-center justify-center w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse"></div>`,
+  className: "user-location-marker",
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+// Map event handlers
+function MapEventHandler({
+  onLocationChange,
+  userLocation,
+  setUserLocation,
+}: {
+  onLocationChange?: (location: {
+    latitude: number;
+    longitude: number;
+  }) => void;
+  userLocation: { latitude: number; longitude: number } | null;
+  setUserLocation: (
+    location: { latitude: number; longitude: number } | null,
+  ) => void;
+}) {
+  const map = useMapEvents({
+    click: async (e) => {
+      const { lat, lng } = e.latlng;
+      const newLocation = { latitude: lat, longitude: lng };
+      setUserLocation(newLocation);
+      onLocationChange?.(newLocation);
+      await nativeService.hapticImpact("light");
+    },
+  });
+
+  return null;
+}
+
+// Map controls component
+function MapControls({ onLocate }: { onLocate: () => void }) {
+  const map = useMap();
+
+  return (
+    <div className="absolute top-4 right-4 z-[1000] space-y-2">
+      <Button
+        size="sm"
+        variant="secondary"
+        className="w-10 h-10 p-0 shadow-md"
+        onClick={() => map.zoomIn()}
+      >
+        <ZoomIn className="h-4 w-4" />
+      </Button>
+      <Button
+        size="sm"
+        variant="secondary"
+        className="w-10 h-10 p-0 shadow-md"
+        onClick={() => map.zoomOut()}
+      >
+        <ZoomOut className="h-4 w-4" />
+      </Button>
+      <Button
+        size="sm"
+        variant="secondary"
+        className="w-10 h-10 p-0 shadow-md"
+        onClick={onLocate}
+      >
+        <Locate className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
 export function MapView({
   items,
   center,
@@ -77,6 +182,9 @@ export function MapView({
   const [selectedItem, setSelectedItem] = useState<MapItem | null>(null);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>(
+    center ? [center.latitude, center.longitude] : [40.7128, -74.006],
+  );
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Get user's current location
@@ -85,11 +193,13 @@ export function MapView({
     try {
       const location = await nativeService.getCurrentLocation();
       if (location) {
-        setUserLocation({
+        const newLocation = {
           latitude: location.latitude,
           longitude: location.longitude,
-        });
-        onLocationChange?.(location);
+        };
+        setUserLocation(newLocation);
+        setMapCenter([location.latitude, location.longitude]);
+        onLocationChange?.(newLocation);
         await nativeService.hapticImpact("light");
       }
     } catch (error) {
@@ -354,107 +464,131 @@ export function MapView({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Map Container */}
-            <div
-              ref={mapRef}
-              className="w-full h-96 bg-muted rounded-lg border relative overflow-hidden"
-            >
-              {/* Realistic Map Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-green-50 to-blue-50">
-                {/* Street Grid Pattern */}
-                <div className="absolute inset-0">
-                  {/* Horizontal Streets */}
-                  {[20, 35, 50, 65, 80].map((top) => (
-                    <div
-                      key={`h-${top}`}
-                      className="absolute w-full h-1 bg-gray-300"
-                      style={{ top: `${top}%` }}
-                    />
-                  ))}
-                  {/* Vertical Streets */}
-                  {[15, 30, 45, 60, 75, 90].map((left) => (
-                    <div
-                      key={`v-${left}`}
-                      className="absolute h-full w-1 bg-gray-300"
-                      style={{ left: `${left}%` }}
-                    />
-                  ))}
-                  {/* Parks/Green Areas */}
-                  <div className="absolute w-16 h-12 bg-green-200 rounded-lg top-4 left-4 opacity-60" />
-                  <div className="absolute w-20 h-16 bg-green-200 rounded-lg bottom-8 right-6 opacity-60" />
-                  {/* Buildings */}
-                  <div className="absolute w-8 h-6 bg-gray-400 top-8 left-20 opacity-40" />
-                  <div className="absolute w-6 h-8 bg-gray-400 top-12 right-20 opacity-40" />
-                  <div className="absolute w-10 h-6 bg-gray-400 bottom-20 left-12 opacity-40" />
-                </div>
-              </div>
+            <div className="w-full h-96 rounded-lg border overflow-hidden relative">
+              <MapContainer
+                center={mapCenter}
+                zoom={13}
+                style={{ height: "100%", width: "100%" }}
+                zoomControl={false}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
 
-              {/* Map Items as Pins */}
-              <div className="absolute inset-0 p-4">
-                {sortedItems.slice(0, 20).map((item, index) => (
-                  <div
+                {/* Event handlers */}
+                <MapEventHandler
+                  onLocationChange={onLocationChange}
+                  userLocation={userLocation}
+                  setUserLocation={setUserLocation}
+                />
+
+                {/* Item markers */}
+                {sortedItems.map((item) => (
+                  <Marker
                     key={item.id}
-                    className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-full transition-transform hover:scale-110"
-                    style={{
-                      left: `${20 + (index % 5) * 15}%`,
-                      top: `${30 + Math.floor(index / 5) * 20}%`,
+                    position={[item.latitude, item.longitude]}
+                    icon={createCustomIcon(
+                      item.type,
+                      selectedItem?.id === item.id,
+                    )}
+                    eventHandlers={{
+                      click: () => handleItemClick(item),
                     }}
-                    onClick={() => handleItemClick(item)}
-                    title={`${item.title}${item.distance ? ` - ${item.distance.toFixed(1)}km away` : ""}`}
                   >
-                    <div
-                      className={cn(
-                        "w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold transition-all",
-                        item.type === "event"
-                          ? "bg-primary hover:bg-primary/80"
-                          : "bg-orange-500 hover:bg-orange-400",
-                        selectedItem?.id === item.id &&
-                          "ring-2 ring-primary scale-110",
-                      )}
-                    >
-                      {item.type === "event" ? (
-                        <Calendar className="h-4 w-4" />
-                      ) : (
-                        "$"
-                      )}
-                    </div>
-                    <div className="w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-white mx-auto" />
-                  </div>
+                    <Popup>
+                      <div className="p-2 min-w-[200px]">
+                        <h3 className="font-semibold text-sm mb-1">
+                          {item.title}
+                        </h3>
+                        {item.description && (
+                          <p className="text-xs text-gray-600 mb-2">
+                            {item.description}
+                          </p>
+                        )}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Badge
+                              variant={
+                                item.type === "event" ? "default" : "secondary"
+                              }
+                              className="text-xs"
+                            >
+                              {item.type === "event"
+                                ? item.eventType || "Event"
+                                : item.category || "Product"}
+                            </Badge>
+                            {item.price && (
+                              <span className="font-bold text-primary text-sm">
+                                ${item.price.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          {item.distance && (
+                            <p className="text-xs text-gray-500">
+                              {item.distance.toFixed(1)} km away
+                            </p>
+                          )}
+                          {item.startDate && (
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-3 w-3 text-gray-500" />
+                              <span className="text-xs text-gray-500">
+                                {formatDate(item.startDate)}
+                              </span>
+                            </div>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigateToItem(item);
+                            }}
+                          >
+                            <Navigation className="h-3 w-3 mr-1" />
+                            Get Directions
+                          </Button>
+                        </div>
+                      </div>
+                    </Popup>
+                  </Marker>
                 ))}
 
-                {/* User Location Pin */}
+                {/* User location marker */}
                 {userLocation && (
-                  <div
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2"
-                    style={{ left: "50%", top: "50%" }}
+                  <Marker
+                    position={[userLocation.latitude, userLocation.longitude]}
+                    icon={userLocationIcon}
                   >
-                    <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
-                  </div>
+                    <Popup>
+                      <div className="p-2">
+                        <p className="text-sm font-semibold">Your Location</p>
+                        <p className="text-xs text-gray-600">
+                          {userLocation.latitude.toFixed(4)},{" "}
+                          {userLocation.longitude.toFixed(4)}
+                        </p>
+                      </div>
+                    </Popup>
+                  </Marker>
                 )}
-              </div>
 
-              {/* Map Controls */}
-              <div className="absolute top-4 right-4 space-y-2">
-                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
-                  +
-                </Button>
-                <Button size="sm" variant="secondary" className="w-8 h-8 p-0">
-                  -
-                </Button>
-              </div>
+                {/* Map controls */}
+                <MapControls onLocate={getCurrentLocation} />
+              </MapContainer>
 
               {/* Map Legend */}
-              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur rounded-lg p-2 space-y-1">
+              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur rounded-lg p-2 space-y-1 z-[1000] shadow-md">
                 <div className="flex items-center space-x-2 text-xs">
                   <div className="w-3 h-3 bg-orange-500 rounded-full" />
                   <span>Products</span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-primary rounded-full" />
+                  <div className="w-3 h-3 bg-blue-500 rounded-full" />
                   <span>Events</span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                   <span>You</span>
                 </div>
               </div>
