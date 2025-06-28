@@ -303,7 +303,16 @@ export default function EventManager() {
         </Card>
 
         {/* Events List */}
-        {events.length === 0 ? (
+        {loading ? (
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading your events...</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : events.length === 0 ? (
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
