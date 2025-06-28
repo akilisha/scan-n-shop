@@ -160,9 +160,29 @@ export default function Cart() {
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Scan & Shop</h1>
-        <p className="text-sm text-muted-foreground">
-          {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
-        </p>
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-muted-foreground">
+            {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+          </p>
+          {!isOnline && (
+            <Badge
+              variant="outline"
+              className="text-xs flex items-center space-x-1"
+            >
+              <WifiOff size={10} />
+              <span>Offline</span>
+            </Badge>
+          )}
+          {currentLocation && (
+            <Badge
+              variant="outline"
+              className="text-xs flex items-center space-x-1"
+            >
+              <MapPin size={10} />
+              <span>Located</span>
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="relative">
         <ShoppingBag className="h-6 w-6 text-primary" />
