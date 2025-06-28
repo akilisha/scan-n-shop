@@ -173,7 +173,14 @@ export default function EventManager() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error creating event:", error);
+        // Show user-friendly error message
+        alert(
+          "Unable to create event. The events database table may not be set up yet. Please check the database setup.",
+        );
+        throw error;
+      }
 
       // Reload events
       await loadUserEvents();
