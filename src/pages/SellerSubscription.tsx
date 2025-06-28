@@ -74,6 +74,7 @@ export default function SellerSubscription() {
   const [selectedPlan, setSelectedPlan] = useState<"promotional" | "regular">(
     "promotional",
   );
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useSupabaseAuth();
