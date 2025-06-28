@@ -261,6 +261,26 @@ export function LocationPicker({
             )}
             Use Current Location
           </Button>
+          {nativeService.isLocationPermissionDenied() && (
+            <Button
+              onClick={() => {
+                nativeService.clearLocationPermissionStatus();
+                setError(null);
+              }}
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+            >
+              Try Again
+            </Button>
+          )}
+        </div>
+
+        {/* Helpful tip for location */}
+        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+          💡 <strong>Pro tip:</strong> You don't need to enable location! Just
+          type your address, neighborhood, or nearby landmark below. Customers
+          will still be able to find you easily.
         </div>
 
         {/* Address Search */}
