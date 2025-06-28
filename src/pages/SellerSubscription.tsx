@@ -188,21 +188,6 @@ export default function SellerSubscription() {
     </div>
   );
 
-  if (!user) {
-    return (
-      <Layout headerContent={headerContent} showBottomNav={false}>
-        <div className="flex flex-col items-center justify-center py-12">
-          <Shield className="h-16 w-16 text-primary mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Sign In Required</h3>
-          <p className="text-sm text-muted-foreground text-center mb-6">
-            Please sign in to start your seller registration process.
-          </p>
-          <Button onClick={() => navigate("/profile")}>Sign In</Button>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
