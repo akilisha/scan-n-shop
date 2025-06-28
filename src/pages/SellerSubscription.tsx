@@ -40,6 +40,7 @@ export default function SellerSubscription() {
   const [subscribing, setSubscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const plans = isYearly ? yearlySellerPlans : sellerPlans;
 
