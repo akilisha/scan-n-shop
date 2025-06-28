@@ -300,6 +300,10 @@ export function ProximitySearch({
           {/* Search Query */}
           <div className="space-y-2">
             <Label>What are you looking for?</Label>
+            <p className="text-xs text-muted-foreground">
+              💡 You can search without setting a location - we'll show results
+              from a general area
+            </p>
             <div className="flex space-x-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
