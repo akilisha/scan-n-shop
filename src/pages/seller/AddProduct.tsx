@@ -28,11 +28,16 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { nativeService } from "@/lib/native";
 
 export default function AddProduct() {
   const navigate = useNavigate();
+  const { user } = useSupabaseAuth();
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [productData, setProductData] = useState({
     name: "",
     description: "",
@@ -56,17 +61,56 @@ export default function AddProduct() {
   ];
 
   const handleSave = async () => {
+    if (!user) {
+      setError("You must be logged in to add products");
+      return;
+    }
+
     setSaving(true);
+    setError(null);
+
     try {
-      // Simulate saving product
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Haptic feedback for start
+      await nativeService.hapticImpact("medium");
+
+      // Save product to Supabase
+      const { data, error: saveError } = await supabase
+        .from("products")
+        .insert({
+          name: productData.name,
+          description: productData.description || null,
+          price: parseFloat(productData.price),
+          category: productData.category,
+          image: productData.image || null,
+          seller_id: user.id,
+          in_stock: productData.inStock,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (saveError) {
+        throw saveError;
+      }
+
+      // Success haptic feedback
+      await nativeService.hapticSuccess();
+
+      // Send success notification
+      await nativeService.sendLocalNotification(
+        "Product Added!",
+        `${productData.name} has been added to your catalog`,
+      );
 
       setSuccess(true);
       setTimeout(() => {
         navigate("/seller");
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save product:", error);
+      setError(error.message || "Failed to save product. Please try again.");
+      await nativeService.hapticError();
     } finally {
       setSaving(false);
     }
@@ -310,13 +354,19 @@ export default function AddProduct() {
           </CardContent>
         </Card>
 
-        {/* Form Validation */}
+        {/* Form Validation & Errors */}
         {!isValid && (
           <Alert>
             <AlertDescription>
               Please fill in all required fields: Product Name, Price, and
               Category.
             </AlertDescription>
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
