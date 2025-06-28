@@ -188,6 +188,17 @@ export function ProximitySearch({
   const handleSearch = () => {
     if (searchLocation) {
       performSearch(searchLocation, filters);
+    } else if (filters.query.trim()) {
+      // If no location is set but user has a search query, use a default location
+      const defaultLocation: SearchLocation = {
+        latitude: 40.7128, // Default to NYC for demo
+        longitude: -74.006,
+        name: "Search Area",
+        address: "General search area",
+      };
+      setSearchLocation(defaultLocation);
+      setLocationInput("General Area");
+      performSearch(defaultLocation, filters);
     }
   };
 
