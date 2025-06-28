@@ -1,394 +1,584 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { AuthModal } from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
-  Check,
+  Shield,
+  TrendingUp,
+  Users,
   Crown,
-  Zap,
-  Building,
+  CreditCard,
+  Building2,
+  CheckCircle,
   Star,
-  Loader2,
-  User,
+  MapPin,
+  BarChart3,
+  Zap,
+  DollarSign,
+  Lock,
+  Globe,
 } from "lucide-react";
-import { sellerPlans, yearlySellerPlans } from "@/data/sellerPlans";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { useAppMode } from "@/contexts/AppModeContext";
-import { usePaymentMethods } from "@/contexts/PaymentMethodsContext";
-import { supabase, createSubscription } from "@/lib/supabase";
-import { nativeService } from "@/lib/native";
-import { cn } from "@/lib/utils";
+
+interface SellerBenefit {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  description: string;
+}
+
+const sellerBenefits: SellerBenefit[] = [
+  {
+    icon: TrendingUp,
+    title: "Sell Locally",
+    description: "Reach customers in your neighborhood and community",
+  },
+  {
+    icon: DollarSign,
+    title: "Keep More Money",
+    description: "Low fees, direct bank deposits, no holding periods",
+  },
+  {
+    icon: MapPin,
+    title: "Location-Based Discovery",
+    description: "Customers find you through our proximity search",
+  },
+  {
+    icon: Shield,
+    title: "Secure Payments",
+    description: "Adyen-powered payments with fraud protection",
+  },
+  {
+    icon: Users,
+    title: "Verified Community",
+    description: "Connect with serious local buyers and sellers",
+  },
+  {
+    icon: BarChart3,
+    title: "Growth Tools",
+    description: "Analytics, premium listings, and business insights",
+  },
+];
+
+type OnboardingStep = "benefits" | "payment" | "bank_setup" | "complete";
 
 export default function SellerSubscription() {
   const navigate = useNavigate();
-  const {
-    user: supabaseUserProfile,
-    supabaseUser,
-    updateUserProfile,
-  } = useSupabaseAuth();
-  const { setMode } = useAppMode();
-  const { paymentMethods } = usePaymentMethods();
-  const [isYearly, setIsYearly] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [subscribing, setSubscribing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+  const { user } = useSupabaseAuth();
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>("benefits");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"promotional" | "regular">(
+    "promotional",
+  );
 
-  const plans = isYearly ? yearlySellerPlans : sellerPlans;
+  // Bank account form state
+  const [bankDetails, setBankDetails] = useState({
+    accountHolderName: "",
+    accountNumber: "",
+    routingNumber: "",
+    bankName: "",
+    accountType: "checking" as "checking" | "savings",
+  });
+
+  const pricing = {
+    promotional: {
+      price: 4.99,
+      duration: "12 months",
+      savings: "50% off",
+      after: "Then $9.99/month",
+    },
+    regular: {
+      price: 9.99,
+      duration: "monthly",
+      savings: null,
+      after: "Cancel anytime",
+    },
+  };
+
+  const handleStartRegistration = () => {
+    if (!user) {
+      navigate("/profile"); // Redirect to sign in
+      return;
+    }
+    setCurrentStep("payment");
+  };
+
+  const handlePaymentSubmit = async () => {
+    setIsProcessing(true);
+
+    // Simulate payment processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      setCurrentStep("bank_setup");
+    }, 2000);
+  };
+
+  const handleBankSetup = async () => {
+    setIsProcessing(true);
+
+    // Here you would integrate with Adyen for Platforms
+    // to create a connected account
+    setTimeout(() => {
+      setIsProcessing(false);
+      setCurrentStep("complete");
+    }, 3000);
+  };
+
+  const handleComplete = () => {
+    navigate("/seller");
+  };
 
   const headerContent = (
-    <div>
-      <h1 className="text-xl font-semibold">Seller Subscription</h1>
-      <p className="text-sm text-muted-foreground">
-        Unlock powerful seller tools
-      </p>
+    <div className="flex items-center gap-3">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate("/")}
+        className="p-2"
+      >
+        <ArrowLeft size={18} />
+      </Button>
+      <div>
+        <h1 className="text-xl font-semibold">Become a Seller</h1>
+        <p className="text-sm text-muted-foreground">
+          Join our local marketplace community
+        </p>
+      </div>
     </div>
   );
 
-  const handleAuthSuccess = () => {
-    setShowAuth(false);
-    setShowAuthPrompt(false);
-  };
-
-  const handleSubscribe = async (planId: string) => {
-    // Check if user is authenticated
-    if (!supabaseUser || !supabaseUserProfile) {
-      setShowAuthPrompt(true);
-      return;
-    }
-
-    // Check if user has payment methods
-    if (paymentMethods.length === 0) {
-      setError("Please add a payment method before subscribing.");
-      setTimeout(
-        () => navigate("/payment-methods?add=true&from=seller-subscription"),
-        2000,
-      );
-      return;
-    }
-
-    setSelectedPlan(planId);
-    setSubscribing(true);
-    setError(null);
-
-    try {
-      const selectedPlanData = plans.find((p) => p.id === planId);
-      if (!selectedPlanData) {
-        throw new Error("Selected plan not found");
-      }
-
-      // Provide haptic feedback for subscription start
-      await nativeService.hapticImpact("medium");
-
-      // Simulate payment processing (in real implementation, this would be Adyen/Stripe)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Update user profile to grant seller access in Supabase
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          has_seller_access: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", supabaseUser.id);
-
-      if (updateError) {
-        throw new Error("Failed to update seller access");
-      }
-
-      // Update local user profile state
-      await updateUserProfile({
-        hasSellerAccess: true,
-      });
-
-      // Create a subscription record in the database
-      const { data: subscriptionData, error: subscriptionError } =
-        await createSubscription(supabaseUser.id, {
-          plan_id: planId,
-          plan_name: selectedPlanData.name,
-          price: selectedPlanData.price,
-          interval: isYearly ? "year" : "month",
-          current_period_end: new Date(
-            Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-        });
-
-      if (subscriptionError) {
-        throw new Error("Failed to create subscription record");
-      }
-
-      console.log("Subscription created successfully:", subscriptionData);
-
-      // Provide success haptic feedback
-      await nativeService.hapticSuccess();
-
-      // Show success notification
-      await nativeService.sendLocalNotification(
-        "Seller Access Activated!",
-        `Welcome to ${selectedPlanData.name}. You can now create and manage products.`,
-      );
-
-      // Switch to seller mode
-      setMode("seller");
-      navigate("/seller");
-    } catch (error) {
-      console.error("Subscription failed:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Subscription failed. Please try again.",
-      );
-      await nativeService.hapticError();
-    } finally {
-      setSubscribing(false);
-      setSelectedPlan(null);
-    }
-  };
-
-  // Check if user already has seller access
-  const hasSellerAccess = supabaseUserProfile?.hasSellerAccess;
-
-  if (hasSellerAccess) {
+  if (!user) {
     return (
-      <Layout headerContent={headerContent} showBottomNav={true}>
-        <div className="space-y-6">
-          <Card className="border-success/20 bg-success/5">
-            <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Crown className="h-8 w-8 text-success" />
-              </div>
-              <h2 className="text-xl font-bold mb-2">
-                You're Already a Seller!
-              </h2>
-              <p className="text-muted-foreground mb-4">
-                You have active seller access and can create products and manage
-                your business.
-              </p>
-              <Button onClick={() => navigate("/seller")}>
-                Go to Seller Dashboard
-              </Button>
-            </CardContent>
-          </Card>
+      <Layout headerContent={headerContent} showBottomNav={false}>
+        <div className="flex flex-col items-center justify-center py-12">
+          <Shield className="h-16 w-16 text-primary mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Sign In Required</h3>
+          <p className="text-sm text-muted-foreground text-center mb-6">
+            Please sign in to start your seller registration process.
+          </p>
+          <Button onClick={() => navigate("/profile")}>Sign In</Button>
         </div>
       </Layout>
     );
   }
 
-  const getPlanIcon = (planId: string) => {
-    if (planId.includes("starter")) return Crown;
-    if (planId.includes("professional")) return Zap;
-    if (planId.includes("enterprise")) return Building;
-    return Star;
-  };
-
   return (
-    <Layout headerContent={headerContent} showBottomNav={true}>
+    <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
-        {/* Authentication Prompt */}
-        {showAuthPrompt && (
-          <Alert>
-            <User className="h-4 w-4" />
-            <AlertDescription>
-              Please sign in to subscribe to seller plans.{" "}
-              <Button
-                variant="link"
-                size="sm"
-                className="p-0 h-auto"
-                onClick={() => setShowAuth(true)}
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center space-x-2">
+          {["benefits", "payment", "bank_setup", "complete"].map(
+            (step, index) => (
+              <div
+                key={step}
+                className={`flex items-center ${index < 3 ? "space-x-2" : ""}`}
               >
-                Sign in here
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Benefits Header */}
-        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-coral-50">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Crown className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <h2 className="text-xl font-bold mb-2">Become a Seller</h2>
-              <p className="text-muted-foreground">
-                Create products, manage payments, and grow your business with
-                our powerful seller tools.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Billing Toggle */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Annual Billing</p>
-                <p className="text-sm text-muted-foreground">
-                  Save 17% with yearly plans
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className={cn("text-sm", !isYearly && "font-medium")}>
-                  Monthly
-                </span>
-                <Switch checked={isYearly} onCheckedChange={setIsYearly} />
-                <span className={cn("text-sm", isYearly && "font-medium")}>
-                  Yearly
-                </span>
-                {isYearly && (
-                  <Badge variant="secondary" className="ml-2">
-                    Save 17%
-                  </Badge>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    currentStep === step
+                      ? "bg-primary text-primary-foreground"
+                      : [
+                            "benefits",
+                            "payment",
+                            "bank_setup",
+                            "complete",
+                          ].indexOf(currentStep) > index
+                        ? "bg-success text-white"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {["benefits", "payment", "bank_setup", "complete"].indexOf(
+                    currentStep,
+                  ) > index ? (
+                    <CheckCircle size={16} />
+                  ) : (
+                    index + 1
+                  )}
+                </div>
+                {index < 3 && (
+                  <div
+                    className={`w-8 h-0.5 ${
+                      ["benefits", "payment", "bank_setup", "complete"].indexOf(
+                        currentStep,
+                      ) > index
+                        ? "bg-success"
+                        : "bg-muted"
+                    }`}
+                  />
                 )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pricing Plans */}
-        <div className="space-y-4">
-          {plans.map((plan) => {
-            const Icon = getPlanIcon(plan.id);
-            const isPopular = plan.popular;
-            const isSelected = selectedPlan === plan.id;
-            const isLoading = subscribing && isSelected;
-
-            return (
-              <Card
-                key={plan.id}
-                className={cn(
-                  "relative overflow-hidden transition-all",
-                  isPopular && "border-primary shadow-lg",
-                  isSelected && "ring-2 ring-primary",
-                )}
-              >
-                {isPopular && (
-                  <div className="absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-center py-1 text-xs font-medium">
-                    Most Popular
-                  </div>
-                )}
-                <CardHeader className={cn(isPopular && "pt-8")}>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{plan.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {plan.description}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <div className="flex items-baseline space-x-2">
-                      <span className="text-3xl font-bold">
-                        ${plan.price.toFixed(0)}
-                      </span>
-                      <span className="text-muted-foreground">
-                        /{plan.interval}
-                      </span>
-                    </div>
-                    {isYearly && (
-                      <p className="text-sm text-muted-foreground">
-                        ${(plan.price / 12).toFixed(2)} per month
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-3 mb-6">
-                    {plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <Check className="h-4 w-4 text-success" />
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button
-                    className={cn(
-                      "w-full",
-                      isPopular &&
-                        "bg-primary text-primary-foreground hover:bg-primary/90",
-                    )}
-                    variant={isPopular ? "default" : "outline"}
-                    onClick={() => handleSubscribe(plan.id)}
-                    disabled={subscribing}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Subscribing...
-                      </>
-                    ) : (
-                      "Get Started"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+            ),
+          )}
         </div>
 
-        {/* FAQ */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Frequently Asked Questions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="font-medium text-sm">Can I cancel anytime?</p>
-              <p className="text-sm text-muted-foreground">
-                Yes, you can cancel your subscription at any time. Your access
-                will continue until the end of your billing period.
-              </p>
-            </div>
-            <Separator />
-            <div>
-              <p className="font-medium text-sm">What payment methods?</p>
-              <p className="text-sm text-muted-foreground">
-                We accept all major credit cards and bank transfers through
-                Stripe's secure payment processing.
-              </p>
-            </div>
-            <Separator />
-            <div>
-              <p className="font-medium text-sm">Is there a free trial?</p>
-              <p className="text-sm text-muted-foreground">
-                We offer a 14-day free trial for all new seller accounts. No
-                credit card required to start.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Step Content */}
+        {currentStep === "benefits" && (
+          <div className="space-y-6">
+            {/* Hero Section */}
+            <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+              <CardContent className="p-8 text-center">
+                <Crown className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-3">
+                  Join Our Seller Community
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  Turn your products into income with our local marketplace
+                  platform. Connect with nearby customers and grow your
+                  business.
+                </p>
+                <div className="inline-flex items-center gap-2 bg-success/10 text-success px-4 py-2 rounded-full text-sm font-medium">
+                  <Star size={14} />
+                  Trusted by 1,000+ local sellers
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Authentication Modal */}
-      <AuthModal
-        isOpen={showAuth}
-        onClose={() => setShowAuth(false)}
-        onSuccess={handleAuthSuccess}
-        mode="login"
-      />
+            {/* Pricing Plans */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Choose Your Plan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs
+                  value={selectedPlan}
+                  onValueChange={(value) =>
+                    setSelectedPlan(value as "promotional" | "regular")
+                  }
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="promotional">
+                      Promotional (Limited Time)
+                    </TabsTrigger>
+                    <TabsTrigger value="regular">Regular</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="promotional" className="mt-6">
+                    <Card className="border-primary/30 bg-primary/5">
+                      <CardContent className="p-6">
+                        <div className="text-center">
+                          <Badge className="mb-3 bg-primary">
+                            50% OFF - Limited Time
+                          </Badge>
+                          <div className="mb-2">
+                            <span className="text-3xl font-bold">
+                              ${pricing.promotional.price}
+                            </span>
+                            <span className="text-muted-foreground">
+                              /month
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            For {pricing.promotional.duration}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {pricing.promotional.after}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="regular" className="mt-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-center">
+                          <div className="mb-2">
+                            <span className="text-3xl font-bold">
+                              ${pricing.regular.price}
+                            </span>
+                            <span className="text-muted-foreground">
+                              /month
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Standard pricing
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {pricing.regular.after}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Benefits Grid */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Seller Benefits</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {sellerBenefits.map((benefit, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <benefit.icon size={20} className="text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-1">{benefit.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {benefit.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CTA */}
+            <Button
+              onClick={handleStartRegistration}
+              className="w-full h-12 text-lg"
+            >
+              Start Registration - ${pricing[selectedPlan].price}/month
+            </Button>
+
+            {/* Trust Indicators */}
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Lock size={14} />
+                <span>Secure Payments</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Globe size={14} />
+                <span>Powered by Adyen</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentStep === "payment" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard size={20} />
+                Payment Setup
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">
+                    {selectedPlan === "promotional"
+                      ? "Promotional Plan"
+                      : "Regular Plan"}
+                  </span>
+                  <span className="font-bold">
+                    ${pricing[selectedPlan].price}/month
+                  </span>
+                </div>
+                {selectedPlan === "promotional" && (
+                  <p className="text-sm text-muted-foreground">
+                    50% off for first 12 months, then $9.99/month
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="card-number">Card Number</Label>
+                    <Input
+                      id="card-number"
+                      placeholder="1234 5678 9012 3456"
+                      disabled={isProcessing}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="expiry">Expiry Date</Label>
+                    <Input
+                      id="expiry"
+                      placeholder="MM/YY"
+                      disabled={isProcessing}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="cvv">CVV</Label>
+                    <Input id="cvv" placeholder="123" disabled={isProcessing} />
+                  </div>
+                  <div>
+                    <Label htmlFor="zip">ZIP Code</Label>
+                    <Input
+                      id="zip"
+                      placeholder="12345"
+                      disabled={isProcessing}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handlePaymentSubmit}
+                disabled={isProcessing}
+                className="w-full"
+              >
+                {isProcessing ? "Processing Payment..." : "Complete Payment"}
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                Your card will be charged ${pricing[selectedPlan].price} today.
+                You can cancel anytime from your seller dashboard.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStep === "bank_setup" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 size={20} />
+                Bank Account Setup
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-900 mb-1">
+                      Secure Bank Integration
+                    </h4>
+                    <p className="text-sm text-blue-700">
+                      We use Adyen to securely handle your bank information.
+                      Your details are encrypted and never stored on our
+                      servers.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="account-holder">Account Holder Name</Label>
+                  <Input
+                    id="account-holder"
+                    value={bankDetails.accountHolderName}
+                    onChange={(e) =>
+                      setBankDetails({
+                        ...bankDetails,
+                        accountHolderName: e.target.value,
+                      })
+                    }
+                    placeholder="Full name as it appears on your bank account"
+                    disabled={isProcessing}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="account-number">Account Number</Label>
+                    <Input
+                      id="account-number"
+                      value={bankDetails.accountNumber}
+                      onChange={(e) =>
+                        setBankDetails({
+                          ...bankDetails,
+                          accountNumber: e.target.value,
+                        })
+                      }
+                      placeholder="Account number"
+                      disabled={isProcessing}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="routing-number">Routing Number</Label>
+                    <Input
+                      id="routing-number"
+                      value={bankDetails.routingNumber}
+                      onChange={(e) =>
+                        setBankDetails({
+                          ...bankDetails,
+                          routingNumber: e.target.value,
+                        })
+                      }
+                      placeholder="9-digit routing number"
+                      disabled={isProcessing}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="bank-name">Bank Name</Label>
+                  <Input
+                    id="bank-name"
+                    value={bankDetails.bankName}
+                    onChange={(e) =>
+                      setBankDetails({
+                        ...bankDetails,
+                        bankName: e.target.value,
+                      })
+                    }
+                    placeholder="Your bank's name"
+                    disabled={isProcessing}
+                  />
+                </div>
+              </div>
+
+              <Button
+                onClick={handleBankSetup}
+                disabled={isProcessing}
+                className="w-full"
+              >
+                {isProcessing
+                  ? "Setting up your account..."
+                  : "Connect Bank Account"}
+              </Button>
+
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>• Payments are processed directly to your bank account</p>
+                <p>• Funds typically arrive in 1-2 business days</p>
+                <p>• Our commission is automatically deducted</p>
+                <p>• You can update your bank details anytime</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStep === "complete" && (
+          <div className="text-center space-y-6">
+            <Card className="bg-gradient-to-r from-success/5 to-success/10 border-success/20">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle size={32} className="text-success" />
+                </div>
+                <h2 className="text-2xl font-bold mb-3">
+                  Welcome to Our Seller Community!
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  Your seller account is now active. You can start listing
+                  products and accepting payments immediately.
+                </p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="bg-white/50 rounded-lg p-3">
+                    <Zap className="h-5 w-5 text-primary mx-auto mb-1" />
+                    <p className="font-medium">Account Active</p>
+                  </div>
+                  <div className="bg-white/50 rounded-lg p-3">
+                    <Building2 className="h-5 w-5 text-success mx-auto mb-1" />
+                    <p className="font-medium">Bank Connected</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button onClick={handleComplete} className="w-full h-12 text-lg">
+              Go to Seller Dashboard
+            </Button>
+          </div>
+        )}
+      </div>
     </Layout>
   );
 }
