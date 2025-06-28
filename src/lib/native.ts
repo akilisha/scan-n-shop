@@ -161,7 +161,21 @@ class NativeService {
           heading: position.coords.heading || undefined,
         };
       } catch (error) {
-        console.error("Web geolocation error:", error);
+        // Handle GeolocationPositionError properly
+        if (error instanceof GeolocationPositionError) {
+          const errorMessages = {
+            1: "Location access denied by user",
+            2: "Location information unavailable",
+            3: "Location request timed out",
+          };
+          console.error(
+            "Web geolocation error:",
+            errorMessages[error.code as keyof typeof errorMessages] ||
+              error.message,
+          );
+        } else {
+          console.error("Web geolocation error:", error);
+        }
         return null;
       }
     }
