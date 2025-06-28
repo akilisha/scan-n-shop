@@ -509,14 +509,19 @@ export function ProximitySearch({
       {searchLocation && (
         <MapView
           items={searchResults}
-          center={searchLocation}
+          center={{
+            latitude: searchLocation.latitude,
+            longitude: searchLocation.longitude,
+          }}
           onItemClick={onItemClick}
           onLocationChange={(location) => {
-            setSearchLocation({
+            const newLocation = {
               latitude: location.latitude,
               longitude: location.longitude,
               name: "Selected Location",
-            });
+            };
+            setSearchLocation(newLocation);
+            setLocationInput("Selected Location");
           }}
           showSearch={false}
           showFilters={false}

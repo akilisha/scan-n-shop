@@ -90,12 +90,46 @@ export default function DiscoverNearby() {
   const [searchResults, setSearchResults] = useState<MapItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<MapItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [savedLocations, setSavedLocations] = useState<any[]>([]);
 
   useEffect(() => {
     // Load initial nearby items
     const mockData = generateMockLocationData();
     setSearchResults(mockData);
+
+    // Load saved locations from storage
+    loadSavedLocations();
   }, []);
+
+  const loadSavedLocations = async () => {
+    try {
+      const saved = await nativeService.getData("saved_locations");
+      if (saved && Array.isArray(saved)) {
+        setSavedLocations(saved);
+      } else {
+        // Default locations for demo - these would normally be empty
+        const defaultLocations = [
+          {
+            latitude: 40.7128,
+            longitude: -74.006,
+            name: "Home",
+            address: "New York, NY",
+          },
+          {
+            latitude: 40.7589,
+            longitude: -73.9851,
+            name: "Work",
+            address: "Times Square, NY",
+          },
+        ];
+        setSavedLocations(defaultLocations);
+        await nativeService.setData("saved_locations", defaultLocations);
+      }
+    } catch (error) {
+      console.error("Error loading saved locations:", error);
+      setSavedLocations([]);
+    }
+  };
 
   const handleSearch = async (location: any, filters: any) => {
     setIsLoading(true);
@@ -227,10 +261,7 @@ export default function DiscoverNearby() {
         <ProximitySearch
           onSearch={handleSearch}
           onItemClick={handleItemClick}
-          savedLocations={[
-            { latitude: 40.7128, longitude: -74.006, name: "Home" },
-            { latitude: 40.7589, longitude: -73.9851, name: "Work" },
-          ]}
+          savedLocations={savedLocations}
           recentSearches={[
             "exercise equipment",
             "vintage furniture",
