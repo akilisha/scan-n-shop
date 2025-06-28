@@ -42,6 +42,15 @@ export default function SellerSubscription() {
 
   const plans = isYearly ? yearlySellerPlans : sellerPlans;
 
+  const headerContent = (
+    <div>
+      <h1 className="text-xl font-semibold">Seller Subscription</h1>
+      <p className="text-sm text-muted-foreground">
+        Unlock powerful seller tools
+      </p>
+    </div>
+  );
+
   const handleSubscribe = async (planId: string) => {
     // Check if user is authenticated
     if (!supabaseUser || !supabaseUserProfile) {
