@@ -184,6 +184,7 @@ export function EventCreator({
       }
     } catch (error) {
       console.error("Error saving event:", error);
+      setErrors({ general: "Failed to save event. Please try again." });
       await nativeService.hapticError();
     } finally {
       setIsSaving(false);
