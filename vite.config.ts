@@ -14,4 +14,20 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: [
+      "@capacitor/core",
+      "@capacitor/camera",
+      "@capacitor/barcode-scanner",
+      "@capacitor/geolocation",
+      "@capacitor/haptics",
+      "@capacitor/preferences",
+      "@capacitor/push-notifications",
+      "@capacitor/network",
+      "@capacitor/device",
+    ],
+  },
+  define: {
+    global: "globalThis",
+  },
 }));
