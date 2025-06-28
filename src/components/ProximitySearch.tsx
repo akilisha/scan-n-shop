@@ -301,7 +301,9 @@ export function ProximitySearch({
               </div>
               <Button
                 onClick={handleSearch}
-                disabled={!searchLocation || isSearching}
+                disabled={
+                  (!searchLocation && !filters.query.trim()) || isSearching
+                }
               >
                 {isSearching ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
