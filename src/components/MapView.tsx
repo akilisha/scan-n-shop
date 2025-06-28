@@ -83,8 +83,10 @@ const createCustomIcon = (
            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
          </svg>
        </div>`
-      : `<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${isSelected ? "bg-orange-600 ring-2 ring-orange-400" : "bg-orange-500"} text-white text-xs font-bold">
-         $
+      : `<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${isSelected ? "bg-green-600 ring-2 ring-green-400" : "bg-green-500"} text-white">
+         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+         </svg>
        </div>`;
 
   return new DivIcon({
@@ -540,11 +542,16 @@ export function MapView({
                                 : item.category || "Product"}
                             </Badge>
                             {item.price && (
-                              <span className="font-bold text-primary text-sm">
+                              <span className="font-bold text-green-600 text-sm">
                                 ${item.price.toFixed(2)}
                               </span>
                             )}
                           </div>
+                          {item.sellerName && item.type === "product" && (
+                            <p className="text-xs text-gray-500">
+                              by {item.sellerName}
+                            </p>
+                          )}
                           {item.distance && (
                             <p className="text-xs text-gray-500">
                               {item.distance.toFixed(1)} km away
@@ -601,7 +608,7 @@ export function MapView({
               {/* Map Legend */}
               <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur rounded-lg p-2 space-y-1 z-[1000] shadow-md">
                 <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full" />
+                  <div className="w-3 h-3 bg-green-500 rounded-full" />
                   <span>Products</span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
