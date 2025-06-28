@@ -57,7 +57,7 @@ const App = () => (
                       path="/payment-history"
                       element={<PaymentHistory />}
                     />
-                    <Route path="/subscriptions" element={<Subscriptions />} />
+                    <Route path="/subscriptions" element={<Plans />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route
