@@ -150,11 +150,27 @@ class NativeService {
               return;
             }
 
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: false, // Use false for faster, less accurate location
-              timeout: 15000, // Increased timeout
-              maximumAge: 600000, // Allow cached location up to 10 minutes
-            });
+            // First try with low accuracy for faster response
+            navigator.geolocation.getCurrentPosition(
+              resolve,
+              (error) => {
+                // If high accuracy fails, try once more with even lower accuracy
+                if (error.code === error.TIMEOUT) {
+                  navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 900000, // 15 minutes cache
+                  });
+                } else {
+                  reject(error);
+                }
+              },
+              {
+                enableHighAccuracy: false,
+                timeout: 10000,
+                maximumAge: 600000,
+              },
+            );
           },
         );
 
