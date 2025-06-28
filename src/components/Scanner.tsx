@@ -90,6 +90,42 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
   };
 
   const initializeScanner = async () => {
+    if (useNativeScanner) {
+      await startNativeScanning();
+    } else {
+      await startWebScanning();
+    }
+  };
+
+  const startNativeScanning = async () => {
+    try {
+      setError(null);
+      setIsScanning(true);
+
+      // Provide haptic feedback when starting scan
+      await nativeService.hapticImpact("light");
+
+      const result = await nativeService.scanBarcode();
+
+      if (result) {
+        // Provide success haptic feedback
+        await nativeService.hapticSuccess();
+        onScan(result.text);
+        onClose();
+      } else {
+        setIsScanning(false);
+        // User cancelled scanning
+      }
+    } catch (error) {
+      console.error("Native scanning error:", error);
+      setError("Failed to access camera. Please check camera permissions.");
+      setIsScanning(false);
+      // Provide error haptic feedback
+      await nativeService.hapticError();
+    }
+  };
+
+  const startWebScanning = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setError(
         "Camera access is not supported on this device or browser. Please use a modern mobile browser.",
@@ -118,7 +154,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
       }
 
       codeReader.current = new BrowserMultiFormatReader();
-      await startScanning();
+      await startWebCameraScanning();
     } catch (err) {
       setError(
         "Failed to initialize camera. Please check your camera permissions and try again.",
