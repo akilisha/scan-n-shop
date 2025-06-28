@@ -16,10 +16,14 @@ import {
   Scan,
   Camera,
   AlertTriangle,
+  Wifi,
+  WifiOff,
+  MapPin,
 } from "lucide-react";
 import { mockProducts } from "@/data/mockData";
 import { Product } from "@/types";
 import { cn } from "@/lib/utils";
+import { nativeService } from "@/lib/native";
 
 export default function Cart() {
   const navigate = useNavigate();
