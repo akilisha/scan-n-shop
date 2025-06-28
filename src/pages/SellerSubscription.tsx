@@ -104,6 +104,10 @@ export default function SellerSubscription() {
   };
 
   const handleStartRegistration = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     setCurrentStep("payment");
   };
 
