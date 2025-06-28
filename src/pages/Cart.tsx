@@ -39,6 +39,8 @@ export default function Cart() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
   const [recentlyAdded, setRecentlyAdded] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [suggestedProducts] = useState<Product[]>(
     mockProducts.filter(
       (p) => !cartItems.some((item) => item.product.id === p.id),
