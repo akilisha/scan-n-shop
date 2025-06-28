@@ -63,20 +63,23 @@ export default function Checkout() {
   const tax = subtotal * 0.08;
   const total = getTotal();
 
-  const handlePaymentSuccess = async () => {
+  const handlePaymentSuccess = async (paymentMethodDetails?: any) => {
     try {
       // Save order to database if user is authenticated
       if (supabaseUser && cartItems.length > 0) {
-        const defaultPaymentMethod =
+        // Use payment method details from callback if available, otherwise fall back to selected method
+        const usedPaymentMethod =
+          paymentMethodDetails ||
+          selectedPaymentMethod ||
           paymentMethods.find((method) => method.isDefault) ||
           paymentMethods[0];
 
         const orderData = {
           total_amount: getTotal(),
           payment_method: {
-            type: defaultPaymentMethod?.type || "card",
-            last4: defaultPaymentMethod?.last4 || "****",
-            brand: defaultPaymentMethod?.brand || "unknown",
+            type: usedPaymentMethod?.type || "card",
+            last4: usedPaymentMethod?.last4 || "****",
+            brand: usedPaymentMethod?.brand || "unknown",
           },
           items: cartItems.map((item) => ({
             id: item.id,
