@@ -280,19 +280,30 @@ export function ProximitySearch({
 
             {/* Saved Locations */}
             {savedLocations.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {savedLocations.map((location, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => useSavedLocation(location)}
-                    className="text-xs"
-                  >
-                    <Bookmark className="h-3 w-3 mr-1" />
-                    {location.name}
-                  </Button>
-                ))}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Quick Locations:
+                  </Label>
+                  <span className="text-xs text-muted-foreground">
+                    📍 Saved for easy searching
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {savedLocations.map((location, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => useSavedLocation(location)}
+                      className="text-xs"
+                      title={`Search near ${location.name}${location.address ? ` (${location.address})` : ""}`}
+                    >
+                      <Bookmark className="h-3 w-3 mr-1" />
+                      {location.name}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
