@@ -197,7 +197,7 @@ export default function SellerSubscription() {
                 variant="link"
                 size="sm"
                 className="p-0 h-auto"
-                onClick={() => navigate("/cart")}
+                onClick={() => setShowAuth(true)}
               >
                 Sign in here
               </Button>
