@@ -390,12 +390,46 @@ export default function Checkout() {
           </Alert>
         )}
 
-        {/* Adyen Payment Form */}
-        <AdyenPaymentForm
-          amount={total}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-        />
+        {/* Payment Processing */}
+        {paymentMethods.length > 0 && selectedPaymentMethod ? (
+          /* Use existing payment method */
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <div className="text-center">
+                <h3 className="font-semibold text-lg mb-2">Complete Payment</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Using {selectedPaymentMethod.brand?.toUpperCase()} ••••
+                  {selectedPaymentMethod.last4}
+                </p>
+              </div>
+
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => handleExistingPaymentMethodPayment()}
+                disabled={checkoutState.processing}
+              >
+                {checkoutState.processing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing Payment...
+                  </>
+                ) : (
+                  `Pay $${total.toFixed(2)}`
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          /* No payment methods - show new card form */
+          <>
+            <AdyenPaymentForm
+              amount={total}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+            />
+          </>
+        )}
 
         <p className="text-xs text-center text-muted-foreground">
           Powered by <span className="text-primary font-medium">Adyen</span>.
