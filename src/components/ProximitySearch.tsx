@@ -306,6 +306,11 @@ export function ProximitySearch({
                 <Input
                   value={filters.query}
                   onChange={(e) => updateFilter("query", e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
                   placeholder="Search for items, brands, or keywords..."
                   className="pl-10"
                 />
