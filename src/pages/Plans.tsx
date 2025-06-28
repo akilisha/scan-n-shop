@@ -196,14 +196,17 @@ export default function Plans() {
   };
 
   const handleServiceAction = (service: ValueAddedService) => {
-    if (service.status === "coming_soon") return;
+    if (service.status === "coming_soon") {
+      navigate(`/seller/services/${service.id}/coming-soon`);
+      return;
+    }
 
     if (service.status === "active") {
       // Navigate to manage/configure service
       navigate(`/seller/services/${service.id}`);
     } else {
-      // Navigate to purchase/enable service
-      navigate(`/seller/services/${service.id}/purchase`);
+      // Navigate to purchase/enable service (for now, same as manage)
+      navigate(`/seller/services/${service.id}`);
     }
   };
 
