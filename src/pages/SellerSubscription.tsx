@@ -28,7 +28,7 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { AuthModal } from "@/components/AuthModal";
 
 interface SellerBenefit {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<{ size?: string | number; className?: string }>;
   title: string;
   description: string;
 }
