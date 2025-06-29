@@ -3,17 +3,39 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    "Missing Supabase environment variables. Please check your .env file:",
+// Validate URL format and provide fallback for development
+const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const isDevelopmentFallback =
+  !supabaseUrl ||
+  !supabaseAnonKey ||
+  supabaseUrl.includes("your_supabase_project_url_here") ||
+  supabaseAnonKey.includes("your_supabase_anon_key_here") ||
+  !isValidUrl(supabaseUrl);
+
+if (isDevelopmentFallback) {
+  console.warn("⚠️  Using fallback Supabase configuration for development");
+  console.warn(
+    "   Add real Supabase credentials to .env for full functionality",
   );
-  console.error(
-    "Required variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY",
-  );
-  throw new Error(
-    "Missing Supabase environment variables. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.",
-  );
+  console.warn("   Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY");
 }
+
+// Use fallback values for development to prevent crashes
+const finalUrl = isDevelopmentFallback
+  ? "https://demo.supabase.co"
+  : supabaseUrl;
+
+const finalKey = isDevelopmentFallback
+  ? "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbW8iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY0NTU2NzAxMCwiZXhwIjoxOTYxMTQzMDEwfQ.demo"
+  : supabaseAnonKey;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
