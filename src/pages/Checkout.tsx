@@ -141,7 +141,7 @@ export default function Checkout() {
       </h1>
       {checkoutState.step === "payment" && (
         <p className="text-sm text-muted-foreground">
-          Secure payment with Adyen
+          Secure payment with Finix
         </p>
       )}
     </div>
