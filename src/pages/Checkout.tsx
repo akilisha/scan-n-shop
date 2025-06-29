@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { AuthModal } from "@/components/AuthModal";
-import { AdyenPaymentForm } from "@/components/AdyenPaymentForm";
+// import { AdyenPaymentForm } from "@/components/AdyenPaymentForm"; // Disabled - pivoted to Finix
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -370,7 +370,7 @@ export default function Checkout() {
                     </div>
                     <div>
                       <p className="font-medium">
-                        {method.brand?.toUpperCase()} ••••{method.last4}
+                        {method.brand?.toUpperCase()} ���•••{method.last4}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {method.nickname ||
