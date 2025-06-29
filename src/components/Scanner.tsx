@@ -257,14 +257,14 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
     // Reset the code reader and clean up completely
     if (codeReader.current) {
       try {
-        if (typeof codeReader.current.reset === "function") {
-          codeReader.current.reset();
-        }
-        if (
-          typeof codeReader.current.stopContinuousDecodeFromInputVideoDevice ===
-          "function"
+        if (typeof (codeReader.current as any).reset === "function") {
+          (codeReader.current as any).reset();
+        } else if (
+          typeof (codeReader.current as any).stopContinuousDecodeFromInputVideoDevice ===
+            "function"
         ) {
-          codeReader.current.stopContinuousDecodeFromInputVideoDevice();
+          (codeReader.current as any).stopContinuousDecodeFromInputVideoDevice();
+        }
         }
       } catch (error) {
         console.log("CodeReader cleanup not available, cleaning up manually");
@@ -352,9 +352,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
                   <Scan className="h-8 w-8 text-primary animate-pulse" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  Camera Opening...
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Camera Opening...</h3>
                 <p className="text-muted-foreground mb-4">
                   The native camera scanner will open automatically
                 </p>
