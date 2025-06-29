@@ -37,6 +37,9 @@ const finalKey = isDevelopmentFallback
   ? "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbW8iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY0NTU2NzAxMCwiZXhwIjoxOTYxMTQzMDEwfQ.demo"
   : supabaseAnonKey;
 
+// Export flag for other components to know if we're using fallback credentials
+export const isUsingFallbackCredentials = isDevelopmentFallback;
+
 export const supabase = createClient(finalUrl, finalKey, {
   auth: {
     autoRefreshToken: true,
