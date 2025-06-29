@@ -26,7 +26,7 @@ interface ValueAddedService {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<{ size?: string | number; className?: string }>;
   price: number;
   billingType: "monthly" | "per_use" | "annual";
   status: "available" | "active" | "coming_soon";
