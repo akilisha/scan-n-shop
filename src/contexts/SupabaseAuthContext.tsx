@@ -48,11 +48,25 @@ export function SupabaseAuthProvider({
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user);
 
-      if (session?.user) {
-        await loadUserProfile(session.user);
-      } else {
-        setUser(null);
-        setSupabaseUser(null);
+      try {
+        if (session?.user) {
+          await loadUserProfile(session.user);
+        } else {
+          setUser(null);
+          setSupabaseUser(null);
+        }
+      } catch (error) {
+        console.error("Error in auth state change:", error);
+
+        // Clear invalid sessions
+        if (
+          error.message?.includes("Invalid Refresh Token") ||
+          error.message?.includes("Refresh Token Not Found")
+        ) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setSupabaseUser(null);
+        }
       }
       setLoading(false);
     });
