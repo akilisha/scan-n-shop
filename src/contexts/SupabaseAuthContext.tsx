@@ -25,6 +25,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateUserProfile: (updates: Partial<User>) => Promise<{ error: any }>;
+  clearInvalidSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
