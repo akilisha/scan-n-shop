@@ -78,6 +78,15 @@ export function SupabaseAuthProvider({
 
   const initializeAuth = async () => {
     try {
+      // Skip auth initialization if using fallback credentials
+      if (isUsingFallbackCredentials) {
+        console.log(
+          "Skipping auth initialization - using fallback Supabase credentials",
+        );
+        setLoading(false);
+        return;
+      }
+
       const { user: supabaseUser } = await getCurrentUser();
       if (supabaseUser) {
         await loadUserProfile(supabaseUser);
