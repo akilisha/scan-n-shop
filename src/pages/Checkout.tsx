@@ -439,15 +439,11 @@ export default function Checkout() {
         ) : (
           /* No payment methods - show new card form */
           <>
-            {/* <AdyenPaymentForm
+            <AdyenPaymentForm
               amount={total}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
-            /> */}
-            <div className="p-8 text-center text-muted-foreground">
-              Payment processing temporarily disabled - Finix integration coming
-              soon
-            </div>
+            />
           </>
         )}
 
