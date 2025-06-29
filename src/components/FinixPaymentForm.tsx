@@ -150,7 +150,6 @@ export function FinixPaymentForm({
 
         // Add payment method to user's stored methods
         await addUserPaymentMethod({
-          id: `pm_${Date.now()}`,
           type: "card",
           last4: cardData.cardNumber.slice(-4),
           brand: cardType || "unknown",
