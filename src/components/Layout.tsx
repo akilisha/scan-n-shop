@@ -48,6 +48,7 @@ export function Layout({
           className,
         )}
       >
+        <DevelopmentNotice />
         {children}
       </main>
 
