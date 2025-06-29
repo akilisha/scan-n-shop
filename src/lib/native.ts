@@ -299,7 +299,7 @@ class NativeService {
     }
 
     try {
-      await Haptics.notification({ type: "SUCCESS" });
+      await Haptics.notification({ type: "SUCCESS" as any });
     } catch (error) {
       console.error("Error with success haptic:", error);
     }
