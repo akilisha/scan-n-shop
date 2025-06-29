@@ -68,6 +68,17 @@ export function SupabaseAuthProvider({
       }
     } catch (error) {
       console.error("Error initializing auth:", error);
+
+      // If it's a refresh token error, clear the session
+      if (
+        error.message?.includes("Invalid Refresh Token") ||
+        error.message?.includes("Refresh Token Not Found")
+      ) {
+        console.log("Clearing invalid session...");
+        await supabase.auth.signOut();
+        setUser(null);
+        setSupabaseUser(null);
+      }
     } finally {
       setLoading(false);
     }
