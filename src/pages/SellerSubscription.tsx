@@ -469,7 +469,7 @@ export default function SellerSubscription() {
                       Secure Bank Integration
                     </h4>
                     <p className="text-sm text-blue-700">
-                      We use Adyen to securely handle your bank information.
+                      We use Finix to securely handle your bank information.
                       Your details are encrypted and never stored on our
                       servers.
                     </p>
