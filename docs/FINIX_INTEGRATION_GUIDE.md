@@ -1,4 +1,4 @@
-# Finix Integration Guide for Local Marketplace
+# Finix Integration Guide for kerbdrop
 
 ## 🎯 Overview
 
