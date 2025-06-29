@@ -118,7 +118,7 @@ export default function SellerSubscription() {
       // Simulate payment processing and subscription creation
       setTimeout(() => {
         // Here you would:
-        // 1. Process payment with Adyen
+        // 1. Process payment with Finix
         // 2. Create subscription record in database
         // 3. Send confirmation email
 
