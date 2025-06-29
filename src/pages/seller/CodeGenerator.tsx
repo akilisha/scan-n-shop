@@ -110,7 +110,10 @@ export default function CodeGenerator() {
       const product = products.find((p) => p.id === selectedProduct);
       if (product) {
         const barcode =
-          customData.barcode || generateRandomBarcode().toString();
+          customData.barcode ||
+          Math.floor(Math.random() * 1000000000000)
+            .toString()
+            .padStart(12, "0");
         if (codeType === "barcode") {
           codeData = barcode;
         } else if (codeType === "qr") {
