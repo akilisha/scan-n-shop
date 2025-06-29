@@ -45,7 +45,7 @@ import { mockUser } from "@/data/mockData";
 export default function Profile() {
   const navigate = useNavigate();
   const { user, setMode } = useAppMode();
-  const { signOut, updateUserProfile } = useSupabaseAuth();
+  const { signOut, updateUserProfile, clearInvalidSession } = useSupabaseAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [localUser, setLocalUser] = useState<UserType>(user || mockUser);
   const [isEditing, setIsEditing] = useState(false);
