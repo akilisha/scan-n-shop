@@ -1,5 +1,5 @@
-/* Import Adyen custom styles */
-@import "./styles/adyen.css";
+/* Import Finix custom styles */
+@import "./styles/finix.css";
 
 /* Import Leaflet styles */
 @import "leaflet/dist/leaflet.css";
