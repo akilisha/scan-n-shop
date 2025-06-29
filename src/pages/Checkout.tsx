@@ -448,7 +448,7 @@ export default function Checkout() {
         )}
 
         <p className="text-xs text-center text-muted-foreground">
-          Powered by <span className="text-primary font-medium">Adyen</span>.
+          Powered by <span className="text-primary font-medium">Finix</span>.
           Your payment information is secure and encrypted.
         </p>
       </div>
