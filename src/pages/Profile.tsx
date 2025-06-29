@@ -114,7 +114,7 @@ export default function Profile() {
       preferences: {
         ...localUser.preferences,
         [category]: {
-          ...(localUser.preferences?.[category] || {}),
+          ...((localUser.preferences?.[category] as any) || {}),
           [key]: value,
         },
       },
