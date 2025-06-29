@@ -98,7 +98,7 @@ export default function PaymentMethods() {
         {/* Add Payment Method Form */}
         {showAddForm && (
           <>
-            <AdyenPaymentForm
+            <FinixPaymentForm
               amount={0}
               onSuccess={handleAddCard}
               onError={handleError}
