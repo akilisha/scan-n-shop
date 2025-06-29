@@ -142,7 +142,11 @@ export default function CodeGenerator() {
     } else {
       // Custom product
       if (codeType === "barcode") {
-        codeData = customData.barcode || generateRandomBarcode().toString();
+        codeData =
+          customData.barcode ||
+          Math.floor(Math.random() * 1000000000000)
+            .toString()
+            .padStart(12, "0");
       } else if (codeType === "qr") {
         codeData = JSON.stringify({
           type: "product",
