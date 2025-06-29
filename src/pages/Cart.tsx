@@ -267,7 +267,7 @@ export default function Cart() {
                 className="w-full mt-4"
                 size="lg"
                 onClick={() => setScannerOpen(true)}
-                disabled={cameraAvailable === false}
+                disabled={cameraAvailable !== true}
               >
                 <Camera className="w-5 h-5 mr-2" />
                 Start Scanning
