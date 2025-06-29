@@ -368,7 +368,7 @@ export default function SellerSubscription() {
               </div>
               <div className="flex items-center gap-1">
                 <Globe size={14} />
-                <span>Powered by Adyen</span>
+                <span>Powered by Finix</span>
               </div>
             </div>
           </div>
