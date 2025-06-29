@@ -314,7 +314,7 @@ class NativeService {
     }
 
     try {
-      await Haptics.notification({ type: "ERROR" });
+      await Haptics.notification({ type: "ERROR" as any });
     } catch (error) {
       console.error("Error with error haptic:", error);
     }
