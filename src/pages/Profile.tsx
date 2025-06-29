@@ -497,6 +497,31 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Debug Section - Only show if there are auth issues */}
+        {user && (
+          <Card className="border-dashed border-warning">
+            <CardHeader>
+              <CardTitle className="text-sm text-warning">
+                Debug Options
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearInvalidSession}
+                className="text-xs"
+              >
+                Clear Invalid Session
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Use this if you encounter authentication errors or invalid
+                refresh token issues.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );
