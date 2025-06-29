@@ -89,14 +89,11 @@ export default function PaymentMethods() {
         {/* Add Payment Method Form */}
         {showAddForm && (
           <>
-            {/* <AdyenPaymentForm
+            <AdyenPaymentForm
               amount={0}
               onSuccess={handleAddCard}
               onError={handleError}
-            /> */}
-            <div className="p-8 text-center text-muted-foreground">
-              Payment form temporarily disabled - Finix integration coming soon
-            </div>
+            />
             <Button
               variant="outline"
               className="w-full mt-4"
