@@ -77,8 +77,10 @@ export function AdyenPaymentForm({
 
   // Check if digital wallets are supported
   const isApplePaySupported =
-    window.ApplePaySession && ApplePaySession.canMakePayments;
-  const isGooglePaySupported = window.google && window.google.payments;
+    (window as any).ApplePaySession &&
+    (window as any).ApplePaySession.canMakePayments;
+  const isGooglePaySupported =
+    (window as any).google && (window as any).google.payments;
 
   const detectCardType = (cardNumber: string): CardType | null => {
     const cleanNumber = cardNumber.replace(/\s/g, "");
