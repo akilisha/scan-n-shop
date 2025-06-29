@@ -192,7 +192,7 @@ export function Scanner({ onScan, onClose, isOpen }: ScannerProps) {
       // Check for flash capability
       const track = stream.getVideoTracks()[0];
       const capabilities = track.getCapabilities();
-      setHasFlash(!!capabilities.torch);
+      setHasFlash(!!(capabilities as any).torch);
 
       // Start decoding
       codeReader.current.decodeFromVideoDevice(
