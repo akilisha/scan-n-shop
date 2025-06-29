@@ -36,6 +36,15 @@ export default function PaymentMethods() {
   );
   const [success, setSuccess] = useState<string | null>(null);
 
+  const handleAddCard = (result: any) => {
+    setSuccess("Payment method added successfully!");
+    setShowAddForm(false);
+  };
+
+  const handleError = (error: any) => {
+    console.error("Payment method error:", error);
+  };
+
   const deletePaymentMethod = async (id: string) => {
     const { error } = await deleteUserPaymentMethod(id);
     if (error) {
