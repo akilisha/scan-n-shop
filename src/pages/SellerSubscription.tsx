@@ -52,7 +52,7 @@ const sellerBenefits: SellerBenefit[] = [
   {
     icon: Shield,
     title: "Secure Payments",
-    description: "Adyen-powered payments with fraud protection",
+    description: "Finix-powered payments with fraud protection",
   },
   {
     icon: Users,
