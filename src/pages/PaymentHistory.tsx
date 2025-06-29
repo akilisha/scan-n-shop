@@ -71,9 +71,11 @@ export default function PaymentHistoryPage() {
         description: `Order #${order.id.slice(0, 8)}`,
         date: new Date(order.created_at),
         paymentMethod: {
+          id: order.payment_method.id || "unknown",
           type: order.payment_method.type || "card",
           brand: order.payment_method.brand || "unknown",
           last4: order.payment_method.last4 || "****",
+          isDefault: false,
         },
         items: order.items || [],
         receiptUrl: null,
