@@ -59,10 +59,8 @@ export function SupabaseAuthProvider({
         console.error("Error in auth state change:", error);
 
         // Clear invalid sessions
-        if (
-          error.message?.includes("Invalid Refresh Token") ||
-          error.message?.includes("Refresh Token Not Found")
-        ) {
+        if (error.message?.includes('Invalid Refresh Token') ||
+            error.message?.includes('Refresh Token Not Found')) {
           await supabase.auth.signOut();
           setUser(null);
           setSupabaseUser(null);
@@ -84,10 +82,8 @@ export function SupabaseAuthProvider({
       console.error("Error initializing auth:", error);
 
       // If it's a refresh token error, clear the session
-      if (
-        error.message?.includes("Invalid Refresh Token") ||
-        error.message?.includes("Refresh Token Not Found")
-      ) {
+      if (error.message?.includes('Invalid Refresh Token') ||
+          error.message?.includes('Refresh Token Not Found')) {
         console.log("Clearing invalid session...");
         await supabase.auth.signOut();
         setUser(null);
@@ -183,15 +179,25 @@ export function SupabaseAuthProvider({
     return { error };
   };
 
-  const handleSignOut = async () => {
-    setLoading(true);
-    await signOut();
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
+    setUser(null);
+    setSupabaseUser(null);
+  };
+
+  const clearInvalidSession = async () => {
+    // Clear local storage and force sign out
+    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token');
+    await supabase.auth.signOut();
     setUser(null);
     setSupabaseUser(null);
     setLoading(false);
   };
-
-  const updateUserProfile = async (updates: Partial<User>) => {
     if (!user || !supabaseUser) {
       return { error: { message: "No user logged in" } };
     }
