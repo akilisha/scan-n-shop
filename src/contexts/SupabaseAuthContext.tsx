@@ -9,6 +9,7 @@ import {
   signOut,
   getProfile,
   createProfile,
+  isUsingFallbackCredentials,
 } from "@/lib/supabase";
 import { User } from "@/types";
 
