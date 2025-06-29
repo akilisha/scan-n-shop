@@ -137,6 +137,7 @@ export function SupabaseAuthProvider({
             },
             language: "English",
             currency: "USD",
+            darkMode: false,
           },
         };
 
