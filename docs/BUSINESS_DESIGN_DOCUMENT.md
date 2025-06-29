@@ -2,7 +2,7 @@
 
 ## 📋 Executive Summary
 
-**Platform Name**: TradeHub (Local Marketplace Platform)
+**Platform Name**: kerbdrop (Local Marketplace Platform)
 **Mission**: Enable local commerce by connecting nearby buyers and sellers through proximity-based discovery
 **Vision**: Become the go-to platform for local, outdoor, and small business traders to build sustainable community-driven commerce
 
@@ -411,6 +411,6 @@ The business model balances simplicity with sustainability, ensuring both seller
 
 _This document represents the crystallized vision emerged from collaborative iteration and architectural refinement. The focus on local commerce, payment simplification, and value-added services creates a defensible market position with clear growth pathways._
 
-**Document Version**: 1.0  
-**Last Updated**: January 2024  
+**Document Version**: 1.0
+**Last Updated**: January 2024
 **Next Review**: Quarterly business model assessment
