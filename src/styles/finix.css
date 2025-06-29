@@ -1,0 +1,173 @@
+/* Finix Component Styling to match our app theme */
+
+/* Main container styling */
+.finix-payment__payment-method {
+  border: 1px solid hsl(35, 100%, 90%);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: hsl(0, 0%, 100%);
+  transition: all 0.2s ease;
+}
+
+.finix-payment__payment-method:hover {
+  border-color: hsl(15, 84%, 58%);
+}
+
+.finix-payment__payment-method--selected {
+  border-color: hsl(15, 84%, 58%);
+  box-shadow: 0 0 0 1px hsl(15, 84%, 58%);
+}
+
+/* Input field styling */
+.finix-payment__field {
+  margin-bottom: 12px;
+}
+
+.finix-payment__input {
+  border: 1px solid hsl(35, 100%, 90%);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  width: 100%;
+  background: hsl(0, 0%, 100%);
+  color: hsl(20, 14.3%, 4.1%);
+  transition: all 0.2s ease;
+  font-family: Inter, sans-serif;
+}
+
+.finix-payment__input::placeholder {
+  color: hsl(25, 5.3%, 44.7%);
+}
+
+.finix-payment__input:focus {
+  outline: none;
+  border-color: hsl(15, 84%, 58%);
+  box-shadow: 0 0 0 1px hsl(15, 84%, 58%);
+}
+
+.finix-payment__input--error {
+  border-color: hsl(0, 84.2%, 60.2%);
+  box-shadow: 0 0 0 1px hsl(0, 84.2%, 60.2%);
+}
+
+/* Label styling */
+.finix-payment__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(20, 14.3%, 4.1%);
+  margin-bottom: 6px;
+  display: block;
+  font-family: Inter, sans-serif;
+}
+
+/* Error message styling */
+.finix-payment__field--error .finix-payment__error-text {
+  color: hsl(0, 84.2%, 60.2%);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Button styling */
+.finix-payment__button {
+  background: hsl(15, 84%, 58%);
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(0, 0%, 100%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  font-family: Inter, sans-serif;
+}
+
+.finix-payment__button:hover {
+  background: hsl(15, 84%, 52%);
+}
+
+.finix-payment__button:disabled {
+  background: hsl(25, 5.3%, 44.7%);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Card component specific styling */
+.finix-payment__card {
+  width: 100%;
+}
+
+.finix-payment__card__cardNumber__input,
+.finix-payment__card__exp-date__input,
+.finix-payment__card__cvc__input {
+  border: 1px solid hsl(35, 100%, 90%);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  font-family: Inter, sans-serif;
+}
+
+/* Digital wallet buttons */
+.finix-payment__applepay__button,
+.finix-payment__googlepay__button {
+  border-radius: 8px;
+  margin-bottom: 12px;
+  min-height: 44px;
+  width: 100%;
+}
+
+/* Loading state */
+.finix-payment__spinner {
+  border-color: hsl(15, 84%, 58%);
+  border-top-color: transparent;
+}
+
+/* Hide Finix branding if needed */
+.finix-payment__payment-method__details__content
+  .finix-payment__payment-method__brand {
+  display: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .finix-payment__payment-method {
+    padding: 12px;
+  }
+
+  .finix-payment__input {
+    padding: 10px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .finix-payment__button {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}
+
+/* Focus states for accessibility */
+.finix-payment__input:focus-visible,
+.finix-payment__button:focus-visible {
+  outline: 2px solid hsl(15, 84%, 58%);
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .finix-payment__payment-method {
+    background: hsl(20, 14.3%, 4.1%);
+    border-color: hsl(24, 9.8%, 10%);
+  }
+
+  .finix-payment__input {
+    background: hsl(20, 14.3%, 4.1%);
+    color: hsl(60, 9.1%, 97.8%);
+    border-color: hsl(24, 9.8%, 10%);
+  }
+
+  .finix-payment__label {
+    color: hsl(60, 9.1%, 97.8%);
+  }
+}
