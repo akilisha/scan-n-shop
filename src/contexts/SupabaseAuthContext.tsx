@@ -248,8 +248,9 @@ export function SupabaseAuthProvider({
     signIn: handleSignIn,
     signUp: handleSignUp,
     signInWithGoogle: handleSignInWithGoogle,
-    signOut: handleSignOut,
+    signOut,
     updateUserProfile,
+    clearInvalidSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
