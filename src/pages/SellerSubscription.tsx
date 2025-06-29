@@ -139,19 +139,19 @@ export default function SellerSubscription() {
     setIsProcessing(true);
 
     try {
-      // Here you would integrate with Adyen for Platforms
-      // to create a connected account
+      // Here you would integrate with Finix
+      // to create a connected merchant account
 
       // For now, simulate the process and update user's seller access
       setTimeout(async () => {
         if (user) {
           // Update the user's seller access in the database
-          // This would normally be done after successful Adyen setup
+          // This would normally be done after successful Finix setup
           // For now we'll simulate it
 
           // You would call your backend API here to:
-          // 1. Create Adyen connected account
-          // 2. Store bank details securely
+          // 1. Create Finix merchant account
+          // 2. Store bank details securely with Finix
           // 3. Update user's has_seller_access to true
           // 4. Create subscription record
 
