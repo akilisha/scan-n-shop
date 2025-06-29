@@ -439,7 +439,7 @@ export default function Checkout() {
         ) : (
           /* No payment methods - show new card form */
           <>
-            <AdyenPaymentForm
+            <FinixPaymentForm
               amount={total}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
