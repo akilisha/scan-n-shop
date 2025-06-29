@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { SellerBottomNavigation } from "./SellerBottomNavigation";
 import { DemoButton } from "./DemoButton";
+import { DevelopmentNotice } from "./DevelopmentNotice";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { cn } from "@/lib/utils";
