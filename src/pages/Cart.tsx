@@ -436,6 +436,36 @@ export default function Cart() {
                 </CardContent>
               </Card>
 
+              <Card className="border-success/20 bg-gradient-to-r from-success/5 to-primary/5">
+                <CardContent className="p-4">
+                  <h3 className="font-medium mb-3 flex items-center">
+                    <Store size={16} className="mr-2 text-success" />
+                    Become a Seller on KerbDrop
+                  </h3>
+                  <div className="text-sm space-y-2 text-muted-foreground">
+                    <p>
+                      <strong>💰 Low fees:</strong> Just 2.9% + $0.30 per
+                      transaction
+                    </p>
+                    <p>
+                      <strong>🚀 Quick setup:</strong> Start selling in minutes
+                    </p>
+                    <p>
+                      <strong>📱 Built-in audience:</strong> Reach KerbDrop
+                      customers
+                    </p>
+                  </div>
+                  <Button
+                    className="w-full mt-3"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/seller/onboarding")}
+                  >
+                    Start Selling Today
+                  </Button>
+                </CardContent>
+              </Card>
+
               <Card className="border-primary/20">
                 <CardContent className="p-4">
                   <h3 className="font-medium mb-3 flex items-center">
