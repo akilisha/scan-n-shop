@@ -94,6 +94,8 @@ export default function StripeConnectOnboarding({
     setError(null);
 
     try {
+      console.log("🚀 Creating Stripe Express account...");
+
       // Create Stripe Express account
       const response = await fetch(
         "http://localhost:8000/api/stripe-connect/connect/create-express-account",
@@ -113,12 +115,20 @@ export default function StripeConnectOnboarding({
       );
 
       if (!response.ok) {
-        throw new Error("Failed to create Stripe account");
+        const errorText = await response.text();
+        console.error(
+          "❌ Stripe account creation failed:",
+          response.status,
+          errorText,
+        );
+        throw new Error(`Failed to create Stripe account: ${response.status}`);
       }
 
       const stripeAccountData = await response.json();
+      console.log("✅ Stripe account created:", stripeAccountData);
 
       // Save account to database
+      console.log("💾 Saving to database...");
       const { data: dbAccount, error: dbError } = await createConnectAccount(
         supabaseUser.id,
         {
@@ -135,9 +145,21 @@ export default function StripeConnectOnboarding({
       );
 
       if (dbError) {
-        console.error("Database error:", dbError);
-        throw new Error("Failed to save account data");
+        console.error("❌ Database error:", dbError);
+        // If database save fails, show helpful error
+        if (
+          dbError.message?.includes(
+            'relation "connect_accounts" does not exist',
+          )
+        ) {
+          throw new Error(
+            "Database not set up. Please run the database setup SQL first.",
+          );
+        }
+        throw new Error(`Database error: ${dbError.message}`);
       }
+
+      console.log("✅ Account saved to database:", dbAccount);
 
       setConnectAccount({
         ...dbAccount,
@@ -150,8 +172,25 @@ export default function StripeConnectOnboarding({
         onSuccess(stripeAccountData);
       }
     } catch (error: any) {
-      console.error("Account creation error:", error);
-      setError(error.message || "Failed to create seller account");
+      console.error("💥 Account creation error:", error);
+
+      // Show user-friendly error messages
+      let userMessage = error.message;
+      if (error.message?.includes("Database not set up")) {
+        userMessage =
+          "Database setup required. Please check the setup instructions.";
+      } else if (error.message?.includes("Failed to fetch")) {
+        userMessage =
+          "Cannot connect to backend server. Make sure it's running.";
+      } else if (
+        error.message?.includes("relation") &&
+        error.message?.includes("does not exist")
+      ) {
+        userMessage =
+          "Database tables not created yet. Please run the database setup first.";
+      }
+
+      setError(userMessage);
       if (onError) {
         onError(error);
       }
