@@ -1,540 +1,448 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Loader2,
+  Store,
+  DollarSign,
+  Shield,
   CheckCircle,
-  Clock,
   AlertTriangle,
   ExternalLink,
-  CreditCard,
-  Building2,
-  FileText,
-  Shield,
-  ArrowRight,
-  Loader2,
 } from "lucide-react";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import {
   createConnectAccount,
-  createAccountLink,
-  getConnectAccount,
-} from "@/lib/stripe";
-
-interface ConnectAccount {
-  id: string;
-  type: "express" | "standard";
-  business_type: "individual" | "company";
-  charges_enabled: boolean;
-  payouts_enabled: boolean;
-  details_submitted: boolean;
-  requirements: {
-    currently_due: string[];
-    eventually_due: string[];
-    past_due: string[];
-    pending_verification: string[];
-  };
-  capabilities: {
-    card_payments: "active" | "inactive" | "pending";
-    transfers: "active" | "inactive" | "pending";
-  };
-  created: number;
-}
+  getUserConnectAccount,
+  updateConnectAccount,
+} from "@/lib/stripe-connect";
 
 interface StripeConnectOnboardingProps {
-  userId: string;
-  onComplete: (accountId: string) => void;
-  onError: (error: any) => void;
-  existingAccountId?: string;
+  onSuccess?: (accountData: any) => void;
+  onError?: (error: any) => void;
 }
 
-const StripeConnectOnboarding: React.FC<StripeConnectOnboardingProps> = ({
-  userId,
-  onComplete,
+export default function StripeConnectOnboarding({
+  onSuccess,
   onError,
-  existingAccountId,
-}) => {
-  const [account, setAccount] = useState<ConnectAccount | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreating, setIsCreating] = useState(false);
+}: StripeConnectOnboardingProps) {
+  const { supabaseUser, user } = useSupabaseAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState(user?.email || "");
+  const [businessType, setBusinessType] = useState<"individual" | "company">(
+    "individual",
+  );
+  const [country, setCountry] = useState("US");
+  const [connectAccount, setConnectAccount] = useState<any>(null);
   const [onboardingUrl, setOnboardingUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (existingAccountId) {
-      loadAccount(existingAccountId);
-    } else {
-      setIsLoading(false);
+  // Load existing connect account on mount
+  React.useEffect(() => {
+    if (supabaseUser) {
+      loadExistingAccount();
     }
-  }, [existingAccountId]);
+  }, [supabaseUser]);
 
-  const loadAccount = async (accountId: string) => {
+  const loadExistingAccount = async () => {
+    if (!supabaseUser) return;
+
     try {
-      setIsLoading(true);
-      const accountData = await getConnectAccount(accountId);
-      setAccount(accountData);
-    } catch (error) {
-      console.error("Failed to load Connect account:", error);
-      onError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const createAccount = async (
-    accountType: "express" | "standard" = "express",
-    businessType: "individual" | "company" = "individual",
-  ) => {
-    try {
-      setIsCreating(true);
-      const accountData = await createConnectAccount(accountType, businessType);
-      setAccount(accountData);
-      await startOnboarding(accountData.id);
-    } catch (error) {
-      console.error("Failed to create Connect account:", error);
-      onError(error);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const startOnboarding = async (accountId: string) => {
-    try {
-      const refreshUrl = `${window.location.origin}/seller/onboarding?refresh=true`;
-      const returnUrl = `${window.location.origin}/seller/onboarding?success=true`;
-
-      const linkData = await createAccountLink(
-        accountId,
-        refreshUrl,
-        returnUrl,
-      );
-      setOnboardingUrl(linkData.url);
-    } catch (error) {
-      console.error("Failed to create onboarding link:", error);
-      onError(error);
-    }
-  };
-
-  const getAccountStatus = () => {
-    if (!account) return "not_started";
-
-    if (account.charges_enabled && account.payouts_enabled) {
-      return "active";
-    }
-
-    if (account.details_submitted) {
-      if (
-        account.requirements.currently_due.length > 0 ||
-        account.requirements.past_due.length > 0
-      ) {
-        return "restricted";
+      const { data, error } = await getUserConnectAccount(supabaseUser.id);
+      if (data && !error) {
+        setConnectAccount(data);
+        // Check account status with Stripe
+        await checkAccountStatus(data.stripe_account_id);
       }
-      return "pending";
-    }
-
-    return "incomplete";
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500";
-      case "pending":
-        return "bg-yellow-500";
-      case "restricted":
-        return "bg-red-500";
-      case "incomplete":
-        return "bg-orange-500";
-      default:
-        return "bg-gray-500";
+    } catch (error) {
+      console.error("Error loading connect account:", error);
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "active":
-        return "Active";
-      case "pending":
-        return "Under Review";
-      case "restricted":
-        return "Restricted";
-      case "incomplete":
-        return "Incomplete";
-      default:
-        return "Not Started";
+  const checkAccountStatus = async (stripeAccountId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/stripe-connect/connect/account/${stripeAccountId}`,
+      );
+      if (response.ok) {
+        const accountData = await response.json();
+        setConnectAccount((prev: any) => ({
+          ...prev,
+          ...accountData,
+        }));
+      }
+    } catch (error) {
+      console.error("Error checking account status:", error);
     }
   };
 
-  const calculateProgress = () => {
-    if (!account) return 0;
+  const createStripeAccount = async () => {
+    if (!supabaseUser || !email) return;
 
-    const status = getAccountStatus();
-    switch (status) {
-      case "active":
-        return 100;
-      case "pending":
-        return 80;
-      case "restricted":
-        return 60;
-      case "incomplete":
-        return 40;
-      default:
-        return 0;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Create Stripe Express account
+      const response = await fetch(
+        "http://localhost:8000/api/stripe-connect/connect/create-express-account",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            business_type: businessType,
+            country,
+            refresh_url: `${window.location.origin}/seller/onboarding?refresh=true`,
+            return_url: `${window.location.origin}/seller/onboarding?success=true`,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create Stripe account");
+      }
+
+      const stripeAccountData = await response.json();
+
+      // Save account to database
+      const { data: dbAccount, error: dbError } = await createConnectAccount(
+        supabaseUser.id,
+        {
+          stripe_account_id: stripeAccountData.account_id,
+          account_type: "express",
+          business_type: businessType,
+          country,
+          email,
+          charges_enabled: stripeAccountData.charges_enabled,
+          payouts_enabled: stripeAccountData.payouts_enabled,
+          details_submitted: stripeAccountData.details_submitted,
+          verification_status: "pending",
+        },
+      );
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        throw new Error("Failed to save account data");
+      }
+
+      setConnectAccount({
+        ...dbAccount,
+        ...stripeAccountData,
+      });
+
+      setOnboardingUrl(stripeAccountData.onboarding_url);
+
+      if (onSuccess) {
+        onSuccess(stripeAccountData);
+      }
+    } catch (error: any) {
+      console.error("Account creation error:", error);
+      setError(error.message || "Failed to create seller account");
+      if (onError) {
+        onError(error);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (isLoading) {
+  const generateAccountLink = async () => {
+    if (!connectAccount?.stripe_account_id) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/stripe-connect/connect/create-account-link",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            account_id: connectAccount.stripe_account_id,
+            refresh_url: `${window.location.origin}/seller/onboarding?refresh=true`,
+            return_url: `${window.location.origin}/seller/onboarding?success=true`,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate account link");
+      }
+
+      const { url } = await response.json();
+      setOnboardingUrl(url);
+    } catch (error: any) {
+      setError(error.message || "Failed to generate onboarding link");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAccountStatusBadge = () => {
+    if (!connectAccount) return null;
+
+    if (connectAccount.charges_enabled && connectAccount.payouts_enabled) {
+      return (
+        <Badge className="bg-success/10 text-success border-success/20">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Active
+        </Badge>
+      );
+    }
+
+    if (connectAccount.details_submitted) {
+      return (
+        <Badge className="bg-warning/10 text-warning border-warning/20">
+          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+          Under Review
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge variant="outline" className="border-orange-200">
+        <AlertTriangle className="h-3 w-3 mr-1" />
+        Setup Required
+      </Badge>
+    );
+  };
+
+  const calculateEstimatedEarnings = (saleAmount: number) => {
+    // KerbDrop fee: 2.9% + $0.30
+    const platformFee = saleAmount * 0.029 + 0.3;
+    const sellerReceives = saleAmount - platformFee;
+    return { platformFee, sellerReceives };
+  };
+
+  if (connectAccount && connectAccount.charges_enabled) {
+    const earnings = calculateEstimatedEarnings(100);
+
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Stripe Connect Setup
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Store className="h-5 w-5" />
+              <span>Seller Account</span>
+            </div>
+            {getAccountStatusBadge()}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2">Loading account information...</span>
+        <CardContent className="space-y-4">
+          <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <CheckCircle className="h-5 w-5 text-success" />
+              <span className="font-semibold text-success">Account Active</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Your seller account is fully set up and ready to receive payments.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-xs text-muted-foreground">Charges</div>
+              <div className="font-semibold text-success">Enabled</div>
+            </div>
+            <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-xs text-muted-foreground">Payouts</div>
+              <div className="font-semibold text-success">Enabled</div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Earnings Calculator</span>
+            </div>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <div>For every $100.00 sale:</div>
+              <div>• Platform fee: ${earnings.platformFee.toFixed(2)}</div>
+              <div>• You receive: ${earnings.sellerReceives.toFixed(2)}</div>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              window.open(
+                `http://localhost:8000/api/stripe-connect/connect/dashboard-link`,
+                "_blank",
+              )
+            }
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            View Stripe Dashboard
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (onboardingUrl) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Store className="h-5 w-5" />
+            <span>Complete Seller Setup</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              Complete your seller verification with Stripe to start receiving
+              payments. This is required by financial regulations.
+            </AlertDescription>
+          </Alert>
+
+          <div className="text-center space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Click the button below to complete your seller account setup with
+              our secure payment partner, Stripe.
+            </div>
+
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => window.open(onboardingUrl, "_blank")}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Complete Setup with Stripe
+            </Button>
+
+            <div className="text-xs text-muted-foreground">
+              This will open in a new window. After completing setup, return
+              here to start selling.
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  const status = getAccountStatus();
-
   return (
-    <div className="space-y-6">
-      {/* Account Status Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Payment Account Setup
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Connect your Stripe account to accept payments and manage
-            transactions
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Status Badge and Progress */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-3 h-3 rounded-full ${getStatusColor(status)}`}
-              />
-              <span className="font-medium">{getStatusText(status)}</span>
-              {account && (
-                <Badge variant="outline" className="text-xs">
-                  {account.type} account
-                </Badge>
-              )}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {calculateProgress()}% complete
-            </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <Store className="h-5 w-5" />
+          <span>Become a Seller</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Alert>
+          <DollarSign className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Platform Fee:</strong> 2.9% + $0.30 per transaction.
+            Competitive rates with instant payouts.
+          </AlertDescription>
+        </Alert>
+
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              required
+            />
           </div>
 
-          <Progress value={calculateProgress()} className="w-full" />
+          <div>
+            <Label htmlFor="businessType">Business Type</Label>
+            <Select
+              value={businessType}
+              onValueChange={(value: "individual" | "company") =>
+                setBusinessType(value)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="individual">Individual</SelectItem>
+                <SelectItem value="company">Company</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {/* Account Information */}
-          {account && (
-            <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-              <div>
-                <div className="text-sm font-medium">Account ID</div>
-                <div className="text-xs font-mono text-muted-foreground">
-                  {account.id}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm font-medium">Business Type</div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {account.business_type}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm font-medium">Charges</div>
-                <div className="text-xs">
-                  {account.charges_enabled ? (
-                    <span className="text-green-600 flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      Enabled
-                    </span>
-                  ) : (
-                    <span className="text-red-600 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      Disabled
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm font-medium">Payouts</div>
-                <div className="text-xs">
-                  {account.payouts_enabled ? (
-                    <span className="text-green-600 flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      Enabled
-                    </span>
-                  ) : (
-                    <span className="text-red-600 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      Disabled
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+          <div>
+            <Label htmlFor="country">Country</Label>
+            <Select value={country} onValueChange={setCountry}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="US">United States</SelectItem>
+                <SelectItem value="CA">Canada</SelectItem>
+                <SelectItem value="GB">United Kingdom</SelectItem>
+                <SelectItem value="AU">Australia</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="text-xs text-muted-foreground space-y-1">
+          <div>By continuing, you agree to:</div>
+          <div>
+            • Stripe's{" "}
+            <a
+              href="https://stripe.com/connect-account/legal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline"
+            >
+              Connected Account Agreement
+            </a>
+          </div>
+          <div>• KerbDrop's Terms of Service</div>
+        </div>
+
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={createStripeAccount}
+          disabled={isLoading || !email}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Creating Account...
+            </>
+          ) : (
+            <>
+              <Shield className="h-4 w-4 mr-2" />
+              Create Seller Account
+            </>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Onboarding Steps */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Setup Steps</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Step 1: Create Account */}
-            <div
-              className={`connect-onboarding-step ${
-                account
-                  ? "connect-onboarding-step--completed"
-                  : "connect-onboarding-step--current"
-              }`}
-            >
-              <div
-                className={`connect-onboarding-icon ${
-                  account
-                    ? "connect-onboarding-icon--completed"
-                    : "connect-onboarding-icon--current"
-                }`}
-              >
-                {account ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <Building2 className="h-4 w-4" />
-                )}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium">Create Stripe Account</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set up your Stripe Connect account for payment processing
-                </p>
-                {!account && (
-                  <div className="mt-3 space-x-2">
-                    <Button
-                      onClick={() => createAccount("express", "individual")}
-                      disabled={isCreating}
-                      size="sm"
-                    >
-                      {isCreating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating...
-                        </>
-                      ) : (
-                        <>
-                          Individual Account
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => createAccount("express", "company")}
-                      disabled={isCreating}
-                      size="sm"
-                    >
-                      Business Account
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Step 2: Complete Onboarding */}
-            <div
-              className={`connect-onboarding-step ${
-                account && account.details_submitted
-                  ? "connect-onboarding-step--completed"
-                  : account
-                    ? "connect-onboarding-step--current"
-                    : "connect-onboarding-step--pending"
-              }`}
-            >
-              <div
-                className={`connect-onboarding-icon ${
-                  account && account.details_submitted
-                    ? "connect-onboarding-icon--completed"
-                    : account
-                      ? "connect-onboarding-icon--current"
-                      : "connect-onboarding-icon--pending"
-                }`}
-              >
-                {account && account.details_submitted ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <FileText className="h-4 w-4" />
-                )}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium">Complete Information</h3>
-                <p className="text-sm text-muted-foreground">
-                  Provide required business and banking information
-                </p>
-                {account && !account.details_submitted && onboardingUrl && (
-                  <div className="mt-3">
-                    <Button asChild size="sm">
-                      <a
-                        href={onboardingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Continue Setup
-                        <ExternalLink className="ml-2 h-4 w-4" />
-                      </a>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Step 3: Verification */}
-            <div
-              className={`connect-onboarding-step ${
-                status === "active"
-                  ? "connect-onboarding-step--completed"
-                  : account && account.details_submitted
-                    ? "connect-onboarding-step--current"
-                    : "connect-onboarding-step--pending"
-              }`}
-            >
-              <div
-                className={`connect-onboarding-icon ${
-                  status === "active"
-                    ? "connect-onboarding-icon--completed"
-                    : account && account.details_submitted
-                      ? "connect-onboarding-icon--current"
-                      : "connect-onboarding-icon--pending"
-                }`}
-              >
-                {status === "active" ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <Shield className="h-4 w-4" />
-                )}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium">Account Verification</h3>
-                <p className="text-sm text-muted-foreground">
-                  Stripe reviews and activates your account for payments
-                </p>
-                {status === "pending" && (
-                  <div className="mt-2">
-                    <Badge variant="secondary" className="text-xs">
-                      <Clock className="mr-1 h-3 w-3" />
-                      Under Review (1-2 business days)
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Requirements and Issues */}
-      {account && account.requirements && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Requirements</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Currently Due */}
-              {account.requirements.currently_due.length > 0 && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Action Required:</strong> The following information
-                    is required to activate your account:
-                    <ul className="mt-2 list-disc list-inside text-sm">
-                      {account.requirements.currently_due.map((req) => (
-                        <li key={req} className="capitalize">
-                          {req.replace(/_/g, " ")}
-                        </li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Eventually Due */}
-              {account.requirements.eventually_due.length > 0 && (
-                <Alert>
-                  <Clock className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Eventually Required:</strong> The following
-                    information will be required in the future:
-                    <ul className="mt-2 list-disc list-inside text-sm">
-                      {account.requirements.eventually_due.map((req) => (
-                        <li key={req} className="capitalize">
-                          {req.replace(/_/g, " ")}
-                        </li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* No Issues */}
-              {account.requirements.currently_due.length === 0 &&
-                account.requirements.past_due.length === 0 && (
-                  <Alert className="border-green-200 bg-green-50">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">
-                      All required information has been provided. Your account
-                      is in good standing.
-                    </AlertDescription>
-                  </Alert>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Success State */}
-      {status === "active" && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-              <div>
-                <h3 className="text-lg font-semibold text-green-800">
-                  Account Setup Complete!
-                </h3>
-                <p className="text-sm text-green-700">
-                  Your Stripe account is active and ready to accept payments.
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={() => onComplete(account!.id)}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Continue to Dashboard
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        </Button>
+      </CardContent>
+    </Card>
   );
-};
-
-export default StripeConnectOnboarding;
+}
