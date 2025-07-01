@@ -29,6 +29,7 @@ interface StripePaymentFormStubProps {
   connectedAccountId?: string;
   showExpressCheckout?: boolean;
   customerEmail?: string;
+  isSetupIntent?: boolean;
 }
 
 // Test card numbers for Stripe testing
@@ -50,6 +51,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
   onError,
   connectedAccountId,
   customerEmail,
+  isSetupIntent = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [cardNumber, setCardNumber] = useState("4242424242424242");
@@ -107,7 +109,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
           id: paymentData.payment_intent_id,
           amount: paymentData.amount,
           currency: paymentData.currency,
-          status: "succeeded",
+          status: isSetupIntent ? "setup_succeeded" : "succeeded",
           payment_method: {
             card: {
               brand: testCard.brand.toLowerCase(),
@@ -118,7 +120,9 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
             type: "card",
           },
           created: Math.floor(Date.now() / 1000),
-          receipt_url: `https://pay.stripe.com/receipts/test_receipt_${Date.now()}`,
+          receipt_url: isSetupIntent
+            ? null
+            : `https://pay.stripe.com/receipts/test_receipt_${Date.now()}`,
           client_secret: paymentData.client_secret,
         };
 
@@ -290,12 +294,16 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing Test Payment...
+                {isSetupIntent
+                  ? "Adding Payment Method..."
+                  : "Processing Test Payment..."}
               </>
             ) : (
               <>
                 <Shield className="mr-2 h-4 w-4" />
-                Test Pay ${(amount / 100).toFixed(2)}
+                {isSetupIntent
+                  ? "Add Payment Method"
+                  : `Test Pay $${(amount / 100).toFixed(2)}`}
               </>
             )}
           </Button>
