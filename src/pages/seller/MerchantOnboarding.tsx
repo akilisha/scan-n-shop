@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Layout from "@/components/Layout";
+import { Layout } from "@/components/Layout";
 import StripeConnectOnboarding from "@/components/StripeConnectOnboarding";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
