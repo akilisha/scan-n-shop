@@ -62,56 +62,89 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
     event.preventDefault();
     setIsLoading(true);
 
-    // Simulate payment processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const testCard = TEST_CARDS[cardNumber as keyof typeof TEST_CARDS];
-
-    if (!testCard) {
-      onError({
-        message: "Invalid card number. Please use a test card number.",
-        type: "card_error",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    if (testCard.result === "success") {
-      // Simulate successful payment
-      const mockPaymentIntent = {
-        id: `pi_test_${Date.now()}`,
-        amount: amount,
-        currency: currency,
-        status: "succeeded",
-        payment_method: {
-          card: {
-            brand: testCard.brand.toLowerCase(),
-            last4: cardNumber.slice(-4),
-            exp_month: parseInt(expiry.split("/")[0]),
-            exp_year: parseInt("20" + expiry.split("/")[1]),
+    try {
+      // Call real backend to create payment intent
+      console.log("Creating payment intent with backend...");
+      const response = await fetch(
+        "http://localhost:8000/api/create-payment-intent",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-          type: "card",
+          body: JSON.stringify({
+            amount,
+            currency,
+            reference: `test_payment_${Date.now()}`,
+          }),
         },
-        created: Math.floor(Date.now() / 1000),
-        receipt_url: `https://pay.stripe.com/receipts/test_receipt_${Date.now()}`,
-      };
+      );
 
-      onSuccess(mockPaymentIntent);
-    } else {
-      // Simulate payment error
-      const errorMessages = {
-        declined: "Your card was declined.",
-        insufficient_funds: "Your card has insufficient funds.",
-        lost_card: "Your card was reported as lost.",
-        stolen_card: "Your card was reported as stolen.",
-      };
+      if (!response.ok) {
+        throw new Error("Failed to create payment intent");
+      }
 
+      const paymentData = await response.json();
+      console.log("Payment intent created:", paymentData);
+
+      // Simulate payment processing delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const testCard = TEST_CARDS[cardNumber as keyof typeof TEST_CARDS];
+
+      if (!testCard) {
+        onError({
+          message: "Invalid card number. Please use a test card number.",
+          type: "card_error",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (testCard.result === "success") {
+        // Use real payment intent data from backend
+        const mockPaymentIntent = {
+          id: paymentData.payment_intent_id,
+          amount: paymentData.amount,
+          currency: paymentData.currency,
+          status: "succeeded",
+          payment_method: {
+            card: {
+              brand: testCard.brand.toLowerCase(),
+              last4: cardNumber.slice(-4),
+              exp_month: parseInt(expiry.split("/")[0]),
+              exp_year: parseInt("20" + expiry.split("/")[1]),
+            },
+            type: "card",
+          },
+          created: Math.floor(Date.now() / 1000),
+          receipt_url: `https://pay.stripe.com/receipts/test_receipt_${Date.now()}`,
+          client_secret: paymentData.client_secret,
+        };
+
+        onSuccess(mockPaymentIntent);
+      } else {
+        // Simulate payment error
+        const errorMessages = {
+          declined: "Your card was declined.",
+          insufficient_funds: "Your card has insufficient funds.",
+          lost_card: "Your card was reported as lost.",
+          stolen_card: "Your card was reported as stolen.",
+        };
+
+        onError({
+          message:
+            errorMessages[testCard.result as keyof typeof errorMessages] ||
+            "Payment failed.",
+          type: "card_error",
+          decline_code: testCard.result,
+        });
+      }
+    } catch (apiError) {
+      console.error("Backend API error:", apiError);
       onError({
-        message:
-          errorMessages[testCard.result as keyof typeof errorMessages] ||
-          "Payment failed.",
-        type: "card_error",
-        decline_code: testCard.result,
+        message: "Failed to connect to payment processor. Please try again.",
+        type: "api_error",
       });
     }
 
