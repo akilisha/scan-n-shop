@@ -68,15 +68,29 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
       let paymentData;
 
       if (isSetupIntent) {
-        // For adding payment methods, we don't need to call the backend for payment
-        // Just simulate successful payment method addition
-        console.log("Setup intent mode - simulating payment method addition");
-        paymentData = {
-          payment_intent_id: `pm_test_${Date.now()}`,
-          amount: 0,
-          currency: currency,
-          client_secret: `setup_intent_${Date.now()}_secret`,
-        };
+        // For adding payment methods, call backend to create setup intent
+        console.log(
+          "Setup intent mode - creating setup intent with backend...",
+        );
+        const response = await fetch(
+          "http://localhost:8000/api/create-setup-intent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // customerId can be null for now, Stripe will handle guest customers
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to create setup intent");
+        }
+
+        paymentData = await response.json();
+        console.log("Setup intent created:", paymentData);
       } else {
         // Call real backend to create payment intent for actual payments
         console.log("Creating payment intent with backend...");
@@ -118,13 +132,16 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
       }
 
       if (testCard.result === "success") {
-        // Use real payment intent data from backend
-        const mockPaymentIntent = {
-          id: paymentData.payment_intent_id,
-          amount: paymentData.amount,
-          currency: paymentData.currency,
+        // Use real data from backend response
+        const mockResult = {
+          id: isSetupIntent
+            ? paymentData.setup_intent_id
+            : paymentData.payment_intent_id,
+          amount: isSetupIntent ? 0 : paymentData.amount,
+          currency: isSetupIntent ? currency : paymentData.currency,
           status: isSetupIntent ? "setup_succeeded" : "succeeded",
           payment_method: {
+            id: `pm_test_${Date.now()}`,
             card: {
               brand: testCard.brand.toLowerCase(),
               last4: cardNumber.slice(-4),
@@ -140,7 +157,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
           client_secret: paymentData.client_secret,
         };
 
-        onSuccess(mockPaymentIntent);
+        onSuccess(mockResult);
       } else {
         // Simulate payment error
         const errorMessages = {
