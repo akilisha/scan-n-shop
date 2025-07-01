@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS connect_accounts (
 );
 
 -- 2. Enhanced Orders Table (add seller support)
-ALTER TABLE orders 
+ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS seller_id UUID REFERENCES profiles(id),
 ADD COLUMN IF NOT EXISTS stripe_connect_account_id VARCHAR(255),
 ADD COLUMN IF NOT EXISTS application_fee DECIMAL(12,2),
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS referrals (
 );
 
 -- 5. Add Stripe fields to profiles
-ALTER TABLE profiles 
+ALTER TABLE profiles
 ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255),
 ADD COLUMN IF NOT EXISTS referral_code VARCHAR(12),
 ADD COLUMN IF NOT EXISTS referred_by VARCHAR(255),
@@ -96,9 +96,9 @@ CREATE POLICY connect_accounts_user_policy ON connect_accounts
 CREATE POLICY application_fees_order_policy ON application_fees
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM orders o 
-            WHERE o.id = application_fees.order_id 
-            AND (o.buyer_id = auth.uid()::uuid OR o.seller_id = auth.uid()::uuid)
+            SELECT 1 FROM orders o
+            WHERE o.id = application_fees.order_id
+            AND (o.user_id = auth.uid()::uuid OR o.seller_id = auth.uid()::uuid)
         )
     );
 
@@ -117,13 +117,13 @@ DECLARE
 BEGIN
     -- Get timestamp component
     timestamp_part := UPPER(TO_CHAR(EXTRACT(epoch FROM NOW())::INTEGER, 'FM000000')::VARCHAR);
-    
+
     -- Get user ID component (last 8 chars, uppercase)
     user_part := UPPER(RIGHT(REPLACE(user_id_param::TEXT, '-', ''), 8));
-    
+
     -- Combine: KERB + 4 chars timestamp + 4 chars user
     final_code := 'KERB' || RIGHT(timestamp_part, 4) || LEFT(user_part, 4);
-    
+
     RETURN final_code;
 END;
 $$ LANGUAGE plpgsql;
