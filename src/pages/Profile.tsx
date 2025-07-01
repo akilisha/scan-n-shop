@@ -466,6 +466,15 @@ export default function Profile() {
                 App Settings
               </Button>
               <Separator />
+              <Button
+                variant="outline"
+                className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                onClick={() => navigate("/seller/onboarding")}
+              >
+                <Store size={16} className="mr-2" />
+                Become a Seller
+              </Button>
+              <Separator />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
