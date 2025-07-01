@@ -2,6 +2,7 @@
   "name": "kerbdrop-app",
   "private": true,
   "version": "1.0.0",
+  "workspaces": ["backend"],
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,7 +16,9 @@
     "android:build": "npm run build && npx cap copy android && npx cap open android",
     "ios:dev": "npx cap run ios --livereload",
     "ios:build": "npm run build && npx cap copy ios && npx cap open ios",
-    "mobile:clean": "npx cap sync && npx cap copy"
+    "mobile:clean": "npx cap sync && npx cap copy",
+    "s:test": "npm run stripe:test -w backend",
+    "s:start": "npm start -w backend"
   },
   "dependencies": {
     "@adyen/adyen-web": "^6.18.0",
