@@ -99,9 +99,11 @@ export default function PaymentMethods() {
         {showAddForm && (
           <>
             <StripePaymentFormStub
-              amount={0}
+              amount={100}
+              currency="usd"
               onSuccess={handleAddCard}
               onError={handleError}
+              isSetupIntent={true}
             />
             <Button
               variant="outline"
