@@ -39,15 +39,6 @@ export function PaymentMethodsProvider({
   const effectivePaymentMethods =
     isDemoMode && !supabaseUser ? mockPaymentMethods : paymentMethods;
 
-  // Debug logging
-  console.log("PaymentMethodsContext debug:", {
-    isDemoMode,
-    hasSupabaseUser: !!supabaseUser,
-    paymentMethodsLength: paymentMethods.length,
-    effectivePaymentMethodsLength: effectivePaymentMethods.length,
-    mockDataShowing: isDemoMode && !supabaseUser,
-  });
-
   useEffect(() => {
     if (supabaseUser && !isDemoMode) {
       loadUserPaymentMethods();
