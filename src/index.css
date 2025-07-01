@@ -1,5 +1,5 @@
-/* Import Finix custom styles */
-@import "./styles/finix.css";
+/* Import Stripe custom styles */
+@import "./styles/stripe.css";
 
 /* Import Leaflet styles */
 @import "leaflet/dist/leaflet.css";
