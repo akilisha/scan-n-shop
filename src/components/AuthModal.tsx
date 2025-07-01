@@ -91,7 +91,16 @@ export function AuthModal({
       }
 
       if (result.error) {
-        setError(result.error.message);
+        // Check if this is a development configuration error
+        if (
+          result.error.message?.includes("configure real Supabase credentials")
+        ) {
+          setError(
+            "Development Mode: Authentication is disabled. Add real Supabase credentials to .env to enable authentication.",
+          );
+        } else {
+          setError(result.error.message);
+        }
       } else {
         // Success for login - close modal
         onClose();

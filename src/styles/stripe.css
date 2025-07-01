@@ -1,0 +1,254 @@
+/* Stripe Connect Elements Styling */
+
+.stripe-elements-container {
+  @apply space-y-4;
+}
+
+.stripe-element {
+  @apply w-full px-3 py-2 border border-border rounded-md bg-background;
+  @apply focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2;
+  @apply transition-colors duration-200;
+}
+
+.stripe-element--invalid {
+  @apply border-destructive;
+}
+
+.stripe-element--complete {
+  @apply border-green-500;
+}
+
+.stripe-element--focus {
+  @apply ring-2 ring-ring ring-offset-2;
+}
+
+/* Payment Element Container */
+.stripe-payment-element {
+  @apply w-full;
+}
+
+/* Express Checkout Element */
+.stripe-express-checkout-element {
+  @apply w-full mb-4;
+}
+
+/* Link Authentication Element */
+.stripe-link-authentication-element {
+  @apply w-full mb-4;
+}
+
+/* Address Element */
+.stripe-address-element {
+  @apply w-full;
+}
+
+/* Connect Account Status Indicators */
+.connect-account-status {
+  @apply flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium;
+}
+
+.connect-account-status--pending {
+  @apply bg-yellow-50 text-yellow-800 border border-yellow-200;
+}
+
+.connect-account-status--active {
+  @apply bg-green-50 text-green-800 border border-green-200;
+}
+
+.connect-account-status--restricted {
+  @apply bg-red-50 text-red-800 border border-red-200;
+}
+
+.connect-account-status--inactive {
+  @apply bg-gray-50 text-gray-800 border border-gray-200;
+}
+
+/* Connect Onboarding Flow */
+.connect-onboarding-container {
+  @apply max-w-2xl mx-auto p-6;
+}
+
+.connect-onboarding-step {
+  @apply flex items-start gap-4 p-6 border border-border rounded-lg;
+}
+
+.connect-onboarding-step--current {
+  @apply border-primary bg-primary/5;
+}
+
+.connect-onboarding-step--completed {
+  @apply border-green-500 bg-green-50;
+}
+
+.connect-onboarding-icon {
+  @apply flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center;
+}
+
+.connect-onboarding-icon--current {
+  @apply bg-primary text-primary-foreground;
+}
+
+.connect-onboarding-icon--completed {
+  @apply bg-green-500 text-white;
+}
+
+.connect-onboarding-icon--pending {
+  @apply bg-muted text-muted-foreground;
+}
+
+/* Referral System Styling */
+.referral-card {
+  @apply bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6;
+}
+
+.referral-code {
+  @apply font-mono text-lg font-bold bg-background border border-border rounded-md px-3 py-2;
+  @apply tracking-wider text-center;
+}
+
+.referral-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6;
+}
+
+.referral-stat-card {
+  @apply bg-card border border-border rounded-lg p-4 text-center;
+}
+
+.referral-stat-value {
+  @apply text-2xl font-bold text-primary;
+}
+
+.referral-stat-label {
+  @apply text-sm text-muted-foreground mt-1;
+}
+
+/* Copy to Clipboard Animation */
+.copy-success {
+  @apply transition-all duration-200 scale-105;
+}
+
+/* Payment Method Cards */
+.payment-method-card {
+  @apply border border-border rounded-lg p-4 hover:border-primary/50;
+  @apply transition-colors duration-200 cursor-pointer;
+}
+
+.payment-method-card--selected {
+  @apply border-primary bg-primary/5;
+}
+
+.payment-method-brand {
+  @apply text-xs uppercase font-semibold text-muted-foreground;
+}
+
+.payment-method-last4 {
+  @apply font-mono text-sm;
+}
+
+/* Subscription Cards */
+.subscription-card {
+  @apply border border-border rounded-lg p-6;
+}
+
+.subscription-card--active {
+  @apply border-green-500 bg-green-50;
+}
+
+.subscription-card--canceled {
+  @apply border-red-500 bg-red-50;
+}
+
+.subscription-card--past_due {
+  @apply border-yellow-500 bg-yellow-50;
+}
+
+/* Loading States */
+.stripe-loading {
+  @apply animate-pulse;
+}
+
+.stripe-loading-element {
+  @apply h-10 bg-muted rounded-md;
+}
+
+/* Error States */
+.stripe-error {
+  @apply text-destructive text-sm mt-2;
+}
+
+.stripe-error-container {
+  @apply border border-destructive bg-destructive/10 rounded-md p-3;
+}
+
+/* Success States */
+.stripe-success {
+  @apply text-green-600 text-sm mt-2;
+}
+
+.stripe-success-container {
+  @apply border border-green-500 bg-green-50 rounded-md p-3;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 640px) {
+  .connect-onboarding-container {
+    @apply p-4;
+  }
+
+  .connect-onboarding-step {
+    @apply p-4;
+  }
+
+  .referral-stats-grid {
+    @apply grid-cols-1;
+  }
+
+  .referral-code {
+    @apply text-base;
+  }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  .connect-account-status--pending {
+    @apply bg-yellow-900/50 text-yellow-200 border-yellow-700;
+  }
+
+  .connect-account-status--active {
+    @apply bg-green-900/50 text-green-200 border-green-700;
+  }
+
+  .connect-account-status--restricted {
+    @apply bg-red-900/50 text-red-200 border-red-700;
+  }
+
+  .subscription-card--active {
+    @apply border-green-700 bg-green-900/20;
+  }
+
+  .subscription-card--canceled {
+    @apply border-red-700 bg-red-900/20;
+  }
+
+  .subscription-card--past_due {
+    @apply border-yellow-700 bg-yellow-900/20;
+  }
+}
+
+/* Custom Stripe Element Overrides */
+.StripeElement {
+  @apply w-full px-3 py-2 border border-border rounded-md bg-background;
+  @apply focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2;
+}
+
+.StripeElement--invalid {
+  @apply border-destructive;
+}
+
+.StripeElement--complete {
+  @apply border-green-500;
+}
+
+.StripeElement--focus {
+  @apply ring-2 ring-ring ring-offset-2;
+}

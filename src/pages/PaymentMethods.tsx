@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { FinixPaymentForm } from "@/components/FinixPaymentFormStub";
+import StripePaymentFormStub from "@/components/StripePaymentFormStub";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,7 +98,7 @@ export default function PaymentMethods() {
         {/* Add Payment Method Form */}
         {showAddForm && (
           <>
-            <FinixPaymentForm
+            <StripePaymentFormStub
               amount={0}
               onSuccess={handleAddCard}
               onError={handleError}
