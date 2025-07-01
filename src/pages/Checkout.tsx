@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { AuthModal } from "@/components/AuthModal";
-import StripePaymentFormStub from "@/components/StripePaymentFormStub";
+import StripePaymentForm from "@/components/StripePaymentForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -439,7 +439,7 @@ export default function Checkout() {
         ) : (
           /* No payment methods - show new card form */
           <>
-            <StripePaymentFormStub
+            <StripePaymentForm
               amount={total}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
