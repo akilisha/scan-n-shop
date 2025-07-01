@@ -65,29 +65,43 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
     setIsLoading(true);
 
     try {
-      // Call real backend to create payment intent
-      console.log("Creating payment intent with backend...");
-      const response = await fetch(
-        "http://localhost:8000/api/create-payment-intent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      let paymentData;
+
+      if (isSetupIntent) {
+        // For adding payment methods, we don't need to call the backend for payment
+        // Just simulate successful payment method addition
+        console.log("Setup intent mode - simulating payment method addition");
+        paymentData = {
+          payment_intent_id: `pm_test_${Date.now()}`,
+          amount: 0,
+          currency: currency,
+          client_secret: `setup_intent_${Date.now()}_secret`,
+        };
+      } else {
+        // Call real backend to create payment intent for actual payments
+        console.log("Creating payment intent with backend...");
+        const response = await fetch(
+          "http://localhost:8000/api/create-payment-intent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount,
+              currency,
+              reference: `test_payment_${Date.now()}`,
+            }),
           },
-          body: JSON.stringify({
-            amount,
-            currency,
-            reference: `test_payment_${Date.now()}`,
-          }),
-        },
-      );
+        );
 
-      if (!response.ok) {
-        throw new Error("Failed to create payment intent");
+        if (!response.ok) {
+          throw new Error("Failed to create payment intent");
+        }
+
+        paymentData = await response.json();
+        console.log("Payment intent created:", paymentData);
       }
-
-      const paymentData = await response.json();
-      console.log("Payment intent created:", paymentData);
 
       // Simulate payment processing delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
