@@ -312,27 +312,45 @@ export default function PaymentHistoryPage() {
                           <Separator className="my-3" />
                           <div className="space-y-2">
                             <p className="text-sm font-medium">Items</p>
-                            {payment.items.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center space-x-3"
-                              >
-                                <img
-                                  src={item.product.image}
-                                  alt={item.product.name}
-                                  className="w-10 h-10 object-cover rounded"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">
-                                    {item.product.name}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Qty: {item.quantity} • $
-                                    {item.product.price.toFixed(2)} each
-                                  </p>
+                            {payment.items.map((item, index) => {
+                              // Handle different item structures safely
+                              const product = item.product || item;
+                              const itemName =
+                                product.name ||
+                                product.product_name ||
+                                "Unknown Item";
+                              const itemImage =
+                                product.image ||
+                                "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop";
+                              const itemPrice = product.price || 0;
+                              const itemQuantity = item.quantity || 1;
+
+                              return (
+                                <div
+                                  key={item.id || index}
+                                  className="flex items-center space-x-3"
+                                >
+                                  <img
+                                    src={itemImage}
+                                    alt={itemName}
+                                    className="w-10 h-10 object-cover rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.src =
+                                        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop";
+                                    }}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">
+                                      {itemName}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      Qty: {itemQuantity} • $
+                                      {itemPrice.toFixed(2)} each
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </>
                       )}
