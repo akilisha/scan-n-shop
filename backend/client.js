@@ -1,3 +1,6 @@
+// Load environment variables
+require("dotenv").config();
+
 // Require the Stripe SDK
 const Stripe = require("stripe");
 
