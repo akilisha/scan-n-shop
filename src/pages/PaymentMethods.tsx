@@ -28,6 +28,7 @@ export default function PaymentMethods() {
   const {
     paymentMethods,
     loading,
+    addUserPaymentMethod,
     deleteUserPaymentMethod,
     setUserDefaultPaymentMethod,
   } = usePaymentMethods();
@@ -36,13 +37,46 @@ export default function PaymentMethods() {
   );
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleAddCard = (result: any) => {
-    setSuccess("Payment method added successfully!");
-    setShowAddForm(false);
+  const handleAddCard = async (result: any) => {
+    try {
+      // Extract payment method details from the result
+      const paymentMethodData = {
+        type: "card" as const,
+        last4: result.payment_method?.card?.last4 || "0000",
+        brand: result.payment_method?.card?.brand || "unknown",
+        expiryMonth: result.payment_method?.card?.exp_month || 12,
+        expiryYear: result.payment_method?.card?.exp_year || 2030,
+        nickname: `${result.payment_method?.card?.brand?.toUpperCase() || "CARD"} ••••${result.payment_method?.card?.last4 || "0000"}`,
+        isDefault: paymentMethods.length === 0, // Make first card default
+      };
+
+      // Add to backend/database
+      const { error } = await addUserPaymentMethod(paymentMethodData);
+
+      if (error) {
+        setSuccess(`Error adding payment method: ${error.message}`);
+      } else {
+        setSuccess("Payment method added successfully!");
+        setShowAddForm(false);
+
+        // If user came from checkout, redirect back
+        const fromCheckout = searchParams.get("from") === "checkout";
+        if (fromCheckout) {
+          setTimeout(() => navigate("/checkout"), 1500);
+        }
+      }
+    } catch (error) {
+      console.error("Error adding payment method:", error);
+      setSuccess("Failed to add payment method. Please try again.");
+    }
+
+    setTimeout(() => setSuccess(null), 3000);
   };
 
   const handleError = (error: any) => {
     console.error("Payment method error:", error);
+    setSuccess(`Error: ${error.message || "Payment method addition failed"}`);
+    setTimeout(() => setSuccess(null), 3000);
   };
 
   const deletePaymentMethod = async (id: string) => {
@@ -63,18 +97,6 @@ export default function PaymentMethods() {
       setSuccess("Default payment method updated");
     }
     setTimeout(() => setSuccess(null), 3000);
-  };
-
-  const handlePaymentSuccess = () => {
-    setShowAddForm(false);
-    setSuccess("Payment method added successfully");
-    setTimeout(() => setSuccess(null), 3000);
-
-    // If user came from checkout, redirect back
-    const fromCheckout = searchParams.get("from") === "checkout";
-    if (fromCheckout) {
-      setTimeout(() => navigate("/checkout"), 1500);
-    }
   };
 
   const headerContent = (
@@ -99,7 +121,7 @@ export default function PaymentMethods() {
         {showAddForm && (
           <>
             <StripePaymentFormStub
-              amount={100}
+              amount={0}
               currency="usd"
               onSuccess={handleAddCard}
               onError={handleError}
