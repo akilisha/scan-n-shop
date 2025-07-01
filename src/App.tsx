@@ -21,6 +21,8 @@ import SellerSubscription from "./pages/SellerSubscription";
 import AuthCallback from "./pages/AuthCallback";
 import DiscoverNearby from "./pages/DiscoverNearby";
 import EventManager from "./pages/seller/EventManager";
+import Referrals from "./pages/Referrals";
+import MerchantOnboarding from "./pages/seller/MerchantOnboarding";
 
 // Seller Mode Pages
 import SellerDashboard from "./pages/seller/Dashboard";
@@ -69,6 +71,7 @@ const App = () => (
                       element={<SellerSubscription />}
                     />
                     <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/referrals" element={<Referrals />} />
 
                     {/* Location-Based Discovery Routes */}
                     <Route path="/discover" element={<DiscoverNearby />} />
@@ -93,6 +96,10 @@ const App = () => (
                       element={<PaymentManagement />}
                     />
                     <Route path="/seller/events" element={<EventManager />} />
+                    <Route
+                      path="/seller/onboarding"
+                      element={<MerchantOnboarding />}
+                    />
 
                     {/* Value-Added Service Management Routes */}
                     <Route
