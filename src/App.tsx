@@ -64,6 +64,11 @@ const App = () => (
                       path="/payment-history"
                       element={<PaymentHistory />}
                     />
+                    <Route path="/order-details" element={<OrderDetails />} />
+                    <Route
+                      path="/order-details/:orderId"
+                      element={<OrderDetails />}
+                    />
                     <Route path="/subscriptions" element={<Plans />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />
