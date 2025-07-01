@@ -439,7 +439,7 @@ export default function Checkout() {
         ) : (
           /* No payment methods - show new card form */
           <>
-            <FinixPaymentForm
+            <StripePaymentFormStub
               amount={total}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
