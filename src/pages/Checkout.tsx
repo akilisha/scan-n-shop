@@ -290,7 +290,11 @@ export default function Checkout() {
           <div className="w-full space-y-3">
             <Button
               className="w-full"
-              onClick={() => navigate("/payment-history")}
+              onClick={() =>
+                navigate("/order-details", {
+                  state: { orderData: completedOrder },
+                })
+              }
             >
               View Order Details
             </Button>
