@@ -370,7 +370,7 @@ export default function Checkout() {
                     </div>
                     <div>
                       <p className="font-medium">
-                        {method.brand?.toUpperCase()} ���•••{method.last4}
+                        {method.brand?.toUpperCase()} ••••{method.last4}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {method.nickname ||
