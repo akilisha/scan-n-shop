@@ -397,7 +397,18 @@ export default function StripeConnectOnboarding({
       <CardContent className="space-y-4">
         {error && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>
+              {error}
+              {error.includes("Database") && (
+                <div className="mt-2 text-sm">
+                  <strong>Setup Required:</strong> Run the SQL from{" "}
+                  <code className="bg-background px-1 rounded">
+                    QUICK_DB_SETUP.sql
+                  </code>{" "}
+                  in your Supabase SQL Editor first.
+                </div>
+              )}
+            </AlertDescription>
           </Alert>
         )}
 
