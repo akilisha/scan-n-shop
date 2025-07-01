@@ -11,24 +11,51 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // First, try to get the session from the URL hash
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
           console.error("Auth callback error:", error);
-          navigate("/?auth=error");
+          navigate("/?auth=error&message=" + encodeURIComponent(error.message));
           return;
         }
 
         if (data.session) {
           // Successfully authenticated
+          console.log("Authentication successful, redirecting to home");
           navigate("/?auth=success");
         } else {
-          // No session, redirect to login
+          // Try to handle the callback from URL parameters
+          const hashParams = new URLSearchParams(
+            window.location.hash.substring(1),
+          );
+          const urlParams = new URLSearchParams(window.location.search);
+
+          // Check for error in URL
+          const error_code = hashParams.get("error") || urlParams.get("error");
+          const error_description =
+            hashParams.get("error_description") ||
+            urlParams.get("error_description");
+
+          if (error_code) {
+            console.error("OAuth error:", error_code, error_description);
+            navigate(
+              "/?auth=error&message=" +
+                encodeURIComponent(error_description || error_code),
+            );
+            return;
+          }
+
+          // No session and no error, likely cancelled
+          console.log("No session found, redirecting as cancelled");
           navigate("/?auth=cancelled");
         }
       } catch (error) {
-        console.error("Unexpected error:", error);
-        navigate("/?auth=error");
+        console.error("Unexpected error in auth callback:", error);
+        navigate(
+          "/?auth=error&message=" +
+            encodeURIComponent("Unexpected authentication error"),
+        );
       }
     };
 
