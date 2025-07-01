@@ -179,7 +179,9 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
-          Payment Information (Test Mode)
+          {isSetupIntent
+            ? "Add Payment Method (Test Mode)"
+            : "Payment Information (Test Mode)"}
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
@@ -202,9 +204,11 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
         <Alert className="mb-6 border-blue-200 bg-blue-50">
           <AlertTriangle className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
-            <strong>Development Mode:</strong> This is a test payment form. No
-            real charges will be made. Use the test card numbers below or enter
-            custom test cards.
+            <strong>Development Mode:</strong>{" "}
+            {isSetupIntent
+              ? "This will add a test payment method. No charges will be made."
+              : "This is a test payment form that calls your real backend API. No real charges will be made."}{" "}
+            Use the test card numbers below or enter custom test cards.
           </AlertDescription>
         </Alert>
 
