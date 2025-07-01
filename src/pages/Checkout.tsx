@@ -25,6 +25,7 @@ export default function Checkout() {
     step: "cart",
     processing: false,
   });
+  const [completedOrder, setCompletedOrder] = useState<any>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<any>(null);
 
@@ -65,15 +66,28 @@ export default function Checkout() {
 
   const handlePaymentSuccess = async (paymentMethodDetails?: any) => {
     try {
+      // Use payment method details from callback if available, otherwise fall back to selected method
+      const usedPaymentMethod =
+        paymentMethodDetails ||
+        selectedPaymentMethod ||
+        paymentMethods.find((method) => method.isDefault) ||
+        paymentMethods[0];
+
+      // Store order data for confirmation page BEFORE clearing cart
+      const orderSummary = {
+        items: cartItems.map((item) => ({
+          id: item.id,
+          product: item.product,
+          quantity: item.quantity,
+        })),
+        subtotal: getSubtotal(),
+        tax: getSubtotal() * 0.08,
+        total: getTotal(),
+        paymentMethod: usedPaymentMethod,
+      };
+
       // Save order to database if user is authenticated
       if (supabaseUser && cartItems.length > 0) {
-        // Use payment method details from callback if available, otherwise fall back to selected method
-        const usedPaymentMethod =
-          paymentMethodDetails ||
-          selectedPaymentMethod ||
-          paymentMethods.find((method) => method.isDefault) ||
-          paymentMethods[0];
-
         const orderData = {
           total_amount: getTotal(),
           payment_method: {
@@ -99,12 +113,21 @@ export default function Checkout() {
         }
       }
 
-      // Clear the cart after successful payment
+      // Store completed order data and clear the cart
+      setCompletedOrder(orderSummary);
       clearCart();
       setCheckoutState({ step: "confirmation", processing: false });
     } catch (error) {
       console.error("Error processing payment success:", error);
       // Still proceed with success flow
+      const orderSummary = {
+        items: cartItems,
+        subtotal: getSubtotal(),
+        tax: getSubtotal() * 0.08,
+        total: getTotal(),
+        paymentMethod: selectedPaymentMethod,
+      };
+      setCompletedOrder(orderSummary);
       clearCart();
       setCheckoutState({ step: "confirmation", processing: false });
     }
@@ -233,7 +256,7 @@ export default function Checkout() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {cartItems.map((item) => (
+                {completedOrder?.items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span>
                       {item.product.name} × {item.quantity}
@@ -244,9 +267,21 @@ export default function Checkout() {
                   </div>
                 ))}
                 <Separator />
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span className="text-primary">${total.toFixed(2)}</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span>${completedOrder?.subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Tax</span>
+                    <span>${completedOrder?.tax.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total</span>
+                    <span className="text-primary">
+                      ${completedOrder?.total.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>

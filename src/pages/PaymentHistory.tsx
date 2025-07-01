@@ -148,7 +148,7 @@ export default function PaymentHistoryPage() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate("/payment-methods")}
+        onClick={() => navigate("/")}
         className="p-2"
       >
         <ArrowLeft size={20} />
