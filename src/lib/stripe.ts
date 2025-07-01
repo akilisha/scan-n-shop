@@ -79,18 +79,22 @@ export const createPaymentIntent = async (
   connectedAccountId?: string,
 ) => {
   try {
-    const response = await fetch("/api/payments/create-payment-intent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    // Use the backend server running on port 8000
+    const response = await fetch(
+      "http://localhost:8000/api/create-payment-intent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: amount * 100, // Stripe expects amount in cents
+          currency,
+          reference,
+          connectedAccountId,
+        }),
       },
-      body: JSON.stringify({
-        amount: amount * 100, // Stripe expects amount in cents
-        currency,
-        reference,
-        connectedAccountId,
-      }),
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Failed to create payment intent");
