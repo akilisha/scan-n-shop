@@ -19,6 +19,7 @@ import {
   Wifi,
   WifiOff,
   MapPin,
+  Store,
 } from "lucide-react";
 import { mockProducts } from "@/data/mockData";
 import { Product } from "@/types";
