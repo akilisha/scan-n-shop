@@ -66,29 +66,51 @@ export default function PaymentHistoryPage() {
 
       // Convert orders to payment history format
       const convertedPayments: PaymentHistory[] = (data || []).map((order) => {
-        // Safely access payment method properties
-        const paymentMethod = order.payment_method || {};
+        try {
+          // Safely access payment method properties
+          const paymentMethod = order.payment_method || {};
 
-        return {
-          id: order.id,
-          amount: order.total_amount || 0,
-          currency: "usd",
-          status:
-            order.status === "completed"
-              ? "succeeded"
-              : (order.status as PaymentHistory["status"]),
-          description: `Order #${order.id ? order.id.slice(0, 8) : "unknown"}`,
-          date: new Date(order.created_at || Date.now()),
-          paymentMethod: {
-            id: paymentMethod.id || "unknown",
-            type: paymentMethod.type || "card",
-            brand: paymentMethod.brand || "unknown",
-            last4: paymentMethod.last4 || "****",
-            isDefault: false,
-          },
-          items: order.items || [],
-          receiptUrl: null,
-        };
+          return {
+            id: order.id || `order_${Date.now()}`,
+            amount: order.total_amount || 0,
+            currency: "usd",
+            status:
+              order.status === "completed"
+                ? "succeeded"
+                : (order.status as PaymentHistory["status"]),
+            description: `Order #${order.id ? order.id.slice(0, 8) : "unknown"}`,
+            date: new Date(order.created_at || Date.now()),
+            paymentMethod: {
+              id: paymentMethod.id || "unknown",
+              type: paymentMethod.type || "card",
+              brand: paymentMethod.brand || "unknown",
+              last4: paymentMethod.last4 || "****",
+              isDefault: false,
+            },
+            items: Array.isArray(order.items) ? order.items : [],
+            receiptUrl: null,
+          };
+        } catch (itemError) {
+          console.error("Error processing order item:", itemError, order);
+          // Return a safe fallback order
+          return {
+            id: order.id || `order_${Date.now()}`,
+            amount: order.total_amount || 0,
+            currency: "usd",
+            status: "succeeded",
+            description: "Order",
+            date: new Date(),
+            paymentMethod: {
+              id: "unknown",
+              type: "card",
+              brand: "unknown",
+              last4: "****",
+              isDefault: false,
+            },
+            items: [],
+            receiptUrl: null,
+          };
+        }
       });
 
       setPayments(convertedPayments);
