@@ -28,13 +28,14 @@ if (isDevelopmentFallback) {
   console.warn("   Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY");
 }
 
-// Use fallback values for development to prevent crashes
+// Use minimal fallback values for development to prevent crashes
+// These are non-functional but valid-looking URLs to prevent network errors
 const finalUrl = isDevelopmentFallback
-  ? "https://demo.supabase.co"
+  ? "https://localhost:54321"
   : supabaseUrl;
 
 const finalKey = isDevelopmentFallback
-  ? "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbW8iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY0NTU2NzAxMCwiZXhwIjoxOTYxMTQzMDEwfQ.demo"
+  ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDU1NjcwMTB9.demo_key_that_wont_work"
   : supabaseAnonKey;
 
 // Export flag for other components to know if we're using fallback credentials
@@ -167,6 +168,18 @@ export const signUp = async (
   password: string,
   fullName: string,
 ) => {
+  // Prevent actual auth attempts when using fallback credentials
+  if (isUsingFallbackCredentials) {
+    return {
+      data: null,
+      error: {
+        message:
+          "Please configure real Supabase credentials in .env to enable authentication",
+        status: 400,
+      },
+    };
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -180,6 +193,18 @@ export const signUp = async (
 };
 
 export const signIn = async (email: string, password: string) => {
+  // Prevent actual auth attempts when using fallback credentials
+  if (isUsingFallbackCredentials) {
+    return {
+      data: null,
+      error: {
+        message:
+          "Please configure real Supabase credentials in .env to enable authentication",
+        status: 400,
+      },
+    };
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -188,6 +213,18 @@ export const signIn = async (email: string, password: string) => {
 };
 
 export const signInWithGoogle = async () => {
+  // Prevent actual auth attempts when using fallback credentials
+  if (isUsingFallbackCredentials) {
+    return {
+      data: null,
+      error: {
+        message:
+          "Please configure real Supabase credentials in .env to enable authentication",
+        status: 400,
+      },
+    };
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
