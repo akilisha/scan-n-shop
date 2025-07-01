@@ -24,6 +24,7 @@ import DiscoverNearby from "./pages/DiscoverNearby";
 import EventManager from "./pages/seller/EventManager";
 import Referrals from "./pages/Referrals";
 import MerchantOnboarding from "./pages/seller/MerchantOnboarding";
+import SellerOnboarding from "./pages/seller/SellerOnboarding";
 
 // Seller Mode Pages
 import SellerDashboard from "./pages/seller/Dashboard";
@@ -104,7 +105,7 @@ const App = () => (
                     <Route path="/seller/events" element={<EventManager />} />
                     <Route
                       path="/seller/onboarding"
-                      element={<MerchantOnboarding />}
+                      element={<SellerOnboarding />}
                     />
 
                     {/* Value-Added Service Management Routes */}
