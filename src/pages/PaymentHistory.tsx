@@ -60,26 +60,31 @@ export default function PaymentHistoryPage() {
       }
 
       // Convert orders to payment history format
-      const convertedPayments: PaymentHistory[] = (data || []).map((order) => ({
-        id: order.id,
-        amount: order.total_amount,
-        currency: "usd",
-        status:
-          order.status === "completed"
-            ? "succeeded"
-            : (order.status as PaymentHistory["status"]),
-        description: `Order #${order.id.slice(0, 8)}`,
-        date: new Date(order.created_at),
-        paymentMethod: {
-          id: order.payment_method.id || "unknown",
-          type: order.payment_method.type || "card",
-          brand: order.payment_method.brand || "unknown",
-          last4: order.payment_method.last4 || "****",
-          isDefault: false,
-        },
-        items: order.items || [],
-        receiptUrl: null,
-      }));
+      const convertedPayments: PaymentHistory[] = (data || []).map((order) => {
+        // Safely access payment method properties
+        const paymentMethod = order.payment_method || {};
+
+        return {
+          id: order.id,
+          amount: order.total_amount || 0,
+          currency: "usd",
+          status:
+            order.status === "completed"
+              ? "succeeded"
+              : (order.status as PaymentHistory["status"]),
+          description: `Order #${order.id ? order.id.slice(0, 8) : "unknown"}`,
+          date: new Date(order.created_at || Date.now()),
+          paymentMethod: {
+            id: paymentMethod.id || "unknown",
+            type: paymentMethod.type || "card",
+            brand: paymentMethod.brand || "unknown",
+            last4: paymentMethod.last4 || "****",
+            isDefault: false,
+          },
+          items: order.items || [],
+          receiptUrl: null,
+        };
+      });
 
       setPayments(convertedPayments);
     } catch (error) {
