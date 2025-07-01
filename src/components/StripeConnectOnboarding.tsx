@@ -64,9 +64,18 @@ export default function StripeConnectOnboarding({
         setConnectAccount(data);
         // Check account status with Stripe
         await checkAccountStatus(data.stripe_account_id);
+      } else if (
+        error &&
+        error.message?.includes('relation "connect_accounts" does not exist')
+      ) {
+        console.warn(
+          "📋 Database tables not set up yet. This is expected for first-time setup.",
+        );
+        // Don't show error to user, just log it
       }
     } catch (error) {
       console.error("Error loading connect account:", error);
+      // Don't show database errors to user unless critical
     }
   };
 
