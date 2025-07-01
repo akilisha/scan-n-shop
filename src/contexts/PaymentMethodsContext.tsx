@@ -35,10 +35,9 @@ export function PaymentMethodsProvider({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Use mock data in demo mode, real data for authenticated users
-  const effectivePaymentMethods = isDemoMode
-    ? mockPaymentMethods
-    : paymentMethods;
+  // Use mock data only in demo mode AND when user is not authenticated
+  const effectivePaymentMethods =
+    isDemoMode && !supabaseUser ? mockPaymentMethods : paymentMethods;
 
   useEffect(() => {
     if (supabaseUser && !isDemoMode) {
