@@ -29,6 +29,7 @@ interface StripePaymentFormStubProps {
   connectedAccountId?: string;
   showExpressCheckout?: boolean;
   customerEmail?: string;
+  isSetupIntent?: boolean;
 }
 
 // Test card numbers for Stripe testing
@@ -50,6 +51,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
   onError,
   connectedAccountId,
   customerEmail,
+  isSetupIntent = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [cardNumber, setCardNumber] = useState("4242424242424242");
@@ -63,29 +65,43 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
     setIsLoading(true);
 
     try {
-      // Call real backend to create payment intent
-      console.log("Creating payment intent with backend...");
-      const response = await fetch(
-        "http://localhost:8000/api/create-payment-intent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      let paymentData;
+
+      if (isSetupIntent) {
+        // For adding payment methods, we don't need to call the backend for payment
+        // Just simulate successful payment method addition
+        console.log("Setup intent mode - simulating payment method addition");
+        paymentData = {
+          payment_intent_id: `pm_test_${Date.now()}`,
+          amount: 0,
+          currency: currency,
+          client_secret: `setup_intent_${Date.now()}_secret`,
+        };
+      } else {
+        // Call real backend to create payment intent for actual payments
+        console.log("Creating payment intent with backend...");
+        const response = await fetch(
+          "http://localhost:8000/api/create-payment-intent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount,
+              currency,
+              reference: `test_payment_${Date.now()}`,
+            }),
           },
-          body: JSON.stringify({
-            amount,
-            currency,
-            reference: `test_payment_${Date.now()}`,
-          }),
-        },
-      );
+        );
 
-      if (!response.ok) {
-        throw new Error("Failed to create payment intent");
+        if (!response.ok) {
+          throw new Error("Failed to create payment intent");
+        }
+
+        paymentData = await response.json();
+        console.log("Payment intent created:", paymentData);
       }
-
-      const paymentData = await response.json();
-      console.log("Payment intent created:", paymentData);
 
       // Simulate payment processing delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -107,7 +123,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
           id: paymentData.payment_intent_id,
           amount: paymentData.amount,
           currency: paymentData.currency,
-          status: "succeeded",
+          status: isSetupIntent ? "setup_succeeded" : "succeeded",
           payment_method: {
             card: {
               brand: testCard.brand.toLowerCase(),
@@ -118,7 +134,9 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
             type: "card",
           },
           created: Math.floor(Date.now() / 1000),
-          receipt_url: `https://pay.stripe.com/receipts/test_receipt_${Date.now()}`,
+          receipt_url: isSetupIntent
+            ? null
+            : `https://pay.stripe.com/receipts/test_receipt_${Date.now()}`,
           client_secret: paymentData.client_secret,
         };
 
@@ -161,7 +179,9 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
-          Payment Information (Test Mode)
+          {isSetupIntent
+            ? "Add Payment Method (Test Mode)"
+            : "Payment Information (Test Mode)"}
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
@@ -184,9 +204,11 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
         <Alert className="mb-6 border-blue-200 bg-blue-50">
           <AlertTriangle className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
-            <strong>Development Mode:</strong> This is a test payment form. No
-            real charges will be made. Use the test card numbers below or enter
-            custom test cards.
+            <strong>Development Mode:</strong>{" "}
+            {isSetupIntent
+              ? "This will add a test payment method. No charges will be made."
+              : "This is a test payment form that calls your real backend API. No real charges will be made."}{" "}
+            Use the test card numbers below or enter custom test cards.
           </AlertDescription>
         </Alert>
 
@@ -290,12 +312,16 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing Test Payment...
+                {isSetupIntent
+                  ? "Adding Payment Method..."
+                  : "Processing Test Payment..."}
               </>
             ) : (
               <>
                 <Shield className="mr-2 h-4 w-4" />
-                Test Pay ${(amount / 100).toFixed(2)}
+                {isSetupIntent
+                  ? "Add Payment Method"
+                  : `Test Pay $${(amount / 100).toFixed(2)}`}
               </>
             )}
           </Button>
