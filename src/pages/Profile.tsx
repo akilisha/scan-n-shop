@@ -36,6 +36,7 @@ import {
   Crown,
   Settings,
   Loader2,
+  Store,
 } from "lucide-react";
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
