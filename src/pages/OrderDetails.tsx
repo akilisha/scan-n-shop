@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,21 +30,24 @@ interface OrderDetailsProps {
 export default function OrderDetails({ orderData }: OrderDetailsProps) {
   const navigate = useNavigate();
   const { orderId } = useParams();
+  const location = useLocation();
   const [order, setOrder] = useState<any>(null);
 
-  // Use passed orderData (from checkout completion) or fetch by orderId
+  // Use passed orderData (from checkout completion) or location state or fetch by orderId
   useEffect(() => {
-    if (orderData) {
+    const stateOrderData = location.state?.orderData;
+    if (orderData || stateOrderData) {
+      const dataToUse = orderData || stateOrderData;
       // Create a mock order from the checkout data
       const mockOrder = {
         id: `order_${Date.now()}`,
         date: new Date(),
         status: "completed",
-        items: orderData.items,
-        subtotal: orderData.subtotal,
-        tax: orderData.tax,
-        total: orderData.total,
-        paymentMethod: orderData.paymentMethod,
+        items: dataToUse.items,
+        subtotal: dataToUse.subtotal,
+        tax: dataToUse.tax,
+        total: dataToUse.total,
+        paymentMethod: dataToUse.paymentMethod,
       };
       setOrder(mockOrder);
     } else if (orderId) {
@@ -61,7 +64,7 @@ export default function OrderDetails({ orderData }: OrderDetailsProps) {
         paymentMethod: { brand: "visa", last4: "4242" },
       });
     }
-  }, [orderData, orderId]);
+  }, [orderData, orderId, location.state]);
 
   if (!order) {
     return (
