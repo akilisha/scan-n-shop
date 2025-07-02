@@ -667,6 +667,61 @@ export default function SellerOnboarding() {
           </Card>
         )}
 
+        {/* Debug Panel - Only show when debugging needed */}
+        {(isSuccess || isRefresh || error) && (
+          <Card className="border-dashed border-warning">
+            <CardHeader>
+              <CardTitle className="text-sm text-warning">
+                Debug Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs space-y-2">
+              <div>
+                <strong>URL Params:</strong>{" "}
+                {JSON.stringify(Object.fromEntries(searchParams.entries()))}
+              </div>
+              <div>
+                <strong>Current Step:</strong> {currentStep}
+              </div>
+              <div>
+                <strong>Is Success:</strong> {isSuccess.toString()}
+              </div>
+              <div>
+                <strong>Is Refresh:</strong> {isRefresh.toString()}
+              </div>
+              <div>
+                <strong>Loading:</strong> {loading.toString()}
+              </div>
+              <div>
+                <strong>Has Connect Account:</strong> {!!connectAccount}
+              </div>
+              <div>
+                <strong>Account ID:</strong>{" "}
+                {connectAccount?.stripe_account_id || "None"}
+              </div>
+              <div>
+                <strong>Charges Enabled:</strong>{" "}
+                {connectAccount?.charges_enabled?.toString() || "Unknown"}
+              </div>
+              <div>
+                <strong>Error:</strong> {error || "None"}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  console.log("🐛 Manual debug trigger");
+                  setError(null);
+                  loadConnectAccount();
+                }}
+                className="mt-2"
+              >
+                Force Refresh
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Support Section */}
         <Card>
           <CardHeader>
