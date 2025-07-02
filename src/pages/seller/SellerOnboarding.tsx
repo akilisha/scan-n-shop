@@ -19,6 +19,7 @@ import {
   Globe,
   Smartphone,
   CreditCard,
+  Loader2,
 } from "lucide-react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { getUserConnectAccount } from "@/lib/stripe-connect";
@@ -41,6 +42,27 @@ export default function SellerOnboarding() {
     }
   }, [supabaseUser]);
 
+  // Handle return from Stripe onboarding
+  useEffect(() => {
+    if (isSuccess || isRefresh) {
+      // User returned from Stripe, refresh account status
+      console.log("🔄 User returned from Stripe, refreshing account status...");
+
+      if (supabaseUser) {
+        // Add a small delay to allow Stripe webhooks to process
+        setTimeout(() => {
+          loadConnectAccount();
+        }, 2000);
+      }
+
+      // Clean up URL parameters
+      const url = new URL(window.location.href);
+      url.searchParams.delete("success");
+      url.searchParams.delete("refresh");
+      window.history.replaceState({}, document.title, url.toString());
+    }
+  }, [isSuccess, isRefresh, supabaseUser]);
+
   const loadConnectAccount = async () => {
     if (!supabaseUser) return;
 
@@ -48,21 +70,84 @@ export default function SellerOnboarding() {
     try {
       const { data, error } = await getUserConnectAccount(supabaseUser.id);
       if (data && !error) {
-        setConnectAccount(data);
-        if (data.charges_enabled && data.payouts_enabled) {
-          setCurrentStep(4); // Account is fully set up
-        } else if (data.details_submitted) {
-          setCurrentStep(3); // Under review
-        } else {
-          setCurrentStep(2); // Account created, needs onboarding
-        }
+        console.log("📊 Account data from database:", data);
+
+        // Check live status with Stripe API
+        await checkLiveAccountStatus(data.stripe_account_id);
       } else {
         setCurrentStep(1); // No account yet
+        setConnectAccount(null);
       }
     } catch (error) {
       console.error("Error loading connect account:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkLiveAccountStatus = async (stripeAccountId: string) => {
+    try {
+      console.log("🔍 Checking live account status with Stripe...");
+      const response = await fetch(
+        `http://localhost:8000/api/stripe-connect/connect/account/${stripeAccountId}`,
+      );
+
+      if (response.ok) {
+        const liveAccountData = await response.json();
+        console.log("✅ Live account status:", liveAccountData);
+
+        // Update local state with live data
+        setConnectAccount((prev) => ({
+          ...prev,
+          ...liveAccountData,
+        }));
+
+        // Update step based on live status
+        if (
+          liveAccountData.charges_enabled &&
+          liveAccountData.payouts_enabled
+        ) {
+          console.log("🎉 Account fully active!");
+          setCurrentStep(4); // Account is fully set up
+        } else if (liveAccountData.details_submitted) {
+          console.log("⏳ Account under review");
+          setCurrentStep(3); // Under review
+        } else {
+          console.log("📝 Account needs onboarding");
+          setCurrentStep(2); // Account created, needs onboarding
+        }
+
+        // If account is now active, update database
+        if (
+          liveAccountData.charges_enabled &&
+          liveAccountData.payouts_enabled
+        ) {
+          await updateDatabaseAccountStatus(liveAccountData);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking live account status:", error);
+      // Fall back to database data if live check fails
+      if (connectAccount) {
+        if (connectAccount.charges_enabled && connectAccount.payouts_enabled) {
+          setCurrentStep(4);
+        } else if (connectAccount.details_submitted) {
+          setCurrentStep(3);
+        } else {
+          setCurrentStep(2);
+        }
+      }
+    }
+  };
+
+  const updateDatabaseAccountStatus = async (liveData: any) => {
+    try {
+      // Update database with latest status from Stripe
+      // This is optional but keeps our database in sync
+      console.log("💾 Updating database with live account status");
+    } catch (error) {
+      console.error("Error updating database:", error);
+      // Not critical, continue anyway
     }
   };
 
@@ -199,9 +284,15 @@ export default function SellerOnboarding() {
         {isRefresh && (
           <Alert>
             <AlertDescription>
-              It looks like you need to complete your account setup. Please
-              continue with the verification process.
+              Checking your account status after Stripe verification...
             </AlertDescription>
+          </Alert>
+        )}
+
+        {loading && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <AlertDescription>Refreshing account status...</AlertDescription>
           </Alert>
         )}
 

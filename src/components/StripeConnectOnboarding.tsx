@@ -370,7 +370,7 @@ export default function StripeConnectOnboarding({
             <Button
               className="w-full"
               size="lg"
-              onClick={() => window.open(onboardingUrl, "_blank")}
+              onClick={() => (window.location.href = onboardingUrl)}
             >
               <ExternalLink className="h-4 w-4 mr-2" />
               Complete Setup with Stripe
