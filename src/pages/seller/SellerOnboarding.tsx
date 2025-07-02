@@ -299,9 +299,25 @@ export default function SellerOnboarding() {
         {/* Progress Steps */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Store className="h-5 w-5" />
-              <span>Setup Progress</span>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Store className="h-5 w-5" />
+                <span>Setup Progress</span>
+              </div>
+              {currentStep > 1 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadConnectAccount}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Refresh Status"
+                  )}
+                </Button>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
