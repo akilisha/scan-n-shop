@@ -20,6 +20,7 @@ import {
   Smartphone,
   CreditCard,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { getUserConnectAccount } from "@/lib/stripe-connect";
@@ -47,12 +48,30 @@ export default function SellerOnboarding() {
     if (isSuccess || isRefresh) {
       // User returned from Stripe, refresh account status
       console.log("🔄 User returned from Stripe, refreshing account status...");
+      setError(null); // Clear any previous errors
+      setRetryCount(0); // Reset retry count
 
       if (supabaseUser) {
         // Add a small delay to allow Stripe webhooks to process
         setTimeout(() => {
           loadConnectAccount();
         }, 2000);
+
+        // Set up retry mechanism in case first attempt fails
+        const retryInterval = setInterval(() => {
+          if (retryCount < 3 && currentStep < 4) {
+            console.log(
+              `🔄 Retry attempt ${retryCount + 1} for account status...`,
+            );
+            setRetryCount((prev) => prev + 1);
+            loadConnectAccount();
+          } else {
+            clearInterval(retryInterval);
+          }
+        }, 10000); // Retry every 10 seconds, max 3 times
+
+        // Clean up interval after 35 seconds
+        setTimeout(() => clearInterval(retryInterval), 35000);
       }
 
       // Clean up URL parameters
@@ -88,9 +107,19 @@ export default function SellerOnboarding() {
   const checkLiveAccountStatus = async (stripeAccountId: string) => {
     try {
       console.log("🔍 Checking live account status with Stripe...");
+
+      // Add timeout to prevent infinite loading
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(
         `http://localhost:8000/api/stripe-connect/connect/account/${stripeAccountId}`,
+        {
+          signal: controller.signal,
+        },
       );
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const liveAccountData = await response.json();
@@ -124,11 +153,29 @@ export default function SellerOnboarding() {
         ) {
           await updateDatabaseAccountStatus(liveAccountData);
         }
+      } else {
+        throw new Error(`API responded with status: ${response.status}`);
       }
-    } catch (error) {
-      console.error("Error checking live account status:", error);
+    } catch (error: any) {
+      console.error("❌ Error checking live account status:", error);
+
+      if (error.name === "AbortError") {
+        console.warn("⏰ Account status check timed out");
+        setError(
+          "Account status check timed out. Please try refreshing manually.",
+        );
+      } else if (error.message?.includes("Failed to fetch")) {
+        console.warn("🔌 Backend server not reachable");
+        setError(
+          "Cannot connect to backend server. Please check if it's running.",
+        );
+      } else {
+        console.warn("🔄 Using database data as fallback");
+      }
+
       // Fall back to database data if live check fails
       if (connectAccount) {
+        console.log("📋 Using database data for status");
         if (connectAccount.charges_enabled && connectAccount.payouts_enabled) {
           setCurrentStep(4);
         } else if (connectAccount.details_submitted) {
@@ -270,29 +317,50 @@ export default function SellerOnboarding() {
   return (
     <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
-        {/* Success/Refresh Messages */}
-        {isSuccess && (
-          <Alert className="border-success text-success">
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              Great! Your seller account has been successfully set up. You can
-              now start selling on KerbDrop.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isRefresh && (
+        {/* Status Messages */}
+        {(isSuccess || isRefresh) && currentStep < 4 && (
           <Alert>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
             <AlertDescription>
               Checking your account status after Stripe verification...
             </AlertDescription>
           </Alert>
         )}
 
-        {loading && (
+        {currentStep === 4 && (isSuccess || isRefresh) && (
+          <Alert className="border-success text-success">
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>
+              Perfect! Your seller account is now fully verified and ready to
+              accept payments.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {loading && !isSuccess && !isRefresh && (
           <Alert>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <AlertDescription>Refreshing account status...</AlertDescription>
+            <AlertDescription>Loading account information...</AlertDescription>
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setError(null);
+                  loadConnectAccount();
+                }}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
           </Alert>
         )}
 
