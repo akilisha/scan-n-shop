@@ -114,19 +114,46 @@ export default function SellerOnboarding() {
     setError(null);
 
     try {
-      console.log("📡 Calling getUserConnectAccount...");
+      console.log("📡 Testing direct Supabase connection...");
 
-      // Add timeout to database call to prevent infinite hanging
-      const { data, error } = await Promise.race([
-        getUserConnectAccount(supabaseUser.id),
+      // Test direct Supabase query to bypass potential function issues
+      const { supabase } = await import("@/lib/supabase");
+      console.log("📡 Direct query to connect_accounts...");
+
+      const directResult = await Promise.race([
+        supabase
+          .from("connect_accounts")
+          .select("*")
+          .eq("user_id", supabaseUser.id)
+          .single(),
         new Promise<{ data: any; error: any }>((_, reject) =>
           setTimeout(
-            () => reject(new Error("Database query timeout after 5 seconds")),
+            () => reject(new Error("Direct query timeout after 5 seconds")),
             5000,
           ),
         ),
       ]);
-      console.log("📋 Database query result:", { data, error });
+
+      console.log("📋 Direct query result:", directResult);
+
+      // If direct query works, use it; otherwise fall back to original function
+      if (directResult && !directResult.error) {
+        console.log("✅ Direct query succeeded, using result");
+        const { data, error } = directResult;
+        console.log("📋 Database query result:", { data, error });
+      } else {
+        console.log("⚠️ Direct query failed, trying original function...");
+        const { data, error } = await Promise.race([
+          getUserConnectAccount(supabaseUser.id),
+          new Promise<{ data: any; error: any }>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Function query timeout after 5 seconds")),
+              5000,
+            ),
+          ),
+        ]);
+        console.log("📋 Function query result:", { data, error });
+      }
 
       if (data && !error) {
         console.log("📊 Account found in database:", data);
@@ -761,6 +788,24 @@ export default function SellerOnboarding() {
                   }}
                 >
                   Start Over
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    console.log("🧪 Skip to Step 4 for testing");
+                    setError(null);
+                    setConnectAccount({
+                      id: "test-account",
+                      stripe_account_id: "acct_test",
+                      charges_enabled: true,
+                      payouts_enabled: true,
+                      details_submitted: true,
+                    });
+                    setCurrentStep(4);
+                  }}
+                >
+                  Skip DB (Test)
                 </Button>
               </div>
             </CardContent>
