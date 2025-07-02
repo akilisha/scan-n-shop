@@ -114,7 +114,18 @@ export default function SellerOnboarding() {
     setError(null);
 
     try {
-      const { data, error } = await getUserConnectAccount(supabaseUser.id);
+      console.log("📡 Calling getUserConnectAccount...");
+
+      // Add timeout to database call to prevent infinite hanging
+      const { data, error } = await Promise.race([
+        getUserConnectAccount(supabaseUser.id),
+        new Promise<{ data: any; error: any }>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Database query timeout after 5 seconds")),
+            5000,
+          ),
+        ),
+      ]);
       console.log("📋 Database query result:", { data, error });
 
       if (data && !error) {
@@ -136,7 +147,19 @@ export default function SellerOnboarding() {
         }
       } else {
         console.log("ℹ️ No account found in database");
-        setCurrentStep(1); // No account yet
+
+        // If we're returning from Stripe success, there might be an account that wasn't saved to DB
+        if (isSuccess || isRefresh) {
+          console.log(
+            "🔄 Returned from Stripe but no DB record. Checking if account exists in Stripe...",
+          );
+          setError(
+            "Account created in Stripe but not found in database. Please try creating a new account.",
+          );
+          setCurrentStep(1); // Go back to account creation
+        } else {
+          setCurrentStep(1); // No account yet
+        }
         setConnectAccount(null);
       }
     } catch (error) {
@@ -706,18 +729,40 @@ export default function SellerOnboarding() {
               <div>
                 <strong>Error:</strong> {error || "None"}
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  console.log("🐛 Manual debug trigger");
-                  setError(null);
-                  loadConnectAccount();
-                }}
-                className="mt-2"
-              >
-                Force Refresh
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    console.log("🐛 Manual debug trigger");
+                    setError(null);
+                    loadConnectAccount();
+                  }}
+                >
+                  Force Refresh
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    console.log("🔄 Reset flow");
+                    setError(null);
+                    setConnectAccount(null);
+                    setCurrentStep(1);
+                    // Clear URL params
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("success");
+                    url.searchParams.delete("refresh");
+                    window.history.replaceState(
+                      {},
+                      document.title,
+                      url.toString(),
+                    );
+                  }}
+                >
+                  Start Over
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
