@@ -32,6 +32,8 @@ export default function SellerOnboarding() {
   const [connectAccount, setConnectAccount] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Check for success/refresh params from Stripe
   const isSuccess = searchParams.get("success") === "true";
