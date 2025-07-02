@@ -39,6 +39,25 @@ export default function SellerOnboarding() {
   const isSuccess = searchParams.get("success") === "true";
   const isRefresh = searchParams.get("refresh") === "true";
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log("🔍 SellerOnboarding Debug Info:");
+    console.log("Current URL:", window.location.href);
+    console.log("Search params:", Object.fromEntries(searchParams.entries()));
+    console.log("isSuccess:", isSuccess);
+    console.log("isRefresh:", isRefresh);
+    console.log("currentStep:", currentStep);
+    console.log("connectAccount:", connectAccount);
+    console.log("supabaseUser:", !!supabaseUser);
+  }, [
+    searchParams,
+    isSuccess,
+    isRefresh,
+    currentStep,
+    connectAccount,
+    supabaseUser,
+  ]);
+
   useEffect(() => {
     if (supabaseUser) {
       loadConnectAccount();
@@ -85,22 +104,44 @@ export default function SellerOnboarding() {
   }, [isSuccess, isRefresh, supabaseUser]);
 
   const loadConnectAccount = async () => {
-    if (!supabaseUser) return;
+    if (!supabaseUser) {
+      console.log("❌ No supabaseUser, cannot load account");
+      return;
+    }
 
+    console.log("🔄 Loading connect account for user:", supabaseUser.id);
     setLoading(true);
+    setError(null);
+
     try {
       const { data, error } = await getUserConnectAccount(supabaseUser.id);
+      console.log("📋 Database query result:", { data, error });
+
       if (data && !error) {
-        console.log("📊 Account data from database:", data);
+        console.log("📊 Account found in database:", data);
+        setConnectAccount(data);
 
         // Check live status with Stripe API
         await checkLiveAccountStatus(data.stripe_account_id);
+      } else if (error) {
+        console.log("❌ Database error:", error);
+        if (
+          error.message?.includes('relation "connect_accounts" does not exist')
+        ) {
+          setError(
+            "Database setup required. Please run the database setup SQL.",
+          );
+        } else {
+          setError(`Database error: ${error.message}`);
+        }
       } else {
+        console.log("ℹ️ No account found in database");
         setCurrentStep(1); // No account yet
         setConnectAccount(null);
       }
     } catch (error) {
-      console.error("Error loading connect account:", error);
+      console.error("💥 Exception loading connect account:", error);
+      setError(`Failed to load account: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -323,8 +364,22 @@ export default function SellerOnboarding() {
         {(isSuccess || isRefresh) && currentStep < 4 && (
           <Alert>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <AlertDescription>
-              Checking your account status after Stripe verification...
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                Checking your account status after Stripe verification...
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  console.log("🔄 Manual status check triggered");
+                  setError(null);
+                  loadConnectAccount();
+                }}
+                className="ml-2"
+              >
+                Check Now
+              </Button>
             </AlertDescription>
           </Alert>
         )}
