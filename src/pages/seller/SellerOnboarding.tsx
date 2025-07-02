@@ -438,6 +438,62 @@ export default function SellerOnboarding() {
           </CardContent>
         </Card>
 
+        {/* Step 3: Under Review */}
+        {currentStep === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Account Under Review</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Great! You've completed the Stripe verification process. Your
+                  account is now under review.
+                </AlertDescription>
+              </Alert>
+
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>
+                  <strong>What happens next?</strong>
+                </p>
+                <p>• Stripe is reviewing your account information</p>
+                <p>• This usually takes a few minutes for test accounts</p>
+                <p>• You'll be able to start selling once approved</p>
+              </div>
+
+              <div className="flex items-center justify-center p-4 bg-muted rounded-lg">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                  <p className="text-sm font-medium">Checking status...</p>
+                  <p className="text-xs text-muted-foreground">
+                    We'll automatically refresh when ready
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={loadConnectAccount}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  "Check Status Now"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Next Steps for Completed Accounts */}
         {currentStep === 4 && (
           <Card>
