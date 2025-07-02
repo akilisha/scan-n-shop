@@ -789,6 +789,24 @@ export default function SellerOnboarding() {
                 >
                   Start Over
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    console.log("🧪 Skip to Step 4 for testing");
+                    setError(null);
+                    setConnectAccount({
+                      id: "test-account",
+                      stripe_account_id: "acct_test",
+                      charges_enabled: true,
+                      payouts_enabled: true,
+                      details_submitted: true,
+                    });
+                    setCurrentStep(4);
+                  }}
+                >
+                  Skip DB (Test)
+                </Button>
               </div>
             </CardContent>
           </Card>
