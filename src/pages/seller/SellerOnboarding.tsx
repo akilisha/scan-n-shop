@@ -34,6 +34,7 @@ export default function SellerOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isQuerying, setIsQuerying] = useState(false);
 
   // Check for success/refresh params from Stripe
   const isSuccess = searchParams.get("success") === "true";
@@ -109,7 +110,14 @@ export default function SellerOnboarding() {
       return;
     }
 
+    // Prevent concurrent queries
+    if (isQuerying) {
+      console.log("⏸️ Query already in progress, skipping");
+      return;
+    }
+
     console.log("🔄 Loading connect account for user:", supabaseUser.id);
+    setIsQuerying(true);
     setLoading(true);
     setError(null);
 
@@ -194,6 +202,7 @@ export default function SellerOnboarding() {
       setError(`Failed to load account: ${error.message}`);
     } finally {
       setLoading(false);
+      setIsQuerying(false);
     }
   };
 
