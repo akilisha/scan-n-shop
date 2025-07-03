@@ -189,7 +189,19 @@ export default function SellerOnboarding() {
         console.log("📊 Account found in database:", data);
         setConnectAccount(data);
 
-        // Check live status with Stripe API
+        // Set step based on existing account status immediately
+        if (data.charges_enabled && data.payouts_enabled) {
+          console.log("🎉 Existing account is fully active!");
+          setCurrentStep(4);
+        } else if (data.details_submitted) {
+          console.log("⏳ Existing account under review");
+          setCurrentStep(3);
+        } else {
+          console.log("📝 Existing account needs onboarding");
+          setCurrentStep(2);
+        }
+
+        // Check live status with Stripe API to get latest data
         await checkLiveAccountStatus(data.stripe_account_id);
       } else if (error) {
         console.log("❌ Database error:", error);
