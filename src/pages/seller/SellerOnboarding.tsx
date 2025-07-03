@@ -61,7 +61,12 @@ export default function SellerOnboarding() {
 
   useEffect(() => {
     if (supabaseUser) {
-      loadConnectAccount();
+      // Add small delay to let auth context settle
+      const timeoutId = setTimeout(() => {
+        loadConnectAccount();
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [supabaseUser]);
 
