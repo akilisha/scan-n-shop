@@ -21,6 +21,7 @@ import {
   CreditCard,
   Loader2,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { getUserConnectAccount } from "@/lib/stripe-connect";
