@@ -192,14 +192,22 @@ export default function SellerOnboarding() {
         setConnectAccount(data);
 
         // Set step based on existing account status immediately
+        console.log("🔍 Account status check:", {
+          charges_enabled: data.charges_enabled,
+          payouts_enabled: data.payouts_enabled,
+          details_submitted: data.details_submitted,
+        });
+
         if (data.charges_enabled && data.payouts_enabled) {
-          console.log("🎉 Existing account is fully active!");
+          console.log("🎉 Existing account is fully active! Setting step to 4");
           setCurrentStep(4);
         } else if (data.details_submitted) {
-          console.log("⏳ Existing account under review");
+          console.log("⏳ Existing account under review, setting step to 3");
           setCurrentStep(3);
         } else {
-          console.log("📝 Existing account needs onboarding");
+          console.log(
+            "📝 Existing account needs onboarding, setting step to 2",
+          );
           setCurrentStep(2);
         }
 
