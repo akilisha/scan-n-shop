@@ -63,15 +63,19 @@ export default function SellerOnboarding() {
   ]);
 
   useEffect(() => {
-    if (supabaseUser) {
+    if (supabaseUser && !skipDatabase) {
       // Add small delay to let auth context settle
       const timeoutId = setTimeout(() => {
         loadConnectAccount();
       }, 500);
 
       return () => clearTimeout(timeoutId);
+    } else if (supabaseUser && skipDatabase) {
+      // If database is disabled, just show step 1
+      setCurrentStep(1);
+      setConnectAccount(null);
     }
-  }, [supabaseUser]);
+  }, [supabaseUser, skipDatabase]);
 
   // Handle return from Stripe onboarding
   useEffect(() => {
