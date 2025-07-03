@@ -579,11 +579,84 @@ export default function SellerOnboarding() {
           </CardContent>
         </Card>
 
-        {/* Main Onboarding Component */}
-        <StripeConnectOnboarding
-          onSuccess={handleAccountCreated}
-          onError={(error) => console.error("Onboarding error:", error)}
-        />
+        {/* Main Onboarding Component - Only show if not fully completed */}
+        {currentStep < 4 && (
+          <StripeConnectOnboarding
+            onSuccess={handleAccountCreated}
+            onError={(error) => console.error("Onboarding error:", error)}
+          />
+        )}
+
+        {/* Account Status for Completed Accounts */}
+        {currentStep === 4 && connectAccount && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Store className="h-5 w-5" />
+                  <span>Seller Account</span>
+                </div>
+                <Badge className="bg-success/10 text-success border-success/20">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <CheckCircle className="h-5 w-5 text-success" />
+                  <span className="font-semibold text-success">
+                    Account Active
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Your seller account is fully set up and ready to receive
+                  payments.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-xs text-muted-foreground">Charges</div>
+                  <div className="font-semibold text-success">Enabled</div>
+                </div>
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-xs text-muted-foreground">Payouts</div>
+                  <div className="font-semibold text-success">Enabled</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">
+                    Earnings Calculator
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <div>For every $100.00 sale:</div>
+                  <div>• Platform fee: $3.20</div>
+                  <div>• You receive: $96.80</div>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  window.open(
+                    `http://localhost:8000/api/stripe-connect/connect/dashboard-link/${connectAccount.stripe_account_id}`,
+                    "_blank",
+                  )
+                }
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Stripe Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Benefits Section - Show only for new sellers */}
         {currentStep === 1 && (
