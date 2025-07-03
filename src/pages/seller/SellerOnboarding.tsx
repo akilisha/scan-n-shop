@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { getUserConnectAccount } from "@/lib/stripe-connect";
+import { AuthModal } from "@/components/AuthModal";
 
 export default function SellerOnboarding() {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export default function SellerOnboarding() {
   const [retryCount, setRetryCount] = useState(0);
   const [isQuerying, setIsQuerying] = useState(false);
   const [skipDatabase, setSkipDatabase] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   // Check for success/refresh params from Stripe
   const isSuccess = searchParams.get("success") === "true";
@@ -405,29 +407,47 @@ export default function SellerOnboarding() {
 
   if (!supabaseUser) {
     return (
-      <Layout headerContent={headerContent} showBottomNav={false}>
-        <div className="flex flex-col items-center justify-center py-12">
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                <Store className="h-10 w-10 text-primary" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
-              <p className="text-muted-foreground text-center mb-6">
-                Please sign in to your account to start the seller onboarding
-                process
-              </p>
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={() => navigate("/")}
-              >
-                Back to Home
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
+      <>
+        <Layout headerContent={headerContent} showBottomNav={false}>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Card className="w-full">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                  <Store className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+                <p className="text-muted-foreground text-center mb-8">
+                  Please sign in to your account to start the seller onboarding
+                  process
+                </p>
+                <div className="w-full space-y-3">
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={() => setShowAuth(true)}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => navigate("/")}
+                  >
+                    Continue Shopping
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </Layout>
+
+        <AuthModal
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => setShowAuth(false)}
+          mode="login"
+        />
+      </>
     );
   }
 

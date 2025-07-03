@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -224,17 +225,47 @@ export default function Plans() {
 
   if (!user) {
     return (
-      <Layout headerContent={headerContent} showBottomNav={true}>
-        <div className="flex flex-col items-center justify-center py-12">
-          <Globe className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Sign In Required</h3>
-          <p className="text-sm text-muted-foreground text-center mb-6">
-            Please sign in to access value-added services and enhance your
-            selling experience.
-          </p>
-          <Button onClick={() => navigate("/profile")}>Sign In</Button>
-        </div>
-      </Layout>
+      <>
+        <Layout headerContent={headerContent} showBottomNav={true}>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Card className="w-full">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                  <Globe className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+                <p className="text-muted-foreground text-center mb-8">
+                  Please sign in to access value-added services and enhance your
+                  selling experience.
+                </p>
+                <div className="w-full space-y-3">
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={() => setShowAuth(true)}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => navigate("/")}
+                  >
+                    Continue Shopping
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </Layout>
+
+        <AuthModal
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => setShowAuth(false)}
+          mode="login"
+        />
+      </>
     );
   }
 
