@@ -55,6 +55,20 @@ export default function StripeConnectOnboarding({
     }
   }, [supabaseUser]);
 
+  // If parent already provided account data, use it
+  React.useEffect(() => {
+    if (supabaseUser) {
+      // Check if parent component already has account data by checking URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFromStripe = urlParams.get("success") || urlParams.get("refresh");
+
+      if (!isFromStripe) {
+        // Only load if we're not returning from Stripe
+        loadExistingAccount();
+      }
+    }
+  }, [supabaseUser]);
+
   const loadExistingAccount = async () => {
     if (!supabaseUser) return;
 
