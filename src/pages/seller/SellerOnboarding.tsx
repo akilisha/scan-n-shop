@@ -35,6 +35,7 @@ export default function SellerOnboarding() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isQuerying, setIsQuerying] = useState(false);
+  const [skipDatabase, setSkipDatabase] = useState(false);
 
   // Check for success/refresh params from Stripe
   const isSuccess = searchParams.get("success") === "true";
@@ -112,6 +113,15 @@ export default function SellerOnboarding() {
   const loadConnectAccount = async () => {
     if (!supabaseUser) {
       console.log("❌ No supabaseUser, cannot load account");
+      return;
+    }
+
+    // Skip database entirely if requested
+    if (skipDatabase) {
+      console.log("⏭️ Database queries disabled, showing create account form");
+      setCurrentStep(1);
+      setConnectAccount(null);
+      setLoading(false);
       return;
     }
 
@@ -820,6 +830,22 @@ export default function SellerOnboarding() {
                   }}
                 >
                   Skip DB (Test)
+                </Button>
+                <Button
+                  size="sm"
+                  variant={skipDatabase ? "default" : "outline"}
+                  onClick={() => {
+                    console.log("🔄 Toggle database queries:", !skipDatabase);
+                    setSkipDatabase(!skipDatabase);
+                    setError(null);
+                    if (!skipDatabase) {
+                      // If disabling DB, go to step 1
+                      setCurrentStep(1);
+                      setConnectAccount(null);
+                    }
+                  }}
+                >
+                  {skipDatabase ? "Enable DB" : "Disable DB"}
                 </Button>
               </div>
             </CardContent>
