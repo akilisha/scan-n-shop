@@ -292,13 +292,44 @@ export default function StripeConnectOnboarding({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <div
+            className={`rounded-lg p-4 ${
+              connectAccount.charges_enabled && connectAccount.payouts_enabled
+                ? "bg-success/5 border border-success/20"
+                : "bg-warning/5 border border-warning/20"
+            }`}
+          >
             <div className="flex items-center space-x-2 mb-2">
-              <CheckCircle className="h-5 w-5 text-success" />
-              <span className="font-semibold text-success">Account Active</span>
+              {connectAccount.charges_enabled &&
+              connectAccount.payouts_enabled ? (
+                <>
+                  <CheckCircle className="h-5 w-5 text-success" />
+                  <span className="font-semibold text-success">
+                    Account Active
+                  </span>
+                </>
+              ) : connectAccount.details_submitted ? (
+                <>
+                  <Loader2 className="h-5 w-5 text-warning animate-spin" />
+                  <span className="font-semibold text-warning">
+                    Under Review
+                  </span>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="h-5 w-5 text-warning" />
+                  <span className="font-semibold text-warning">
+                    Setup Required
+                  </span>
+                </>
+              )}
             </div>
             <p className="text-sm text-muted-foreground">
-              Your seller account is fully set up and ready to receive payments.
+              {connectAccount.charges_enabled && connectAccount.payouts_enabled
+                ? "Your seller account is fully set up and ready to receive payments."
+                : connectAccount.details_submitted
+                  ? "Your account is being reviewed. This usually takes a few minutes."
+                  : "Complete the verification process to start receiving payments."}
             </p>
           </div>
 
