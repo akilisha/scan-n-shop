@@ -138,9 +138,8 @@ export default function StripeConnectOnboarding({
 
       // Save account to database
       console.log("💾 Saving to database...");
-      const { data: dbAccount, error: dbError } = await createConnectAccount(
-        supabaseUser.id,
-        {
+      const { data: dbAccount, error: dbError } = await Promise.race([
+        createConnectAccount(supabaseUser.id, {
           stripe_account_id: stripeAccountData.account_id,
           account_type: "express",
           business_type: businessType,
@@ -150,8 +149,14 @@ export default function StripeConnectOnboarding({
           payouts_enabled: stripeAccountData.payouts_enabled,
           details_submitted: stripeAccountData.details_submitted,
           verification_status: "pending",
-        },
-      );
+        }),
+        new Promise<{ data: any; error: any }>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Database save timeout after 10 seconds")),
+            10000,
+          ),
+        ),
+      ]);
 
       if (dbError) {
         console.error("❌ Database error:", dbError);
