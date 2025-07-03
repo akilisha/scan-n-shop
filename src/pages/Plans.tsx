@@ -21,6 +21,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 interface ValueAddedService {
   id: string;
@@ -128,6 +129,7 @@ export default function Plans() {
   const navigate = useNavigate();
   const { user } = useSupabaseAuth();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [showAuth, setShowAuth] = useState(false);
 
   const categories = [
     { id: "all", label: "All Services", count: valueAddedServices.length },
