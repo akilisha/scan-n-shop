@@ -169,6 +169,31 @@ export default function StripeConnectOnboarding({
           throw new Error(
             "Database not set up. Please run the database setup SQL first.",
           );
+        } else if (
+          dbError.message?.includes("duplicate key") ||
+          dbError.message?.includes("already exists") ||
+          dbError.message?.includes("UNIQUE constraint")
+        ) {
+          console.warn(
+            "⚠️ Account already exists in database, using existing account",
+          );
+          // If account already exists, try to fetch it instead
+          const { data: existingAccount } = await getUserConnectAccount(
+            supabaseUser.id,
+          );
+          if (existingAccount) {
+            setConnectAccount({
+              ...existingAccount,
+              ...stripeAccountData,
+            });
+            setOnboardingUrl(stripeAccountData.onboarding_url);
+            if (onSuccess) {
+              onSuccess(stripeAccountData);
+            }
+            return;
+          }
+        } else if (dbError.message?.includes("timeout")) {
+          throw new Error("Database connection timed out. Please try again.");
         }
         throw new Error(`Database error: ${dbError.message}`);
       }
