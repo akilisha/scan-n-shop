@@ -305,11 +305,27 @@ export default function StripeConnectOnboarding({
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-3 bg-muted rounded-lg">
               <div className="text-xs text-muted-foreground">Charges</div>
-              <div className="font-semibold text-success">Enabled</div>
+              <div
+                className={`font-semibold ${
+                  connectAccount.charges_enabled
+                    ? "text-success"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {connectAccount.charges_enabled ? "Enabled" : "Disabled"}
+              </div>
             </div>
             <div className="text-center p-3 bg-muted rounded-lg">
               <div className="text-xs text-muted-foreground">Payouts</div>
-              <div className="font-semibold text-success">Enabled</div>
+              <div
+                className={`font-semibold ${
+                  connectAccount.payouts_enabled
+                    ? "text-success"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {connectAccount.payouts_enabled ? "Enabled" : "Disabled"}
+              </div>
             </div>
           </div>
 
