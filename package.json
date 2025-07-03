@@ -21,7 +21,7 @@
     "mobile:clean": "npx cap sync && npx cap copy",
     "s:test": "npm run stripe:test -w backend",
     "s:start": "npm start -w backend",
-    "s:debug": "concurrently \"npm startw -w backend\" \"npm run dev\""
+    "s:debug": "concurrently \"npm run startw -w backend\" \"npm run dev\""
   },
   "dependencies": {
     "@adyen/adyen-web": "^6.18.0",
