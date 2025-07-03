@@ -765,115 +765,35 @@ export default function SellerOnboarding() {
           </Card>
         )}
 
-        {/* Debug Panel - Only show when debugging needed */}
-        {(isSuccess || isRefresh || error) && (
-          <Card className="border-dashed border-warning">
-            <CardHeader>
-              <CardTitle className="text-sm text-warning">
-                Debug Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs space-y-2">
-              <div>
-                <strong>URL Params:</strong>{" "}
-                {JSON.stringify(Object.fromEntries(searchParams.entries()))}
-              </div>
-              <div>
-                <strong>Current Step:</strong> {currentStep}
-              </div>
-              <div>
-                <strong>Is Success:</strong> {isSuccess.toString()}
-              </div>
-              <div>
-                <strong>Is Refresh:</strong> {isRefresh.toString()}
-              </div>
-              <div>
-                <strong>Loading:</strong> {loading.toString()}
-              </div>
-              <div>
-                <strong>Has Connect Account:</strong> {!!connectAccount}
-              </div>
-              <div>
-                <strong>Account ID:</strong>{" "}
-                {connectAccount?.stripe_account_id || "None"}
-              </div>
-              <div>
-                <strong>Charges Enabled:</strong>{" "}
-                {connectAccount?.charges_enabled?.toString() || "Unknown"}
-              </div>
-              <div>
-                <strong>Error:</strong> {error || "None"}
-              </div>
-              <div className="flex gap-2 mt-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    console.log("🐛 Manual debug trigger");
-                    setError(null);
-                    loadConnectAccount();
-                  }}
-                >
-                  Force Refresh
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => {
-                    console.log("🔄 Reset flow");
-                    setError(null);
-                    setConnectAccount(null);
-                    setCurrentStep(1);
-                    // Clear URL params
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete("success");
-                    url.searchParams.delete("refresh");
-                    window.history.replaceState(
-                      {},
-                      document.title,
-                      url.toString(),
-                    );
-                  }}
-                >
-                  Start Over
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    console.log("🧪 Skip to Step 4 for testing");
-                    setError(null);
-                    setConnectAccount({
-                      id: "test-account",
-                      stripe_account_id: "acct_test",
-                      charges_enabled: true,
-                      payouts_enabled: true,
-                      details_submitted: true,
-                    });
-                    setCurrentStep(4);
-                  }}
-                >
-                  Skip DB (Test)
-                </Button>
-                <Button
-                  size="sm"
-                  variant={skipDatabase ? "default" : "outline"}
-                  onClick={() => {
-                    console.log("🔄 Toggle database queries:", !skipDatabase);
-                    setSkipDatabase(!skipDatabase);
-                    setError(null);
-                    if (!skipDatabase) {
-                      // If disabling DB, go to step 1
-                      setCurrentStep(1);
-                      setConnectAccount(null);
-                    }
-                  }}
-                >
-                  {skipDatabase ? "Enable DB" : "Disable DB"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Simple Error Handling */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setError(null);
+                  setCurrentStep(1);
+                  setConnectAccount(null);
+                  // Clear URL params
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete("success");
+                  url.searchParams.delete("refresh");
+                  window.history.replaceState(
+                    {},
+                    document.title,
+                    url.toString(),
+                  );
+                }}
+                className="ml-2"
+              >
+                Start Over
+              </Button>
+            </AlertDescription>
+          </Alert>
         )}
 
         {/* Support Section */}
