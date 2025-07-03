@@ -166,14 +166,15 @@ export default function SellerOnboarding() {
 
       console.log("📋 Direct query result:", directResult);
 
+      let data, error;
+
       // If direct query works, use it; otherwise fall back to original function
       if (directResult && !directResult.error) {
         console.log("✅ Direct query succeeded, using result");
-        const { data, error } = directResult;
-        console.log("📋 Database query result:", { data, error });
+        ({ data, error } = directResult);
       } else {
         console.log("⚠️ Direct query failed, trying original function...");
-        const { data, error } = await Promise.race([
+        ({ data, error } = await Promise.race([
           getUserConnectAccount(supabaseUser.id),
           new Promise<{ data: any; error: any }>((_, reject) =>
             setTimeout(
@@ -181,9 +182,10 @@ export default function SellerOnboarding() {
               5000,
             ),
           ),
-        ]);
-        console.log("📋 Function query result:", { data, error });
+        ]));
       }
+
+      console.log("📋 Final query result:", { data, error });
 
       if (data && !error) {
         console.log("📊 Account found in database:", data);
