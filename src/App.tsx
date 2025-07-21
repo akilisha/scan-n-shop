@@ -27,6 +27,7 @@ import SellerOnboarding from "./pages/seller/SellerOnboarding";
 
 // Seller Mode Pages
 import SellerDashboard from "./pages/seller/Dashboard";
+import SellerAnalytics from "./pages/seller/SellerAnalytics";
 import CodeGenerator from "./pages/seller/CodeGenerator";
 import PaymentManagement from "./pages/seller/PaymentManagement";
 import AddProduct from "./pages/seller/AddProduct";
@@ -77,6 +78,10 @@ const App = () => (
 
                   {/* Seller Mode Routes */}
                   <Route path="/seller" element={<SellerDashboard />} />
+                  <Route
+                    path="/seller/analytics"
+                    element={<SellerAnalytics />}
+                  />
                   <Route path="/seller/products" element={<ProductManager />} />
                   <Route path="/seller/products/new" element={<AddProduct />} />
                   <Route
