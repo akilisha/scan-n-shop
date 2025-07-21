@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, Product } from "@/types";
-import { useDemo } from "@/contexts/DemoContext";
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -67,12 +66,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cartItems]);
 
   const addToCart = (product: Product) => {
-    // If in demo mode, use demo cart operations
-    if (isDemoMode && addDemoItem) {
-      addDemoItem(product.id);
-      return;
-    }
-
     const existingItem = cartItems.find(
       (item) => item.product.id === product.id,
     );
@@ -96,12 +89,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
-    // If in demo mode, use demo cart operations
-    if (isDemoMode && updateDemoQuantity) {
-      updateDemoQuantity(itemId, newQuantity);
-      return;
-    }
-
     if (newQuantity === 0) {
       removeItem(itemId);
       return;
@@ -114,22 +101,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeItem = (itemId: string) => {
-    // If in demo mode, use demo cart operations
-    if (isDemoMode && removeDemoItem) {
-      removeDemoItem(itemId);
-      return;
-    }
-
     setCartItems(cartItems.filter((item) => item.id !== itemId));
   };
 
   const clearCart = () => {
-    // If in demo mode, use demo cart operations
-    if (isDemoMode && clearDemoCart) {
-      clearDemoCart();
-      return;
-    }
-
     setCartItems([]);
   };
 
