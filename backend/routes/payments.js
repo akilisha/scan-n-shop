@@ -415,7 +415,7 @@ router.get("/referrals/stats/:userId", async (req, res) => {
     const { userId } = req.params;
 
     // In a real implementation, you would query your database for actual stats
-    // For now, we'll return mock data
+    // Return empty stats until real data integration
     const mockStats = {
       totalReferrals: 5,
       successfulReferrals: 3,
