@@ -24,9 +24,15 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   // Create a demo user with limited seller access
   const demoUser: User = {
-    ...mockUser,
-    name: "Demo User",
+    id: "demo-user",
     email: "demo@example.com",
+    name: "Demo User",
+    preferences: {
+      notifications: { email: true, push: true, sms: false },
+      currency: "USD",
+      language: "English",
+      darkMode: false,
+    },
     hasSellerAccess: true, // Give demo user seller access to showcase features
   };
 
@@ -51,8 +57,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addDemoItem = (productId: string) => {
-    const product = mockProducts.find((p) => p.id === productId);
-    if (!product) return;
+    // No demo products available - this function is disabled
+    return;
 
     const existingItem = demoCartItems.find(
       (item) => item.product.id === productId,
