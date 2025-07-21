@@ -125,7 +125,8 @@ export default function Cart() {
   };
 
   const findProductByBarcode = (barcode: string): Product | null => {
-    return mockProducts.find((product) => product.barcode === barcode) || null;
+    // TODO: Implement real barcode lookup from database
+    return null;
   };
 
   const parseScannedData = (data: string): Product | null => {
@@ -147,9 +148,8 @@ export default function Cart() {
 
     // For demo purposes, randomly assign a product if barcode not found
     // In a real app, this would call an API to lookup the product
-    const randomProduct =
-      mockProducts[Math.floor(Math.random() * mockProducts.length)];
-    return randomProduct;
+    // TODO: Implement real product suggestions from database
+    return null;
   };
 
   const handleScan = (data: string) => {
@@ -413,8 +413,15 @@ export default function Cart() {
               <Card>
                 <CardContent className="p-4">
                   <h3 className="font-medium mb-3">Or try these demo items:</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {mockProducts.slice(0, 4).map((product) => (
+                  <div className="text-center text-muted-foreground py-4">
+                    <p>Product suggestions will appear here</p>
+                    <p className="text-sm">
+                      Start shopping to see personalized recommendations
+                    </p>
+                  </div>
+                  {/* TODO: Implement real product suggestions */}
+                  <div className="grid grid-cols-2 gap-2 hidden">
+                    {[].map((product: any) => (
                       <Button
                         key={product.id}
                         variant="outline"
