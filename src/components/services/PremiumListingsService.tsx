@@ -17,11 +17,6 @@ interface BoostHistory {
 }
 
 const mockBoostHistory: BoostHistory[] = [];
-  {
-    id: "1",
-    productName: "Vintage Bicycle",
-    type: "product",
-    boostedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
     duration: 24,
     views: 47,
     cost: 4.99,

@@ -25,11 +25,6 @@ interface Location {
 }
 
 const mockLocations: Location[] = [];
-  {
-    id: "1",
-    name: "Main Workshop",
-    address: "123 Main St, Downtown",
-    coordinates: { lat: 40.7128, lng: -74.006 },
     hours: "Mon-Fri 9AM-5PM",
     isDefault: true,
   },
