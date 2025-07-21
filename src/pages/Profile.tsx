@@ -41,14 +41,25 @@ import {
 import { useAppMode } from "@/contexts/AppModeContext";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { User as UserType } from "@/types";
-import { mockUser } from "@/data/mockData";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, setMode } = useAppMode();
   const { signOut, updateUserProfile, clearInvalidSession } = useSupabaseAuth();
   const [showAuth, setShowAuth] = useState(false);
-  const [localUser, setLocalUser] = useState<UserType>(user || mockUser);
+  const [localUser, setLocalUser] = useState<UserType>(
+    user || {
+      id: "",
+      email: "",
+      name: "",
+      preferences: {
+        notifications: { email: true, push: true, sms: false },
+        currency: "USD",
+        language: "English",
+        darkMode: false,
+      },
+    },
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({

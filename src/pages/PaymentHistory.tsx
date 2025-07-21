@@ -22,7 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockPaymentHistory } from "@/data/mockData";
+
 import { PaymentHistory } from "@/types";
 import { format } from "date-fns";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
