@@ -525,7 +525,7 @@ export default function SellerDashboard() {
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() => navigate("/seller/qr-codes")}
+              onClick={() => navigate("/seller/codes")}
             >
               <Package className="h-4 w-4 mr-2" />
               QR Codes & Marketing
