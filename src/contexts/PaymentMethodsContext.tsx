@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { PaymentMethod } from "@/types";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { useDemo } from "@/contexts/DemoContext";
+
 import {
   getUserPaymentMethods,
   addPaymentMethod,
@@ -30,7 +30,7 @@ export function PaymentMethodsProvider({
   children: React.ReactNode;
 }) {
   const { supabaseUser } = useSupabaseAuth();
-  const { isDemoMode } = useDemo();
+
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(false);
 
