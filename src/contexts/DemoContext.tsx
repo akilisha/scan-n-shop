@@ -41,19 +41,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   const enterDemoMode = () => {
     setIsDemoMode(true);
-    // Pre-populate demo cart with a few items
-    const demoItems: CartItem[] = [
-      {
-        id: "demo1",
-        product: mockProducts[0],
-        quantity: 2,
-      },
-      {
-        id: "demo2",
-        product: mockProducts[1],
-        quantity: 1,
-      },
-    ];
+    // No demo items - keep cart empty in demo mode
+    const demoItems: CartItem[] = [];
     setDemoCartItems(demoItems);
   };
 

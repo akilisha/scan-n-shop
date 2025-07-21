@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
-// Mock events for demo
-const mockEvents: (EventData & { id: string })[] = [
+// Real events will be fetched from database
+const mockEvents: (EventData & { id: string })[] = [];
   {
     id: "1",
     title: "Weekend Moving Sale",
