@@ -69,9 +69,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
 
       if (isSetupIntent) {
         // For adding payment methods, call backend to create setup intent
-        console.log(
-          "Setup intent mode - creating setup intent with backend...",
-        );
+        console.log("Setup intent mode - creating setup intent with backend...");
         const response = await fetch(
           "http://localhost:8000/api/create-setup-intent",
           {
@@ -133,10 +131,8 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
 
       if (testCard.result === "success") {
         // Use real data from backend response
-        const mockResult = {
-          id: isSetupIntent
-            ? paymentData.setup_intent_id
-            : paymentData.payment_intent_id,
+        const result = {
+          id: isSetupIntent ? paymentData.setup_intent_id : paymentData.payment_intent_id,
           amount: isSetupIntent ? 0 : paymentData.amount,
           currency: isSetupIntent ? currency : paymentData.currency,
           status: isSetupIntent ? "setup_succeeded" : "succeeded",
@@ -157,7 +153,7 @@ const StripePaymentFormStub: React.FC<StripePaymentFormStubProps> = ({
           client_secret: paymentData.client_secret,
         };
 
-        onSuccess(mockResult);
+        onSuccess(result);
       } else {
         // Simulate payment error
         const errorMessages = {
