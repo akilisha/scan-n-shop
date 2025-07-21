@@ -67,7 +67,12 @@ export default function Settings() {
   };
 
   const resetAllSettings = () => {
-    setSettings(mockAppSettings);
+    setSettings({
+      notifications: { push: true, email: true, sms: false, marketing: false },
+      security: { biometric: true, twoFactor: false },
+      display: { darkMode: false, currency: "USD", language: "English" },
+      privacy: { analytics: true, dataSharing: false }
+    });
   };
 
   const headerContent = (
