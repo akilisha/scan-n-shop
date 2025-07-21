@@ -23,9 +23,8 @@ import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 // Mock location-based data for demo (events + products)
 const generateMockLocationData = (): MapItem[] => {
-  const baseLocation = { lat: 40.7128, lng: -74.006 }; // NYC
-
-  const events: MapItem[] = [
+  // Real location data will be fetched from database
+  const events: MapItem[] = [];
     {
       id: "event-1",
       type: "event",
