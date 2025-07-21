@@ -39,6 +39,7 @@ export default function SellerOnboarding() {
   const [isQuerying, setIsQuerying] = useState(false);
   const [skipDatabase, setSkipDatabase] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [dbFailureCount, setDbFailureCount] = useState(0);
 
   // Check for success/refresh params from Stripe
   const isSuccess = searchParams.get("success") === "true";
@@ -64,19 +65,28 @@ export default function SellerOnboarding() {
   ]);
 
   useEffect(() => {
-    if (supabaseUser && !skipDatabase) {
+    if (supabaseUser && !skipDatabase && dbFailureCount < 2) {
       // Add small delay to let auth context settle
       const timeoutId = setTimeout(() => {
         loadConnectAccount();
       }, 500);
 
       return () => clearTimeout(timeoutId);
-    } else if (supabaseUser && skipDatabase) {
-      // If database is disabled, just show step 1
+    } else if (supabaseUser && (skipDatabase || dbFailureCount >= 2)) {
+      // If database is disabled or failed too many times, just show step 1
+      console.log(
+        "🚫 Skipping database queries - showing account creation form",
+      );
       setCurrentStep(1);
       setConnectAccount(null);
+      setLoading(false);
+      if (dbFailureCount >= 2) {
+        setError(
+          "Database unavailable. You can still create a seller account via Stripe.",
+        );
+      }
     }
-  }, [supabaseUser, skipDatabase]);
+  }, [supabaseUser, skipDatabase, dbFailureCount]);
 
   // Handle return from Stripe onboarding
   useEffect(() => {
@@ -267,16 +277,30 @@ export default function SellerOnboarding() {
       }
     } catch (error: any) {
       console.error("💥 Exception loading connect account:", error);
+      const newFailureCount = dbFailureCount + 1;
+      setDbFailureCount(newFailureCount);
+
       if (
         error.message?.includes("timeout") ||
         error.message?.includes("timed out")
       ) {
-        console.log("⏰ Database timeout - likely not set up yet");
-        setError(
-          "Database connection timeout. You can still create a seller account via Stripe.",
+        console.log(
+          `⏰ Database timeout #${newFailureCount} - likely not set up yet`,
         );
-        setCurrentStep(1);
-        setConnectAccount(null);
+        if (newFailureCount >= 2) {
+          console.log(
+            "🚫 Too many database failures, auto-skipping database queries",
+          );
+          setError("Database unavailable. Continuing with Stripe-only mode.");
+          setCurrentStep(1);
+          setConnectAccount(null);
+        } else {
+          setError(
+            "Database connection timeout. You can still create a seller account via Stripe.",
+          );
+          setCurrentStep(1);
+          setConnectAccount(null);
+        }
       } else {
         setError(`Failed to load account: ${error.message}`);
       }
@@ -554,7 +578,24 @@ export default function SellerOnboarding() {
         {loading && !isSuccess && !isRefresh && (
           <Alert>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <AlertDescription>Loading account information...</AlertDescription>
+            <AlertDescription className="flex items-center justify-between">
+              <span>Loading account information...</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  console.log("🚫 User manually skipped database loading");
+                  setSkipDatabase(true);
+                  setDbFailureCount(2); // Force skip
+                  setLoading(false);
+                  setCurrentStep(1);
+                  setConnectAccount(null);
+                }}
+                className="ml-2"
+              >
+                Skip & Continue
+              </Button>
+            </AlertDescription>
           </Alert>
         )}
 
