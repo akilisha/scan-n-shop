@@ -8,7 +8,6 @@ import {
   setDefaultPaymentMethod,
   deletePaymentMethod,
 } from "@/lib/supabase";
-import { mockPaymentMethods } from "@/data/mockData";
 
 interface PaymentMethodsContextType {
   paymentMethods: PaymentMethod[];

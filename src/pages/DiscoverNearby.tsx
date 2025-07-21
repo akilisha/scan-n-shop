@@ -18,7 +18,7 @@ import {
   Info,
 } from "lucide-react";
 import { nativeService } from "@/lib/native";
-import { mockProducts } from "@/data/mockData";
+
 import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 // Mock location-based data for demo (events + products)

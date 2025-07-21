@@ -39,7 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { mockAppSettings } from "@/data/mockData";
+
 import { AppSettings } from "@/types";
 
 export default function Settings() {

@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { mockSubscriptions } from "@/data/mockData";
+
 import { Subscription } from "@/types";
 import { format } from "date-fns";
 
