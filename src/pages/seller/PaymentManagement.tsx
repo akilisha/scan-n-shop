@@ -45,8 +45,8 @@ export default function PaymentManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [refunding, setRefunding] = useState<string | null>(null);
 
-  // Mock seller payment data
-  const [payments] = useState([
+  // Real payment data will be loaded from database
+  const [payments] = useState([]);
     {
       id: "pay_1",
       buyerInfo: { name: "John Doe", email: "john@example.com" },
