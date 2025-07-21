@@ -67,18 +67,14 @@ export function LocationPicker({
     // Check permission status first
     const permissionStatus = await nativeService.getLocationPermissionStatus();
 
-    if (permissionStatus === "denied") {
-      setError(
-        "Location access was previously denied. You can still search by entering an address below, or enable location in your browser settings.",
-      );
+    if (permissionStatus === 'denied') {
+      setError("Location access was previously denied. You can still search by entering an address below, or enable location in your browser settings.");
       setIsLoadingLocation(false);
       return;
     }
 
-    if (permissionStatus === "unsupported") {
-      setError(
-        "Location services are not supported. Please enter an address manually.",
-      );
+    if (permissionStatus === 'unsupported') {
+      setError("Location services are not supported. Please enter an address manually.");
       setIsLoadingLocation(false);
       return;
     }
@@ -121,9 +117,7 @@ export function LocationPicker({
       }
     } catch (error) {
       console.log("Location not available:", error);
-      setError(
-        "No problem! Location access isn't required. Just enter your address below and we'll help customers find you.",
-      );
+      setError("No problem! Location access isn't required. Just enter your address below and we'll help customers find you.");
       // Don't show haptic error for location denial - it's not an error
     } finally {
       setIsLoadingLocation(false);
@@ -153,8 +147,8 @@ export function LocationPicker({
 
     try {
       // In a real app, you'd use Google Places API or similar
-      // For now, return mock suggestions
-      const mockSuggestions = [
+      // Return empty suggestions until real API integration
+      const mockSuggestions = [];
         {
           place_id: "1",
           formatted_address: `${query}, City, State 12345`,
@@ -278,9 +272,7 @@ export function LocationPicker({
 
         {/* Helpful tip for location */}
         <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
-          💡 <strong>Pro tip:</strong> You don't need to enable location! Just
-          type your address, neighborhood, or nearby landmark below. Customers
-          will still be able to find you easily.
+          💡 <strong>Pro tip:</strong> You don't need to enable location! Just type your address, neighborhood, or nearby landmark below. Customers will still be able to find you easily.
         </div>
 
         {/* Address Search */}
