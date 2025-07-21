@@ -18,19 +18,8 @@ export function AppModeProvider({ children }: { children: React.ReactNode }) {
   // Get user from Supabase auth
   const { user: supabaseUser } = useSupabaseAuth();
 
-  // Access demo context safely
-  let demoUser = null;
-  let isDemoMode = false;
-  try {
-    const demo = useDemo();
-    demoUser = demo?.demoUser;
-    isDemoMode = demo?.isDemoMode || false;
-  } catch {
-    // Demo context not available, continue normally
-  }
-
-  // Use demo user when in demo mode, otherwise use Supabase user
-  const effectiveUser = isDemoMode ? demoUser : supabaseUser;
+  // Always use real Supabase user
+  const effectiveUser = supabaseUser;
 
   // Check seller access based on user subscriptions
   // Only allow seller access if they have completed the subscription flow
