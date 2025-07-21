@@ -37,9 +37,8 @@ export default function SellerOnboarding() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isQuerying, setIsQuerying] = useState(false);
-  const [skipDatabase, setSkipDatabase] = useState(true); // Default to skip due to persistent issues
+  const [skipDatabase, setSkipDatabase] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [dbFailureCount, setDbFailureCount] = useState(0);
 
   // Check for success/refresh params from Stripe
   const isSuccess = searchParams.get("success") === "true";
@@ -65,28 +64,19 @@ export default function SellerOnboarding() {
   ]);
 
   useEffect(() => {
-    if (supabaseUser && !skipDatabase && dbFailureCount < 2) {
+    if (supabaseUser && !skipDatabase) {
       // Add small delay to let auth context settle
       const timeoutId = setTimeout(() => {
         loadConnectAccount();
       }, 500);
 
       return () => clearTimeout(timeoutId);
-    } else if (supabaseUser && (skipDatabase || dbFailureCount >= 2)) {
-      // If database is disabled or failed too many times, just show step 1
-      console.log(
-        "🚫 Skipping database queries - showing account creation form",
-      );
+    } else if (supabaseUser && skipDatabase) {
+      // If database is disabled, just show step 1
       setCurrentStep(1);
       setConnectAccount(null);
-      setLoading(false);
-      if (dbFailureCount >= 2) {
-        setError(
-          "Database unavailable. You can still create a seller account via Stripe.",
-        );
-      }
     }
-  }, [supabaseUser, skipDatabase, dbFailureCount]);
+  }, [supabaseUser, skipDatabase]);
 
   // Handle return from Stripe onboarding
   useEffect(() => {
@@ -133,17 +123,12 @@ export default function SellerOnboarding() {
       return;
     }
 
-    // Skip database entirely if requested OR if we've had failures
-    if (skipDatabase || dbFailureCount >= 1) {
-      console.log(
-        "⏭️ Database queries disabled/failed, showing create account form",
-      );
+    // Skip database entirely if requested
+    if (skipDatabase) {
+      console.log("⏭️ Database queries disabled, showing create account form");
       setCurrentStep(1);
       setConnectAccount(null);
       setLoading(false);
-      setError(
-        "Database connection unavailable. Stripe account creation still works!",
-      );
       return;
     }
 
@@ -282,33 +267,7 @@ export default function SellerOnboarding() {
       }
     } catch (error: any) {
       console.error("💥 Exception loading connect account:", error);
-      const newFailureCount = dbFailureCount + 1;
-      setDbFailureCount(newFailureCount);
-
-      if (
-        error.message?.includes("timeout") ||
-        error.message?.includes("timed out")
-      ) {
-        console.log(
-          `⏰ Database timeout #${newFailureCount} - likely not set up yet`,
-        );
-        if (newFailureCount >= 2) {
-          console.log(
-            "🚫 Too many database failures, auto-skipping database queries",
-          );
-          setError("Database unavailable. Continuing with Stripe-only mode.");
-          setCurrentStep(1);
-          setConnectAccount(null);
-        } else {
-          setError(
-            "Database connection timeout. You can still create a seller account via Stripe.",
-          );
-          setCurrentStep(1);
-          setConnectAccount(null);
-        }
-      } else {
-        setError(`Failed to load account: ${error.message}`);
-      }
+      setError(`Failed to load account: ${error.message}`);
     } finally {
       setLoading(false);
       setIsQuerying(false);
@@ -583,74 +542,26 @@ export default function SellerOnboarding() {
         {loading && !isSuccess && !isRefresh && (
           <Alert>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>Loading account information...</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  console.log("🚫 User manually skipped database loading");
-                  setSkipDatabase(true);
-                  setDbFailureCount(2); // Force skip
-                  setLoading(false);
-                  setCurrentStep(1);
-                  setConnectAccount(null);
-                }}
-                className="ml-2"
-              >
-                Skip & Continue
-              </Button>
-            </AlertDescription>
+            <AlertDescription>Loading account information...</AlertDescription>
           </Alert>
         )}
 
         {error && (
-          <Alert
-            variant={error.includes("Database") ? "default" : "destructive"}
-          >
+          <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              <div className="space-y-2">
-                <span>{error}</span>
-                {error.includes("Database") && (
-                  <div className="text-xs text-muted-foreground">
-                    <strong>Good news:</strong> The Stripe integration still
-                    works! You can create a seller account and it will be saved
-                    via the Stripe API. The database is only needed for faster
-                    loading.
-                  </div>
-                )}
-                <div className="flex items-center justify-end space-x-2">
-                  {skipDatabase && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSkipDatabase(false);
-                        setDbFailureCount(0);
-                        setError(null);
-                        loadConnectAccount();
-                      }}
-                      className="mt-2"
-                    >
-                      Try Database
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setError(null);
-                      setSkipDatabase(true);
-                      setCurrentStep(1);
-                      setConnectAccount(null);
-                    }}
-                    className="mt-2"
-                  >
-                    Continue Without DB
-                  </Button>
-                </div>
-              </div>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setError(null);
+                  loadConnectAccount();
+                }}
+                className="ml-2"
+              >
+                Retry
+              </Button>
             </AlertDescription>
           </Alert>
         )}
