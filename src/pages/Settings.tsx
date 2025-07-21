@@ -45,7 +45,12 @@ import { AppSettings } from "@/types";
 export default function Settings() {
   const navigate = useNavigate();
   const { user, canAccessSellerMode, setMode } = useAppMode();
-  const [settings, setSettings] = useState<AppSettings>(mockAppSettings);
+  const [settings, setSettings] = useState<AppSettings>({
+    notifications: { push: true, email: true, sms: false, marketing: false },
+    security: { biometric: true, twoFactor: false },
+    display: { darkMode: false, currency: "USD", language: "English" },
+    privacy: { analytics: true, dataSharing: false }
+  });
 
   const updateSetting = (
     category: keyof AppSettings,

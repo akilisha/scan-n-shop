@@ -31,8 +31,7 @@ import { format } from "date-fns";
 
 export default function Subscriptions() {
   const navigate = useNavigate();
-  const [subscriptions, setSubscriptions] =
-    useState<Subscription[]>(mockSubscriptions);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 
   const cancelSubscription = (id: string) => {
     setSubscriptions(
