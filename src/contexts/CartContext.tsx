@@ -17,35 +17,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Access demo context safely
-  let demoCartItems: CartItem[] = [];
-  let isDemoMode = false;
-  let addDemoItem: ((productId: string) => void) | undefined;
-  let updateDemoQuantity:
-    | ((itemId: string, newQuantity: number) => void)
-    | undefined;
-  let removeDemoItem: ((itemId: string) => void) | undefined;
-  let clearDemoCart: (() => void) | undefined;
-
-  try {
-    const demo = useDemo();
-    if (demo) {
-      demoCartItems = demo.demoCartItems || [];
-      isDemoMode = demo.isDemoMode || false;
-      addDemoItem = demo.addDemoItem;
-      updateDemoQuantity = demo.updateDemoQuantity;
-      removeDemoItem = demo.removeDemoItem;
-      clearDemoCart = demo.clearDemoCart;
-    }
-  } catch {
-    // Demo context not available, continue normally
-    isDemoMode = false;
-    demoCartItems = [];
-  }
-
-  // Use demo cart when in demo mode, otherwise use real cart
-  const effectiveCartItems =
-    isDemoMode && demoCartItems.length >= 0 ? demoCartItems : cartItems;
+  // Always use real cart - no more demo mode
+  const effectiveCartItems = cartItems;
 
   // Load cart from localStorage on mount
   useEffect(() => {
