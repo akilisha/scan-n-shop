@@ -1,296 +1,538 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { SellerBottomNavigation } from "@/components/SellerBottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import {
-  TrendingUp,
-  Package,
-  CreditCard,
-  Users,
-  Plus,
-  Eye,
-  ArrowUpRight,
+  ArrowLeft,
+  Store,
   DollarSign,
-  Calendar,
-  QrCode,
+  Package,
+  TrendingUp,
+  Plus,
+  ExternalLink,
+  CheckCircle,
+  AlertTriangle,
+  Loader2,
+  Settings,
+  BarChart3,
+  ShoppingCart,
+  Users,
 } from "lucide-react";
-import { useAppMode } from "@/contexts/AppModeContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { getUserConnectAccount } from "@/lib/stripe-connect";
+import { AuthModal } from "@/components/AuthModal";
 
 export default function SellerDashboard() {
   const navigate = useNavigate();
-  const { user } = useAppMode();
-
-  // Mock seller data
-  const [dashboardData] = useState({
-    todayRevenue: 1247.5,
-    todayOrders: 23,
-    totalProducts: 45,
-    totalCustomers: 234,
-    recentPayments: [
-      {
-        id: "1",
-        customer: "John Doe",
-        amount: 49.99,
-        product: "Wireless Earbuds",
-        time: "2 min ago",
-        status: "completed" as const,
-      },
-      {
-        id: "2",
-        customer: "Sarah Wilson",
-        amount: 24.99,
-        product: "Premium Coffee",
-        time: "15 min ago",
-        status: "completed" as const,
-      },
-      {
-        id: "3",
-        customer: "Mike Johnson",
-        amount: 89.99,
-        product: "Yoga Mat + Water Bottle",
-        time: "1 hr ago",
-        status: "pending" as const,
-      },
-    ],
-    topProducts: [
-      { name: "Wireless Earbuds", sales: 12, revenue: 1799.88 },
-      { name: "Premium Coffee", sales: 8, revenue: 199.92 },
-      { name: "Yoga Mat", sales: 6, revenue: 275.94 },
-    ],
+  const { supabaseUser, user } = useSupabaseAuth();
+  const [connectAccount, setConnectAccount] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [stats, setStats] = useState({
+    totalEarnings: 0,
+    productCount: 0,
+    orderCount: 0,
+    recentOrders: [],
   });
 
+  useEffect(() => {
+    if (supabaseUser) {
+      loadSellerData();
+    } else {
+      setLoading(false);
+    }
+  }, [supabaseUser]);
+
+  const loadSellerData = async () => {
+    if (!supabaseUser) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Load Stripe Connect account
+      const { data: accountData, error: accountError } =
+        await getUserConnectAccount(supabaseUser.id);
+
+      if (accountData && !accountError) {
+        setConnectAccount(accountData);
+
+        // Check live status with Stripe API
+        await checkLiveAccountStatus(accountData.stripe_account_id);
+      } else if (
+        accountError &&
+        !accountError.message?.includes(
+          'relation "connect_accounts" does not exist',
+        )
+      ) {
+        setError(`Account error: ${accountError.message}`);
+      }
+
+      // TODO: Load real seller stats from database
+      // For now, show honest empty state
+      setStats({
+        totalEarnings: 0,
+        productCount: 0,
+        orderCount: 0,
+        recentOrders: [],
+      });
+    } catch (error: any) {
+      console.error("Error loading seller data:", error);
+      setError(`Failed to load data: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkLiveAccountStatus = async (stripeAccountId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/stripe-connect/connect/account/${stripeAccountId}`,
+        { signal: AbortSignal.timeout(10000) },
+      );
+
+      if (response.ok) {
+        const liveAccountData = await response.json();
+        setConnectAccount((prev: any) => ({
+          ...prev,
+          ...liveAccountData,
+        }));
+      }
+    } catch (error) {
+      console.warn("Could not fetch live account status:", error);
+      // Continue with database data
+    }
+  };
+
+  const getAccountStatusBadge = () => {
+    if (!connectAccount) return null;
+
+    if (connectAccount.charges_enabled && connectAccount.payouts_enabled) {
+      return (
+        <Badge className="bg-success/10 text-success border-success/20">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Active
+        </Badge>
+      );
+    }
+
+    if (connectAccount.details_submitted) {
+      return (
+        <Badge className="bg-warning/10 text-warning border-warning/20">
+          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+          Under Review
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge variant="outline" className="border-orange-200">
+        <AlertTriangle className="h-3 w-3 mr-1" />
+        Setup Required
+      </Badge>
+    );
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
   const headerContent = (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center space-x-4">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate("/")}
+        className="p-2"
+      >
+        <ArrowLeft size={20} />
+      </Button>
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Seller Dashboard</h1>
+        <h1 className="text-xl font-semibold">Seller Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Welcome back, {user?.name || "Seller"}
+          Manage your store and earnings
         </p>
       </div>
-      <Button onClick={() => navigate("/seller/products/new")} size="sm">
-        <Plus size={16} className="mr-1" />
-        Add Product
-      </Button>
     </div>
   );
 
+  if (!supabaseUser) {
+    return (
+      <>
+        <Layout headerContent={headerContent} showBottomNav={false}>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Card className="w-full">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                  <Store className="h-10 w-10 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
+                <p className="text-muted-foreground text-center mb-8">
+                  Please sign in to access your seller dashboard
+                </p>
+                <div className="w-full space-y-3">
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={() => setShowAuth(true)}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => navigate("/")}
+                  >
+                    Continue Shopping
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </Layout>
+
+        <AuthModal
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => setShowAuth(false)}
+          mode="login"
+        />
+      </>
+    );
+  }
+
   return (
-    <Layout
-      headerContent={headerContent}
-      showBottomNav={false}
-      className="pb-20"
-    >
+    <Layout headerContent={headerContent} showBottomNav={false}>
       <div className="space-y-6">
-        {/* Key Metrics */}
+        {/* Loading State */}
+        {loading && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <AlertDescription>
+              Loading your seller dashboard...
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadSellerData}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Account Status */}
+        {connectAccount ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Store className="h-5 w-5" />
+                  <span>Stripe Connect Account</span>
+                </div>
+                {getAccountStatusBadge()}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-xs text-muted-foreground">Charges</div>
+                  <div
+                    className={`font-semibold ${
+                      connectAccount.charges_enabled
+                        ? "text-success"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {connectAccount.charges_enabled ? "Enabled" : "Disabled"}
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-xs text-muted-foreground">Payouts</div>
+                  <div
+                    className={`font-semibold ${
+                      connectAccount.payouts_enabled
+                        ? "text-success"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {connectAccount.payouts_enabled ? "Enabled" : "Disabled"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-sm">
+                  <strong>Account ID:</strong>{" "}
+                  {connectAccount.stripe_account_id}
+                </div>
+                <div className="text-sm">
+                  <strong>Business Type:</strong>{" "}
+                  {connectAccount.business_type || "Individual"}
+                </div>
+                <div className="text-sm">
+                  <strong>Country:</strong> {connectAccount.country || "US"}
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  window.open(
+                    `http://localhost:8000/api/stripe-connect/connect/dashboard-link/${connectAccount.stripe_account_id}`,
+                    "_blank",
+                  )
+                }
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Stripe Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          !loading && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Store className="h-5 w-5" />
+                  <span>Get Started Selling</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Set up your seller account to start accepting payments and
+                  managing products.
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={() => navigate("/seller/onboarding")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Seller Account
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        )}
+
+        {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Today's Revenue
-                  </p>
-                  <p className="text-lg font-bold text-success">
-                    ${dashboardData.todayRevenue.toFixed(2)}
-                  </p>
-                </div>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-primary">
+                {formatCurrency(stats.totalEarnings)}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Total Earnings
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <CreditCard className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Orders Today</p>
-                  <p className="text-lg font-bold">
-                    {dashboardData.todayOrders}
-                  </p>
-                </div>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-primary">
+                {stats.productCount}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-coral-500/10 rounded-full flex items-center justify-center">
-                  <Package className="h-5 w-5 text-coral-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Products</p>
-                  <p className="text-lg font-bold">
-                    {dashboardData.totalProducts}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-peach-500/10 rounded-full flex items-center justify-center">
-                  <Users className="h-5 w-5 text-peach-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Customers</p>
-                  <p className="text-lg font-bold">
-                    {dashboardData.totalCustomers}
-                  </p>
-                </div>
-              </div>
+              <div className="text-sm text-muted-foreground">Products</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Action Items */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5" />
+              <span>Quick Actions</span>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+          <CardContent className="space-y-3">
+            {stats.productCount === 0 && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <Package className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Get started:</strong> Add your first product to begin
+                  selling
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid gap-3">
               <Button
-                variant="outline"
-                className="h-16 flex flex-col justify-center"
-                onClick={() => navigate("/seller/products")}
-              >
-                <Package size={20} className="mb-1" />
-                <span className="text-sm">My Products</span>
-              </Button>
-              <Button
-                className="h-16 flex flex-col justify-center"
+                className="w-full justify-start"
+                variant={stats.productCount === 0 ? "default" : "outline"}
                 onClick={() => navigate("/seller/products/new")}
               >
-                <Plus size={20} className="mb-1" />
-                <span className="text-sm">Add Product</span>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
               </Button>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
               <Button
                 variant="outline"
-                className="h-16 flex flex-col justify-center"
-                onClick={() => navigate("/seller/codes")}
+                className="w-full justify-start"
+                onClick={() => navigate("/seller/products")}
               >
-                <QrCode size={20} className="mb-1" />
-                <span className="text-sm">Generate Codes</span>
+                <Package className="h-4 w-4 mr-2" />
+                Manage Products
+                <Badge variant="secondary" className="ml-auto">
+                  {stats.productCount}
+                </Badge>
               </Button>
+
               <Button
                 variant="outline"
-                className="h-16 flex flex-col justify-center"
+                className="w-full justify-start"
+                onClick={() => navigate("/seller/analytics")}
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                View Analytics
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start"
                 onClick={() => navigate("/seller/events")}
               >
-                <Calendar size={20} className="mb-1" />
-                <span className="text-sm">My Events</span>
+                <Users className="h-4 w-4 mr-2" />
+                Manage Events
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Recent Payments */}
+        {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Recent Payments</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/seller/payments")}
-              >
-                <Eye size={14} className="mr-1" />
-                View All
-              </Button>
-            </div>
+            <CardTitle className="flex items-center space-x-2">
+              <ShoppingCart className="h-5 w-5" />
+              <span>Recent Orders</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {dashboardData.recentPayments.map((payment) => (
-                <div
-                  key={payment.id}
-                  className="flex items-center justify-between"
+            {stats.orderCount === 0 ? (
+              <div className="text-center py-8">
+                <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-medium mb-2">No orders yet</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Once customers start purchasing your products, their orders
+                  will appear here.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/seller/products/new")}
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {payment.customer}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {payment.product}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">${payment.amount}</p>
-                    <div className="flex items-center space-x-1">
-                      <Badge
-                        variant={
-                          payment.status === "completed"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className="text-xs"
-                      >
-                        {payment.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  Add Your First Product
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Real orders will be displayed here */}
+                <p className="text-sm text-muted-foreground">
+                  Order history will be loaded from your actual transactions.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Top Products */}
+        {/* Fee Calculator */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Top Products Today
+            <CardTitle className="flex items-center space-x-2">
+              <DollarSign className="h-5 w-5" />
+              <span>Earnings Calculator</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {dashboardData.topProducts.map((product, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">
-                        #{index + 1}
+              <div className="text-sm text-muted-foreground">
+                Calculate your earnings for different sale amounts:
+              </div>
+
+              {[25, 50, 100, 200].map((amount) => {
+                const platformFee = amount * 0.029 + 0.3;
+                const youReceive = amount - platformFee;
+
+                return (
+                  <div
+                    key={amount}
+                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  >
+                    <div className="text-sm">
+                      <span className="font-medium">
+                        {formatCurrency(amount)}
+                      </span>{" "}
+                      sale
+                    </div>
+                    <div className="text-sm space-x-4 text-right">
+                      <span className="text-muted-foreground">
+                        Fee: {formatCurrency(platformFee)}
+                      </span>
+                      <span className="font-semibold text-success">
+                        You get: {formatCurrency(youReceive)}
                       </span>
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {product.sales} sales
-                      </p>
-                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">
-                      ${product.revenue.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-success flex items-center">
-                      <ArrowUpRight size={10} className="mr-1" />+
-                      {product.sales}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
+
+              <div className="text-xs text-muted-foreground pt-2 border-t">
+                Platform fee: 2.9% + $0.30 per transaction. No monthly fees or
+                hidden costs.
+              </div>
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      <SellerBottomNavigation />
+        {/* Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Settings className="h-5 w-5" />
+              <span>Account Settings</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/seller/onboarding")}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Account Setup
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate("/seller/qr-codes")}
+            >
+              <Package className="h-4 w-4 mr-2" />
+              QR Codes & Marketing
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </Layout>
   );
 }
