@@ -412,7 +412,7 @@ export default function Cart() {
             <>
               <Card>
                 <CardContent className="p-4">
-                  <h3 className="font-medium mb-3">Or try these demo items:</h3>
+                  <h3 className="font-medium mb-3">Suggested items:</h3>
                   <div className="text-center text-muted-foreground py-4">
                     <p>Product suggestions will appear here</p>
                     <p className="text-sm">
@@ -435,7 +435,7 @@ export default function Cart() {
                     ))}
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">
-                    For demo purposes - normally you'd scan these items
+                    Scan items with your camera or add them manually
                   </p>
                 </CardContent>
               </Card>
