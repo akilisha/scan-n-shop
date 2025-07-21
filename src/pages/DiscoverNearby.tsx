@@ -450,7 +450,9 @@ export default function DiscoverNearby() {
 
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary">5km</div>
+              <div className="text-2xl font-bold text-primary">
+                {searchResults.length > 0 ? "5km" : "-"}
+              </div>
               <div className="text-sm text-muted-foreground">Search Radius</div>
             </CardContent>
           </Card>
