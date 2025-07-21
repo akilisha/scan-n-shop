@@ -7,7 +7,6 @@ import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { PaymentMethodsProvider } from "@/contexts/PaymentMethodsContext";
 import { AppModeProvider } from "@/contexts/AppModeContext";
 import { CartProvider } from "@/contexts/CartContext";
-import { DemoProvider } from "@/contexts/DemoContext";
 
 // Buyer Mode Pages
 import Cart from "./pages/Cart";
