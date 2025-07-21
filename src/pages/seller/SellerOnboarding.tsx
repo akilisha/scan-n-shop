@@ -37,7 +37,7 @@ export default function SellerOnboarding() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isQuerying, setIsQuerying] = useState(false);
-  const [skipDatabase, setSkipDatabase] = useState(false);
+  const [skipDatabase, setSkipDatabase] = useState(true); // Default to skip due to persistent issues
   const [showAuth, setShowAuth] = useState(false);
   const [dbFailureCount, setDbFailureCount] = useState(0);
 
@@ -133,12 +133,17 @@ export default function SellerOnboarding() {
       return;
     }
 
-    // Skip database entirely if requested
-    if (skipDatabase) {
-      console.log("⏭️ Database queries disabled, showing create account form");
+    // Skip database entirely if requested OR if we've had failures
+    if (skipDatabase || dbFailureCount >= 1) {
+      console.log(
+        "⏭️ Database queries disabled/failed, showing create account form",
+      );
       setCurrentStep(1);
       setConnectAccount(null);
       setLoading(false);
+      setError(
+        "Database connection unavailable. Stripe account creation still works!",
+      );
       return;
     }
 
@@ -615,17 +620,34 @@ export default function SellerOnboarding() {
                     loading.
                   </div>
                 )}
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-end space-x-2">
+                  {skipDatabase && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSkipDatabase(false);
+                        setDbFailureCount(0);
+                        setError(null);
+                        loadConnectAccount();
+                      }}
+                      className="mt-2"
+                    >
+                      Try Database
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
                       setError(null);
-                      loadConnectAccount();
+                      setSkipDatabase(true);
+                      setCurrentStep(1);
+                      setConnectAccount(null);
                     }}
                     className="mt-2"
                   >
-                    Retry
+                    Continue Without DB
                   </Button>
                 </div>
               </div>
