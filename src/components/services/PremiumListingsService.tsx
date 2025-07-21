@@ -16,7 +16,7 @@ interface BoostHistory {
   status: "active" | "completed" | "expired";
 }
 
-const mockBoostHistory: BoostHistory[] = [
+const mockBoostHistory: BoostHistory[] = [];
   {
     id: "1",
     productName: "Vintage Bicycle",

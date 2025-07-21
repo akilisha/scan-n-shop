@@ -47,9 +47,6 @@ export default function PaymentManagement() {
 
   // Real payment data will be loaded from database
   const [payments] = useState([]);
-    {
-      id: "pay_1",
-      buyerInfo: { name: "John Doe", email: "john@example.com" },
       amount: 149.99,
       fees: { stripe: 4.65, platform: 7.5 },
       netAmount: 137.84,

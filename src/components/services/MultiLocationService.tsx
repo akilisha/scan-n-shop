@@ -24,7 +24,7 @@ interface Location {
   isDefault: boolean;
 }
 
-const mockLocations: Location[] = [
+const mockLocations: Location[] = [];
   {
     id: "1",
     name: "Main Workshop",
