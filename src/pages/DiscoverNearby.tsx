@@ -45,10 +45,9 @@ export default function DiscoverNearby() {
   const [showProductDetail, setShowProductDetail] = useState(false);
 
   useEffect(() => {
-    // Load initial nearby items
-    const mockData = generateMockLocationData();
-    setAllItems(mockData);
-    setSearchResults(mockData);
+    // Load initial nearby items - empty until real data is available
+    setAllItems([]);
+    setSearchResults([]);
 
     // Load saved locations from storage
     loadSavedLocations();
