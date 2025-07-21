@@ -155,14 +155,30 @@ export default function SellerOnboarding() {
           .from("connect_accounts")
           .select("*")
           .eq("user_id", supabaseUser.id)
-          .single(),
+          .single()
+          .then((result) => {
+            console.log("✅ Direct Supabase query completed:", result);
+            return result;
+          })
+          .catch((error) => {
+            console.log("❌ Direct Supabase query failed:", error);
+            return { data: null, error };
+          }),
         new Promise<{ data: any; error: any }>((_, reject) =>
           setTimeout(
-            () => reject(new Error("Direct query timeout after 5 seconds")),
-            5000,
+            () =>
+              reject(
+                new Error(
+                  "Database query timed out - this usually means the database is not set up yet",
+                ),
+              ),
+            3000, // Reduced timeout
           ),
         ),
-      ]);
+      ]).catch((error) => {
+        console.log("⏰ Query timeout or error:", error);
+        return { data: null, error: { message: error.message } };
+      });
 
       console.log("📋 Direct query result:", directResult);
 
