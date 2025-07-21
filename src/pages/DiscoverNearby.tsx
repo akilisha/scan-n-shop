@@ -25,47 +25,6 @@ import { ProductDetailModal } from "@/components/ProductDetailModal";
 const generateMockLocationData = (): MapItem[] => {
   // Real location data will be fetched from database
   const events: MapItem[] = [];
-    {
-      id: "event-1",
-      type: "event",
-      latitude: baseLocation.lat + 0.01,
-      longitude: baseLocation.lng + 0.008,
-      title: "Weekend Garage Sale - Moving Sale!",
-      description: "Everything must go! Furniture, electronics, clothes, books",
-      eventType: "garage_sale",
-      startDate: new Date(Date.now() + 86400000), // Tomorrow
-      endDate: new Date(Date.now() + 172800000), // Day after tomorrow
-      tags: ["furniture", "electronics", "vintage"],
-      sellerName: "Sarah Johnson",
-      distance: 1.2,
-    },
-    {
-      id: "event-2",
-      type: "event",
-      latitude: baseLocation.lat - 0.015,
-      longitude: baseLocation.lng + 0.012,
-      title: "Downtown Farmers Market",
-      description: "Fresh produce, local crafts, artisan goods",
-      eventType: "farmers_market",
-      startDate: new Date(Date.now() + 259200000), // 3 days
-      tags: ["fresh", "local", "organic"],
-      sellerName: "Market Collective",
-      distance: 2.1,
-    },
-    {
-      id: "event-3",
-      type: "event",
-      latitude: baseLocation.lat + 0.008,
-      longitude: baseLocation.lng - 0.018,
-      title: "Estate Sale - Antique Treasures",
-      description: "Rare antiques, vintage jewelry, collectibles",
-      eventType: "estate_sale",
-      startDate: new Date(Date.now() + 518400000), // 6 days
-      tags: ["antiques", "vintage", "jewelry"],
-      sellerName: "Heritage Estates",
-      distance: 1.8,
-    },
-  ];
 
   // Real local products will be fetched from database
   const localProducts: MapItem[] = [];
