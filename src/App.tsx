@@ -48,91 +48,78 @@ const App = () => (
         <PaymentMethodsProvider>
           <CartProvider>
             <AppModeProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <Routes>
-                    {/* Buyer Mode Routes */}
-                    <Route path="/" element={<Cart />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route
-                      path="/payment-methods"
-                      element={<PaymentMethods />}
-                    />
-                    <Route
-                      path="/payment-history"
-                      element={<PaymentHistory />}
-                    />
-                    <Route path="/order-details" element={<OrderDetails />} />
-                    <Route
-                      path="/order-details/:orderId"
-                      element={<OrderDetails />}
-                    />
-                    <Route path="/subscriptions" element={<Plans />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route
-                      path="/seller-subscription"
-                      element={<SellerSubscription />}
-                    />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/referrals" element={<Referrals />} />
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  {/* Buyer Mode Routes */}
+                  <Route path="/" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/payment-methods" element={<PaymentMethods />} />
+                  <Route path="/payment-history" element={<PaymentHistory />} />
+                  <Route path="/order-details" element={<OrderDetails />} />
+                  <Route
+                    path="/order-details/:orderId"
+                    element={<OrderDetails />}
+                  />
+                  <Route path="/subscriptions" element={<Plans />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route
+                    path="/seller-subscription"
+                    element={<SellerSubscription />}
+                  />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/referrals" element={<Referrals />} />
 
-                    {/* Location-Based Discovery Routes */}
-                    <Route path="/discover" element={<DiscoverNearby />} />
+                  {/* Location-Based Discovery Routes */}
+                  <Route path="/discover" element={<DiscoverNearby />} />
 
-                    {/* Seller Mode Routes */}
-                    <Route path="/seller" element={<SellerDashboard />} />
-                    <Route
-                      path="/seller/products"
-                      element={<ProductManager />}
-                    />
-                    <Route
-                      path="/seller/products/new"
-                      element={<AddProduct />}
-                    />
-                    <Route
-                      path="/seller/products/edit/:productId"
-                      element={<EditProduct />}
-                    />
-                    <Route path="/seller/codes" element={<CodeGenerator />} />
-                    <Route
-                      path="/seller/payments"
-                      element={<PaymentManagement />}
-                    />
-                    <Route path="/seller/events" element={<EventManager />} />
-                    <Route
-                      path="/seller/onboarding"
-                      element={<SellerOnboarding />}
-                    />
+                  {/* Seller Mode Routes */}
+                  <Route path="/seller" element={<SellerDashboard />} />
+                  <Route path="/seller/products" element={<ProductManager />} />
+                  <Route path="/seller/products/new" element={<AddProduct />} />
+                  <Route
+                    path="/seller/products/edit/:productId"
+                    element={<EditProduct />}
+                  />
+                  <Route path="/seller/codes" element={<CodeGenerator />} />
+                  <Route
+                    path="/seller/payments"
+                    element={<PaymentManagement />}
+                  />
+                  <Route path="/seller/events" element={<EventManager />} />
+                  <Route
+                    path="/seller/onboarding"
+                    element={<SellerOnboarding />}
+                  />
 
-                    {/* Value-Added Service Management Routes */}
-                    <Route
-                      path="/seller/services/premium_listings"
-                      element={<PremiumListingsManager />}
-                    />
-                    <Route
-                      path="/seller/services/custom_branding"
-                      element={<CustomBrandingManager />}
-                    />
-                    <Route
-                      path="/seller/services/multi_location"
-                      element={<MultiLocationManager />}
-                    />
-                    <Route
-                      path="/seller/services/:serviceId/coming-soon"
-                      element={<ComingSoon />}
-                    />
-                    {/* Add more seller routes as they're created */}
+                  {/* Value-Added Service Management Routes */}
+                  <Route
+                    path="/seller/services/premium_listings"
+                    element={<PremiumListingsManager />}
+                  />
+                  <Route
+                    path="/seller/services/custom_branding"
+                    element={<CustomBrandingManager />}
+                  />
+                  <Route
+                    path="/seller/services/multi_location"
+                    element={<MultiLocationManager />}
+                  />
+                  <Route
+                    path="/seller/services/:serviceId/coming-soon"
+                    element={<ComingSoon />}
+                  />
+                  {/* Add more seller routes as they're created */}
 
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-              </AppModeProvider>
-            </CartProvider>
-          </PaymentMethodsProvider>
-        </DemoProvider>
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </AppModeProvider>
+          </CartProvider>
+        </PaymentMethodsProvider>
       </SupabaseAuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
