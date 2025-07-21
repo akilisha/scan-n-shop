@@ -25,27 +25,6 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 // Real events will be fetched from database
 const mockEvents: (EventData & { id: string })[] = [];
-  {
-    id: "1",
-    title: "Weekend Moving Sale",
-    description: "Everything must go! Furniture, electronics, books, and more.",
-    eventType: "garage_sale",
-    location: {
-      latitude: 40.7128,
-      longitude: -74.006,
-      address: "123 Main St, New York, NY",
-      locationName: "My Garage",
-      searchRadius: 5,
-    },
-    startDate: new Date(Date.now() + 86400000), // Tomorrow
-    endDate: new Date(Date.now() + 172800000), // Day after
-    isRecurring: false,
-    entryFee: 0,
-    tags: ["furniture", "electronics", "books"],
-    images: [],
-    status: "active",
-  },
-];
 
 export default function EventManager() {
   const navigate = useNavigate();
