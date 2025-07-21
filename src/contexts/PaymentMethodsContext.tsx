@@ -34,22 +34,17 @@ export function PaymentMethodsProvider({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Use mock data only in demo mode AND when user is not authenticated
-  // Never show mock data for authenticated users
-  const effectivePaymentMethods = supabaseUser
-    ? paymentMethods
-    : isDemoMode
-      ? mockPaymentMethods
-      : paymentMethods;
+  // Always use real payment methods
+  const effectivePaymentMethods = paymentMethods;
 
   useEffect(() => {
-    if (supabaseUser && !isDemoMode) {
+    if (supabaseUser) {
       loadUserPaymentMethods();
-    } else if (!supabaseUser) {
+    } else {
       // Clear payment methods when user logs out
       setPaymentMethods([]);
     }
-  }, [supabaseUser, isDemoMode]);
+  }, [supabaseUser]);
 
   const loadUserPaymentMethods = async () => {
     if (!supabaseUser) return;
