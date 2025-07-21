@@ -21,15 +21,9 @@ import { nativeService } from "@/lib/native";
 
 import { ProductDetailModal } from "@/components/ProductDetailModal";
 
-// Mock location-based data for demo (events + products)
+// Real location data will be fetched from database when available
 const generateMockLocationData = (): MapItem[] => {
-  // Real location data will be fetched from database
-  const events: MapItem[] = [];
-
-  // Real local products will be fetched from database
-  const localProducts: MapItem[] = [];
-
-  return [...events, ...localProducts];
+  return []; // Empty until real data integration
 };
 
 type DiscoveryMode = "all" | "events" | "products";
