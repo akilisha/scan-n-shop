@@ -160,7 +160,7 @@ export function PaymentMethodsProvider({
   };
 
   const refreshPaymentMethods = async () => {
-    if (supabaseUser && !isDemoMode) {
+    if (supabaseUser) {
       await loadUserPaymentMethods();
     }
   };
