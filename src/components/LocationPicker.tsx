@@ -148,32 +148,8 @@ export function LocationPicker({
     try {
       // In a real app, you'd use Google Places API or similar
       // Return empty suggestions until real API integration
-      const mockSuggestions = [];
-        {
-          place_id: "1",
-          formatted_address: `${query}, City, State 12345`,
-          name: query,
-          geometry: {
-            location: {
-              lat: 40.7128 + Math.random() * 0.1,
-              lng: -74.006 + Math.random() * 0.1,
-            },
-          },
-        },
-        {
-          place_id: "2",
-          formatted_address: `${query} Plaza, Downtown, State 12346`,
-          name: `${query} Plaza`,
-          geometry: {
-            location: {
-              lat: 40.7128 + Math.random() * 0.1,
-              lng: -74.006 + Math.random() * 0.1,
-            },
-          },
-        },
-      ];
-
-      setSuggestions(mockSuggestions);
+      const suggestions: any[] = [];
+      setSuggestions(suggestions);
     } catch (error) {
       console.error("Geocoding error:", error);
       setError("Failed to search for addresses. Please try again.");
