@@ -21,7 +21,7 @@ import {
   MapPin,
   Store,
 } from "lucide-react";
-import { mockProducts } from "@/data/mockData";
+
 import { Product } from "@/types";
 import { cn } from "@/lib/utils";
 import { nativeService } from "@/lib/native";
@@ -42,11 +42,7 @@ export default function Cart() {
   const [recentlyAdded, setRecentlyAdded] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
-  const [suggestedProducts] = useState<Product[]>(
-    mockProducts.filter(
-      (p) => !cartItems.some((item) => item.product.id === p.id),
-    ),
-  );
+  const [suggestedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     checkCameraAvailability();

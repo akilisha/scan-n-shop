@@ -68,23 +68,8 @@ const generateMockLocationData = (): MapItem[] => {
     },
   ];
 
-  // Add realistic local products
-  const localProducts: MapItem[] = [
-    {
-      id: "prod-1",
-      type: "product",
-      latitude: baseLocation.lat + 0.006,
-      longitude: baseLocation.lng + 0.003,
-      title: "Vintage Bicycle - Great Condition",
-      description: "Red Schwinn bike, well maintained, perfect for city riding",
-      price: 180,
-      category: "Sports & Outdoors",
-      imageUrl: "/api/placeholder/400/300",
-      sellerName: "Mike's Bikes",
-      distance: 0.8,
-      tags: ["vintage", "bicycle", "transportation"],
-      status: "available",
-    },
+  // Real local products will be fetched from database
+  const localProducts: MapItem[] = [];
     {
       id: "prod-2",
       type: "product",
