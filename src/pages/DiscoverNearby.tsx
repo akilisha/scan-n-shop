@@ -70,69 +70,6 @@ const generateMockLocationData = (): MapItem[] => {
 
   // Real local products will be fetched from database
   const localProducts: MapItem[] = [];
-    {
-      id: "prod-2",
-      type: "product",
-      latitude: baseLocation.lat - 0.004,
-      longitude: baseLocation.lng + 0.007,
-      title: "Handmade Wooden Coffee Table",
-      description: "Beautiful oak table, custom made, seats 4 people",
-      price: 320,
-      category: "Furniture",
-      imageUrl: "/api/placeholder/400/300",
-      sellerName: "Sarah's Woodworks",
-      distance: 1.1,
-      tags: ["furniture", "handmade", "wood"],
-      status: "available",
-    },
-    {
-      id: "prod-3",
-      type: "product",
-      latitude: baseLocation.lat + 0.008,
-      longitude: baseLocation.lng - 0.005,
-      title: "Fresh Organic Vegetables",
-      description: "Locally grown tomatoes, lettuce, carrots from our farm",
-      price: 25,
-      category: "Food",
-      imageUrl: "/api/placeholder/400/300",
-      sellerName: "Green Valley Farm",
-      distance: 1.5,
-      tags: ["organic", "vegetables", "local"],
-      status: "available",
-    },
-    {
-      id: "prod-4",
-      type: "product",
-      latitude: baseLocation.lat - 0.009,
-      longitude: baseLocation.lng - 0.003,
-      title: "Art Prints & Paintings",
-      description:
-        "Original watercolor paintings and prints of local landmarks",
-      price: 75,
-      category: "Art & Collectibles",
-      imageUrl: "/api/placeholder/400/300",
-      sellerName: "Local Artist Collective",
-      distance: 1.3,
-      tags: ["art", "paintings", "local"],
-      status: "available",
-    },
-    {
-      id: "prod-5",
-      type: "product",
-      latitude: baseLocation.lat + 0.003,
-      longitude: baseLocation.lng + 0.009,
-      title: "Homemade Sourdough Bread",
-      description:
-        "Fresh baked daily, using traditional methods and local flour",
-      price: 8,
-      category: "Food",
-      imageUrl: "/api/placeholder/400/300",
-      sellerName: "Neighborhood Bakery",
-      distance: 0.6,
-      tags: ["bread", "homemade", "fresh"],
-      status: "available",
-    },
-  ];
 
   return [...events, ...localProducts];
 };
