@@ -38,13 +38,8 @@ export default function PaymentHistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Use mock data only in demo mode AND when user is not authenticated
-  // For authenticated users, always use real data regardless of demo mode
-  const effectivePayments = supabaseUser
-    ? payments
-    : isDemoMode
-      ? mockPaymentHistory
-      : payments;
+  // Always use real data - no more mock data
+  const effectivePayments = payments;
 
   useEffect(() => {
     if (supabaseUser && !isDemoMode) {
