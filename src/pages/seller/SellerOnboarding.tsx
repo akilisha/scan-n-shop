@@ -559,21 +559,35 @@ export default function SellerOnboarding() {
         )}
 
         {error && (
-          <Alert variant="destructive">
+          <Alert
+            variant={error.includes("Database") ? "default" : "destructive"}
+          >
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>{error}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setError(null);
-                  loadConnectAccount();
-                }}
-                className="ml-2"
-              >
-                Retry
-              </Button>
+            <AlertDescription>
+              <div className="space-y-2">
+                <span>{error}</span>
+                {error.includes("Database") && (
+                  <div className="text-xs text-muted-foreground">
+                    <strong>Good news:</strong> The Stripe integration still
+                    works! You can create a seller account and it will be saved
+                    via the Stripe API. The database is only needed for faster
+                    loading.
+                  </div>
+                )}
+                <div className="flex items-center justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setError(null);
+                      loadConnectAccount();
+                    }}
+                    className="mt-2"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
         )}
