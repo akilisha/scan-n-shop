@@ -232,11 +232,19 @@ export default function SellerOnboarding() {
       } else if (error) {
         console.log("❌ Database error:", error);
         if (
-          error.message?.includes('relation "connect_accounts" does not exist')
+          error.message?.includes(
+            'relation "connect_accounts" does not exist',
+          ) ||
+          error.message?.includes("Database query timed out") ||
+          error.message?.includes("timeout")
         ) {
+          console.log("🔧 Database tables not set up or connection issue");
           setError(
-            "Database setup required. Please run the database setup SQL.",
+            "Database not set up yet. You can still create a seller account - it will work via Stripe API.",
           );
+          // Set to step 1 so user can still create account via API
+          setCurrentStep(1);
+          setConnectAccount(null);
         } else {
           setError(`Database error: ${error.message}`);
         }
@@ -257,9 +265,21 @@ export default function SellerOnboarding() {
         }
         setConnectAccount(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("💥 Exception loading connect account:", error);
-      setError(`Failed to load account: ${error.message}`);
+      if (
+        error.message?.includes("timeout") ||
+        error.message?.includes("timed out")
+      ) {
+        console.log("⏰ Database timeout - likely not set up yet");
+        setError(
+          "Database connection timeout. You can still create a seller account via Stripe.",
+        );
+        setCurrentStep(1);
+        setConnectAccount(null);
+      } else {
+        setError(`Failed to load account: ${error.message}`);
+      }
     } finally {
       setLoading(false);
       setIsQuerying(false);
