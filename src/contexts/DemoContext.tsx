@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, User } from "@/types";
-import { mockProducts, mockUser } from "@/data/mockData";
 
 interface DemoContextType {
   isDemoMode: boolean;
