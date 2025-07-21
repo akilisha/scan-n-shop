@@ -88,7 +88,7 @@ export function PaymentMethodsProvider({
   const addUserPaymentMethod = async (
     paymentMethod: Omit<PaymentMethod, "id">,
   ) => {
-    if (!supabaseUser || isDemoMode) {
+    if (!supabaseUser) {
       return { error: { message: "User not authenticated" } };
     }
 
@@ -119,7 +119,7 @@ export function PaymentMethodsProvider({
   };
 
   const setUserDefaultPaymentMethod = async (id: string) => {
-    if (!supabaseUser || isDemoMode) {
+    if (!supabaseUser) {
       return { error: { message: "User not authenticated" } };
     }
 
@@ -142,7 +142,7 @@ export function PaymentMethodsProvider({
   };
 
   const deleteUserPaymentMethod = async (id: string) => {
-    if (!supabaseUser || isDemoMode) {
+    if (!supabaseUser) {
       return { error: { message: "User not authenticated" } };
     }
 
