@@ -26,13 +26,13 @@ import {
 import { PaymentHistory } from "@/types";
 import { format } from "date-fns";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { useDemo } from "@/contexts/DemoContext";
+
 import { getUserOrders } from "@/lib/supabase";
 
 export default function PaymentHistoryPage() {
   const navigate = useNavigate();
   const { supabaseUser } = useSupabaseAuth();
-  const { isDemoMode } = useDemo();
+
   const [payments, setPayments] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,10 +42,10 @@ export default function PaymentHistoryPage() {
   const effectivePayments = payments;
 
   useEffect(() => {
-    if (supabaseUser && !isDemoMode) {
+    if (supabaseUser) {
       loadUserOrders();
     }
-  }, [supabaseUser, isDemoMode]);
+  }, [supabaseUser]);
 
   const loadUserOrders = async () => {
     if (!supabaseUser) return;
