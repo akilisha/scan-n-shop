@@ -55,22 +55,37 @@ export default function SellerDashboard() {
     setError(null);
 
     try {
-      // Load Stripe Connect account
-      const { data: accountData, error: accountError } =
-        await getUserConnectAccount(supabaseUser.id);
+      // Load Stripe Connect account with timeout
+      const { data: accountData, error: accountError } = await Promise.race([
+        getUserConnectAccount(supabaseUser.id),
+        new Promise<{ data: any; error: any }>((_, reject) =>
+          setTimeout(() => reject(new Error("Database query timeout")), 3000),
+        ),
+      ]).catch((error) => {
+        console.log("Database query failed:", error);
+        return { data: null, error: { message: error.message } };
+      });
 
       if (accountData && !accountError) {
         setConnectAccount(accountData);
 
         // Check live status with Stripe API
         await checkLiveAccountStatus(accountData.stripe_account_id);
-      } else if (
-        accountError &&
-        !accountError.message?.includes(
-          'relation "connect_accounts" does not exist',
-        )
-      ) {
-        setError(`Account error: ${accountError.message}`);
+      } else if (accountError) {
+        if (
+          accountError.message?.includes(
+            'relation "connect_accounts" does not exist',
+          ) ||
+          accountError.message?.includes("timeout") ||
+          accountError.message?.includes("timed out")
+        ) {
+          console.log(
+            "Database not set up yet, continuing without account data",
+          );
+          // Don't set error - just continue with empty state
+        } else {
+          setError(`Account error: ${accountError.message}`);
+        }
       }
 
       // TODO: Load real seller stats from database
