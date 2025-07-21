@@ -45,10 +45,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SupabaseAuthProvider>
-        <DemoProvider>
-          <PaymentMethodsProvider>
-            <CartProvider>
-              <AppModeProvider>
+        <PaymentMethodsProvider>
+          <CartProvider>
+            <AppModeProvider>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
